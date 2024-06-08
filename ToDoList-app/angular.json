@@ -3,7 +3,7 @@
 	"version": 1,
 	"newProjectRoot": "projects",
 	"projects": {
-		"ToDoList-app": {
+		"todo-list-lowgular": {
 			"projectType": "application",
 			"schematics": {
 				"@schematics/angular:component": {
