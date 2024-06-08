@@ -1,6 +1,12 @@
 {
 	"hosting": {
-		"public": "ToDoList-app/dist/to-do-list-app/browser",
-		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+		"public": "public",
+		"ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+		"rewrites": [
+			{
+				"source": "**",
+				"destination": "/index.html"
+			}
+		]
 	}
 }
