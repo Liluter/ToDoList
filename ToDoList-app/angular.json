@@ -33,7 +33,7 @@
 							"src/styles.scss",
 							"./node_modules/bootstrap/dist/css/bootstrap.css"
 						],
-						"scripts": ["./node_modules/bootstrap/dist/js/bootstrap.js"]
+						"scripts": ["./node_modules/bootstrap/dist/js/bootstrap.bundle.js"]
 					},
 					"configurations": {
 						"production": {
@@ -63,10 +63,10 @@
 					"builder": "@angular-devkit/build-angular:dev-server",
 					"configurations": {
 						"production": {
-							"buildTarget": "ToDoList-app:build:production"
+							"buildTarget": "todo-list-lowgular:build:production"
 						},
 						"development": {
-							"buildTarget": "ToDoList-app:build:development"
+							"buildTarget": "todo-list-lowgular:build:development"
 						}
 					},
 					"defaultConfiguration": "development"
