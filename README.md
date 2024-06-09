@@ -10,4 +10,5 @@
 - [x] Set up GitHub actions . It auto deploys when merge to main or PR.
       Steps to deploy: - $ ng build - merge to main or PR ( git push ) or $ firebase deploy.
       OR - $ ng build - in your aplication workspace - $ firebase deploy - in your firebase workspace
+- [x] UI with bootstrap in one component for further refactoring.
 - [ ] next steps.
