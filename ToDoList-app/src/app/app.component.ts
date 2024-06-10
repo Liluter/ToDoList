@@ -9,6 +9,8 @@ import { Item } from './interfaces/item.interface';
 import { SyncItem } from './interfaces/syncItem.interface';
 import { ItemCompleted } from './interfaces/item-completed.interface';
 import { AllCompleted } from './interfaces/all-completed.interface';
+import { Label } from './interfaces/label.interface';
+import { SyncLabels } from './interfaces/syncLabels.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -24,12 +26,15 @@ export class AppComponent implements OnInit {
   clickObservable$: Observable<string>
   completedTasks$?: Observable<[ItemCompleted]>
   uncompletedTasks$?: Observable<Item[]>
-
+  descriptionOpenHandler!: string;
+  labels?: [Label]
   constructor(private readonly http: HttpClient) {
     this.clickObservable$ = from(this.clickEvent)
   }
 
   ngOnInit() {
+    this.fetchLabelsList()
+
     this.clickObservable$.pipe(
       debounceTime(1000),
       tap((data) => {
@@ -94,7 +99,8 @@ export class AppComponent implements OnInit {
         }
       }).pipe(
         tap(() => this.showTasks = true),
-        map(data => data.items)
+        map(data => data.items),
+        tap(data => console.dir(data))
       )
   }
   fetchCompletedTasks() {
@@ -105,5 +111,32 @@ export class AppComponent implements OnInit {
         tap(() => this.showCompletedTasks = true),
         map(data => data.items)
       )
+  }
+  fetchLabelsList() {
+    this.http.get<SyncLabels>("https://api.todoist.com/sync/v9/sync",
+      {
+        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
+        params: {
+          sync_token: '*',
+          resource_types: '["labels"]'
+        }
+      }).pipe(
+        map(data => data.labels),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(data => this.labels = [...data])
+  }
+  openDescription(id: string) {
+    if (this.descriptionOpenHandler === id) {
+      this.descriptionOpenHandler = ''
+      return
+    }
+    this.descriptionOpenHandler = id;
+  }
+
+  getLabelColor(labelName: string) {
+    if (!this.labels) {
+      return
+    }
+    return this.labels.find(label => label.name === labelName)?.color
   }
 }
