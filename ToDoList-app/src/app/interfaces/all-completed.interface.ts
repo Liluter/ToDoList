@@ -1,6 +1,8 @@
 import { ItemCompleted } from "./item-completed.interface"
+import { Project } from "./project.interface"
+import { Section } from "./section.interface"
 export interface AllCompleted {
   items: [ItemCompleted]
-  projects: { id: {} }
-  sections: { id: {} }
+  projects: { [key: string]: Project }
+  sections: { [key: string]: Section }
 }
