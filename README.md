@@ -11,4 +11,5 @@
       Steps to deploy: - $ ng build - merge to main or PR ( git push ) or $ firebase deploy.
       OR - $ ng build - in your aplication workspace - $ firebase deploy - in your firebase workspace
 - [x] UI with bootstrap in one component for further refactoring.
+- [x] UI Improvments, Add and fix interfaces, fix Description show issue.
 - [ ] next steps.
