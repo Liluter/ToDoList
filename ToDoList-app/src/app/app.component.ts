@@ -19,6 +19,7 @@ import { SyncLabels } from './interfaces/syncLabels.interface';
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
+  currentDate: string = new Date().toISOString()
   clickEvent = new EventEmitter<string>()
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
@@ -64,7 +65,7 @@ export class AppComponent implements OnInit {
   badgeClass(priority: number) {
     switch (priority) {
       case 1:
-        return 'text-bg-light'
+        return 'text-bg-secondary'
       case 2:
         return 'text-bg-primary'
       case 3:
@@ -72,7 +73,7 @@ export class AppComponent implements OnInit {
       case 4:
         return 'text-bg-danger'
       default:
-        return 'text-bg-light'
+        return 'text-bg-secondary'
     }
   }
   priorityText(priority: number) {
@@ -100,7 +101,6 @@ export class AppComponent implements OnInit {
       }).pipe(
         tap(() => this.showTasks = true),
         map(data => data.items),
-        tap(data => console.dir(data))
       )
   }
   fetchCompletedTasks() {
@@ -139,4 +139,5 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
+
 }
