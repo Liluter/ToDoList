@@ -140,7 +140,6 @@ export class AppComponent implements OnInit {
         }
       }).pipe(
         map(data => data.projects),
-        tap(data => console.dir(data))
       ).subscribe(projects => this.projects = projects)
   }
   openDescription(id: string) {
