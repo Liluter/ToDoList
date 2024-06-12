@@ -11,6 +11,8 @@ import { ItemCompleted } from './interfaces/item-completed.interface';
 import { AllCompleted } from './interfaces/all-completed.interface';
 import { Label } from './interfaces/label.interface';
 import { SyncLabels } from './interfaces/syncLabels.interface';
+import { SyncProject } from './interfaces/syncProject.interface';
+import { SyncProjects } from './interfaces/syncProjects.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -29,11 +31,13 @@ export class AppComponent implements OnInit {
   uncompletedTasks$?: Observable<Item[]>
   descriptionOpenHandler!: string;
   labels?: [Label]
+  projects?: SyncProject[];
   constructor(private readonly http: HttpClient) {
     this.clickObservable$ = from(this.clickEvent)
   }
 
   ngOnInit() {
+    this.fetchProjectList()
     this.fetchLabelsList()
 
     this.clickObservable$.pipe(
@@ -125,6 +129,20 @@ export class AppComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       ).subscribe(data => this.labels = [...data])
   }
+
+  fetchProjectList() {
+    this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
+      {
+        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
+        params: {
+          sync_token: '*',
+          resource_types: '["projects"]'
+        }
+      }).pipe(
+        map(data => data.projects),
+        tap(data => console.dir(data))
+      ).subscribe(projects => this.projects = projects)
+  }
   openDescription(id: string) {
     if (this.descriptionOpenHandler === id) {
       this.descriptionOpenHandler = ''
@@ -139,5 +157,7 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
-
+  getProjectById(id: string) {
+    return this.projects?.find(project => project.id === id)
+  }
 }
