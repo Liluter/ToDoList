@@ -22,7 +22,7 @@ export interface Item {
   labels: [string]
   parent_id: string | number | null
   priority: number
-  project_id: string | number
+  project_id: string
   responsible_uid: string | null
   section_id: string | null
   sync_id: string | null
