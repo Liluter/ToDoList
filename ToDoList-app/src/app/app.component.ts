@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, debounceTime, map, switchMap, empty, scheduled, asyncScheduler, of, EMPTY, concat, concatMap, combineLatest, mergeMap, combineLatestWith, startWith } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -29,7 +29,6 @@ export class AppComponent implements OnInit {
   labels?: [Label]
   tasks: Tasks = { uncompleted: [], completed: [] }
 
-
   clickObservable$: Observable<Tasks>;
 
   uncompletedTasks$: Observable<Tasks>;
@@ -52,6 +51,7 @@ export class AppComponent implements OnInit {
         }),
         map(data => { return { uncompleted: data.items, completed: null } }),
       )
+
     this.completedTasks$ = this.http.get<AllCompleted>("https://api.todoist.com/sync/v9/completed/get_all",
       {
         headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
@@ -75,8 +75,6 @@ export class AppComponent implements OnInit {
       })
     )
 
-
-
     this.clickObservable$ = from(this.clickEvent).pipe(
       switchMap(data => {
         if (data === 'uncompleted') {
@@ -87,33 +85,12 @@ export class AppComponent implements OnInit {
           return this.allTasks$
         }
         return EMPTY
-
       }),
-
     )
-
   }
 
   ngOnInit() {
     this.fetchLabelsList()
-
-
-
-    // this.clickObservable$.pipe(
-    //   debounceTime(1000),
-    //   tap((data) => {
-    //     if (data === 'uncompleted') {
-    //       this.fetchUncompletedTasks()
-    //     } else if (data === 'completed') {
-    //       this.fetchCompletedTasks()
-    //     } else if (data === 'all') {
-    //       this.fetchUncompletedTasks()
-    //       this.fetchCompletedTasks()
-    //     }
-    //   }
-    //   ),
-    //   takeUntilDestroyed(this.destroyRef),
-    // ).subscribe();
   }
 
   getCompletedTasks() {
@@ -153,18 +130,6 @@ export class AppComponent implements OnInit {
       default:
         return '4'
     }
-  }
-  fetchUncompletedTasks() {
-
-  }
-  fetchCompletedTasks() {
-    // this.completedTasks$ = this.http.get<AllCompleted>("https://api.todoist.com/sync/v9/completed/get_all",
-    //   {
-    //     headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    //   }).pipe(
-    //     tap(() => this.showCompletedTasks = true),
-    //     map(data => data.items)
-    //   )
   }
   fetchLabelsList() {
     this.http.get<SyncLabels>("https://api.todoist.com/sync/v9/sync",
