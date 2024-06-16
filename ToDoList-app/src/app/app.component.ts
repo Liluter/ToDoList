@@ -27,7 +27,6 @@ export class AppComponent implements OnInit {
   showCompletedTasks?: boolean = false
   descriptionOpenHandler?: string;
   labels?: [Label]
-  tasks: Tasks = { uncompleted: [], completed: [] }
 
   clickObservable$: Observable<Tasks>;
 
