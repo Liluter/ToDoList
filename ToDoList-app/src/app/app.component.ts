@@ -12,6 +12,7 @@ import { AllCompleted } from './interfaces/all-completed.interface';
 import { Label } from './interfaces/label.interface';
 import { SyncLabels } from './interfaces/syncLabels.interface';
 import { Tasks } from './interfaces/tasks.interface';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -144,6 +145,7 @@ export class AppComponent implements OnInit {
       ).subscribe(data => this.labels = [...data])
   }
   openDescription(id: string | undefined) {
+
     if (this.descriptionOpenHandler === id) {
       this.descriptionOpenHandler = ''
       return
@@ -157,5 +159,7 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
-
+  getProjectById(id: string) {
+    return this.projects?.find(project => project.id === id)
+  }
 }
