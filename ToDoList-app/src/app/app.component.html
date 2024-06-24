@@ -11,6 +11,17 @@
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Add
+          </a>
+          <ul class="dropdown-menu">
+            <li class="ps-3"><a class="dropdown-item " href="#" (click)="addTask()">Task</a></li>
+            <li class="ps-3"><a class="dropdown-item " href="#">Project</a>
+            </li>
+            <li class="ps-3"><a class="dropdown-item " href="#">Label</a></li>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Tasks
           </a>
           <ul class="dropdown-menu">
@@ -44,73 +55,141 @@
 </nav>
 <div class="container mx-auto my-3 ">
   <ul class="list-group ">
-    <ng-container *ngIf="clickObservable$ | async as data">
-      <h4 class="text-body-secondary" *ngIf="showTasks">Uncompleted tasks:</h4>
-      <ul class="list-group mb-3" *ngFor="let task of data?.uncompleted">
-        <li class="list-group-item px-2 ">
-          <div class="input-group input-group-sm">
-            <span class="input-group-text">
-              <input class="form-check-input mt-0" type="checkbox" value=""
-                checked="{{task.completed_at ? 'true' : ''}}" id="flexCheckDefault">
-            </span>
-            <span class="input-group-text">
-              <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
-            </span>
-            <span class="input-group-text" *ngIf="task.due">
-              Due:
-              <span class="badge rounded-pill text-bg-secondary ms-1">
-                {{task.due.date | date : 'EEEE, d MMMM'}}</span>
-            </span>
-            <span class="input-group-text">
-              <div class="d-flex justify-content-center">
-                <span class="badge rounded-pill text-black label mx-1 p-1 " ngClass="{{getLabelColor(label)}}"
-                  *ngFor=" let label of task.labels" disabled><i class="bi bi-tag ">{{label}}</i></span>
-              </div>
-            </span>
-          </div>
-          <div class="input-group mt-1">
-            <span class="input-group-text">Title:</span>
-            <input type="text" class="form-control" value={{task.content}} readonly>
-            <!-- <button class="btn btn-outline-secondary" type="button">Open</button> -->
-            <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
-            <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-              data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="visually-hidden">Toggle Dropdown</span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#">Edit</a></li>
-              <li><a class="dropdown-item" href="#">Add Label</a></li>
-              <li><a class="dropdown-item" href="#">Change Date</a></li>
-              <li><a class="dropdown-item" href="#">Share</a></li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="#">Delete</a></li>
-            </ul>
-          </div>
-          <div class="input-group col-12 mt-1" *ngIf="(descriptionOpenHandler === task.id)" id="{{task.id}}">
-            <span class="input-group-text">Note:</span>
-            <textarea class="form-control" value="{{task.description}}" style="min-height: fit-content" readonly
-              aria-label="Description"></textarea>
-          </div>
-        </li>
-      </ul>
-      
-      <h4 class="text-body-secondary" *ngIf="showCompletedTasks">Completed tasks:</h4>
-      <ul class="list-group mb-3" *ngFor="let task of data.completed ">
-        <li class="list-group-item px-2">
-          <div class="input-group ">
-            <span class="input-group-text"><input class="form-check-input" type="checkbox" value=""
-                checked="{{task.completed_at ? 'true' : ''}}"></span>
+    <ng-container *ngIf="clickObservable$  | async as data">
+      <ng-container *ngIf="showTasks">
+        <h4 class="text-body-secondary">Uncompleted tasks:</h4>
+        <ul class="list-group mb-3" *ngFor="let task of data?.uncompleted">
+          <li class="list-group-item px-2 ">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">
+                <input class="form-check-input mt-0" type="checkbox" value=""
+                  checked="{{task.completed_at ? 'true' : ''}}" id="flexCheckDefault">
+              </span>
+              <span class="input-group-text">
+                <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
+              </span>
+              <span class="input-group-text" *ngIf="task.due">
+                Due:
+                <span class="badge rounded-pill text-bg-secondary ms-1">
+                  {{task.due.date | date : 'EEEE, d MMMM'}}</span>
+              </span>
+              <span class="input-group-text">
+                <div class="d-flex justify-content-center">
+                  <span class="badge rounded-pill text-black label mx-1 p-1 " ngClass="{{getLabelColor(label)}}"
+                    *ngFor=" let label of task.labels" disabled><i class="bi bi-tag ">{{label}}</i></span>
+                </div>
+              </span>
+            </div>
+            <div class="input-group mt-1">
+              <span class="input-group-text">Title:</span>
+              <input type="text" class="form-control" value={{task.content}} readonly>
+              <!-- <button class="btn btn-outline-secondary" type="button">Open</button> -->
+              <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
+              <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#">Edit</a></li>
+                <li><a class="dropdown-item" href="#">Add Label</a></li>
+                <li><a class="dropdown-item" href="#">Change Date</a></li>
+                <li><a class="dropdown-item" href="#">Share</a></li>
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="#">Delete</a></li>
+              </ul>
+            </div>
+            <div class="input-group col-12 mt-1" *ngIf="(descriptionOpenHandler === task.id)" id="{{task.id}}">
+              <span class="input-group-text">Note:</span>
+              <textarea class="form-control" value="{{task.description}}" style="min-height: fit-content" readonly
+                aria-label="Description"></textarea>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
+      <ng-container *ngIf="showCompletedTasks">
 
-            <input type="text" class="form-control" value={{task.content}} readonly>
-            <span class="input-group-text">ended:<span
-                class="badge rounded-pill text-bg-secondary ms-3">{{task.completed_at |
-                date:
-                'dd-MM-YY hh:mm'}}</span></span>
-          </div>
-        </li>
-      </ul>
+        <h4 class="text-body-secondary" *ngIf="showCompletedTasks">Completed tasks:</h4>
+        <ul class="list-group mb-3" *ngFor="let task of data.completed ">
+          <li class="list-group-item px-2">
+            <div class="input-group ">
+              <span class="input-group-text"><input class="form-check-input" type="checkbox" value=""
+                  checked="{{task.completed_at ? 'true' : ''}}"></span>
+
+              <input type="text" class="form-control" value={{task.content}} readonly>
+              <span class="input-group-text">ended:<span
+                  class="badge rounded-pill text-bg-secondary ms-3">{{task.completed_at |
+                  date:
+                  'dd-MM-YY hh:mm'}}</span></span>
+            </div>
+          </li>
+        </ul>
+      </ng-container>
     </ng-container>
+
+
+
   </ul>
+  <ng-container *ngIf="addTaskModal">
+    <h4 class="text-body-secondary" *ngIf="addTaskModal">Add new Task:</h4>
+    <form #newTaskForm="ngForm" (ngSubmit)="onAddTask(newTaskForm)">
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="Title">Title</span>
+        <input type="text" #title="ngModel" class="form-control" [class]="title.valid ? 'is-valid' : 'is-invalid'"
+          placeholder="max 40 chars" aria-label="Title" aria-describedby="Title" name="title" maxlength="30"
+          [(ngModel)]="newTask.content" required>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text" id="Note">Note</span>
+        <textarea class="form-control" placeholder="add description" name="note" aria-label="Add description"
+          [(ngModel)]="newTask.description"></textarea>
+      </div>
+      <div class="input-group mb-3 d-flex justify-content-center">
+
+        <select class="form-select" multiple aria-label="Multiple select example" id="labels" name='labels'
+          [(ngModel)]="newTask.labels">
+          <option *ngFor="let label of labels;  index as i" [ngValue]="label.name">{{label.name}}
+          </option>
+        </select>
+      </div>
+      <div class="input-group mb-3">
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group"
+          *ngFor="let project of projects; index as i">
+          <ng-container *ngIf="i !== 0">
+            <input type="radio" class="btn-check" [value]="project.id" name="btnradio" id="{{project.id}}"
+              autocomplete="off" [(ngModel)]="newTask.project_id">
+            <label class="btn btn-outline-primary" for="{{project.id}}">{{project.name}}</label>
+          </ng-container>
+        </div>
+
+      </div>
+      <div class="input-group mb-3">
+        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+          <input type="radio" class="btn-check" name="priority" id="priority1" autocomplete="off"
+            [(ngModel)]="newTask.priority" [value]="4">
+          <label class="btn btn-outline-primary" for="priority1"><span class="badge rounded-pill"
+              [ngClass]="badgeClass(4)">4</span></label>
+
+          <input type="radio" class="btn-check" name="priority" id="priority2" autocomplete="off"
+            [(ngModel)]="newTask.priority" [value]="3">
+          <label class="btn btn-outline-primary" for="priority2"><span class="badge rounded-pill"
+              [ngClass]="badgeClass(3)">3</span></label>
+
+          <input type="radio" class="btn-check" name="priority" id="priority3" autocomplete="off"
+            [(ngModel)]="newTask.priority" [value]="2">
+          <label class="btn btn-outline-primary" for="priority3"><span class="badge rounded-pill"
+              [ngClass]="badgeClass(2)">2</span></label>
+          <input type="radio" class="btn-check" name="priority" id="priority4" autocomplete="off"
+            [(ngModel)]="newTask.priority" [value]="1">
+          <label class="btn btn-outline-primary" for="priority4"><span class="badge rounded-pill"
+              [ngClass]="badgeClass(1)">1</span></label>
+        </div>
+      </div>
+      <div class="input-group mb-3">
+        <button type="submit" class="btn btn-success">Add Task</button>
+      </div>
+    </form>
+
+  </ng-container>
 </div>
