@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -12,28 +12,43 @@ import { AllCompleted } from './interfaces/all-completed.interface';
 import { Label } from './interfaces/label.interface';
 import { SyncLabels } from './interfaces/syncLabels.interface';
 import { Tasks } from './interfaces/tasks.interface';
+import { Project } from './interfaces/project.interface';
+import { SyncProjects } from './interfaces/syncProjects.interface';
+import { SyncProject } from './interfaces/syncProject.interface';
+import { Form, FormsModule } from '@angular/forms';
+import { Task } from './interfaces/task.interface';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   currentDate: string = new Date().toISOString()
-  clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all'>()
+  clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
   showCompletedTasks?: boolean = false
   descriptionOpenHandler?: string;
-  labels?: [Label]
-
+  labels?: Label[]
+  projects?: SyncProject[]
   clickObservable$: Observable<Tasks>;
 
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
+  addTaskModal: boolean = false
+  newTask = <Task>{
+    content: '',
+    description: '',
+    due: { date: '', string: '' },
+    labels: [''],
+    priority: 1,
+    project_id: '' // inbox"2334294385"
+  }
+
 
   constructor(private readonly http: HttpClient) {
 
@@ -46,6 +61,7 @@ export class AppComponent implements OnInit {
         }
       }).pipe(
         tap(() => {
+          this.addTaskModal = false
           this.showTasks = true
           this.showCompletedTasks = false
         }),
@@ -57,6 +73,7 @@ export class AppComponent implements OnInit {
         headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
       }).pipe(
         tap(() => {
+          this.addTaskModal = false
           this.showTasks = false
           this.showCompletedTasks = true
         }),
@@ -67,6 +84,7 @@ export class AppComponent implements OnInit {
     this.allTasks$ = combineLatest([this.uncompletedTasks$, this.completedTasks$]).pipe(
       startWith([null, null]),
       tap(() => {
+        this.addTaskModal = false
         this.showTasks = true
         this.showCompletedTasks = true
       }),
@@ -83,6 +101,10 @@ export class AppComponent implements OnInit {
           return this.completedTasks$
         } else if (data === 'all') {
           return this.allTasks$
+        } else if (data === 'none') {
+          this.showTasks = false
+          this.showCompletedTasks = false
+          return EMPTY
         }
         return EMPTY
       }),
@@ -91,6 +113,7 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.fetchLabelsList()
+    this.fetchProjectsList()
   }
 
   getCompletedTasks() {
@@ -102,7 +125,9 @@ export class AppComponent implements OnInit {
   getAllTasks() {
     this.clickEvent.emit('all');
   }
-
+  getNoneTasks() {
+    this.clickEvent.emit('none');
+  }
   badgeClass(priority: number | undefined) {
     switch (priority) {
       case 1:
@@ -159,7 +184,44 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
-  getProjectById(id: string) {
-    return this.projects?.find(project => project.id === id)
+  // getProjectById(id: string) {
+  //   return this.projects?.find(project => project.id === id)
+  // }
+
+  addTask() {
+    this.getNoneTasks()
+    this.addTaskModal = !this.addTaskModal
+
+    console.log('toggle adddTask')
   }
+  selectLabel(name: string) {
+    console.log('Label ', name, ' selected')
+  }
+  fetchProjectsList() {
+    this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
+      {
+        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
+        params: {
+          sync_token: '*',
+          resource_types: '["projects"]'
+        }
+      }).pipe(
+        tap(data => console.dir(data)),
+        map(data => data.projects),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe(data => this.projects = [...data])
+  }
+
+  onAddTask(form: Form) {
+    console.log(form);
+    console.dir(this.newTask)
+    // REST API
+    this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
+      params: {
+        sync_token: '*'
+      }
+    }).subscribe(data => console.log('Respose from server :', data), error => console.log(error))
+  }
+
 }

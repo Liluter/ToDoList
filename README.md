@@ -18,4 +18,8 @@
 - [x] UI with bootstrap in one component for further refactoring.
 - [x] UI Improvments, Add and fix interfaces, fix Description show issue.
 - [x] UI Improvments, Add Dates to tasks, to secret menu Add Edit mode. Change Dropdown button tag from description to shorter Note, Fixed padding in task cards
+
+===
+
+- [x] Add new task feature with http.post method and Rest API endpoint.
 - [ ] next steps.
