@@ -15,7 +15,7 @@ import { Tasks } from './interfaces/tasks.interface';
 import { Project } from './interfaces/project.interface';
 import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
-import { Form, FormsModule } from '@angular/forms';
+import { Form, FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 
 @Component({
@@ -43,12 +43,21 @@ export class AppComponent implements OnInit {
   newTask = <Task>{
     content: '',
     description: '',
-    due: { date: '', string: '' },
+    due_date: '',
+    due_string: '',
     labels: [''],
     priority: 1,
     project_id: '' // inbox"2334294385"
   }
-
+  readonly defaultValue = <Task>{
+    content: '',
+    description: '',
+    due_date: '',
+    due_string: '',
+    labels: [''],
+    priority: 1,
+    project_id: ''
+  }
 
   constructor(private readonly http: HttpClient) {
 
@@ -206,22 +215,25 @@ export class AppComponent implements OnInit {
           resource_types: '["projects"]'
         }
       }).pipe(
-        tap(data => console.dir(data)),
         map(data => data.projects),
         takeUntilDestroyed(this.destroyRef),
       ).subscribe(data => this.projects = [...data])
   }
 
-  onAddTask(form: Form) {
-    console.log(form);
-    console.dir(this.newTask)
+  onAddTask(form: NgForm) {
+    // console.log(form);
+    // console.dir(this.newTask)
     // REST API
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
       params: {
         sync_token: '*'
       }
-    }).subscribe(data => console.log('Respose from server :', data), error => console.log(error))
+    }).subscribe(data => {
+      if (data) {
+        form.resetForm(this.defaultValue)
+      }
+    }, error => console.log('ERROR :', error))
   }
 
 }

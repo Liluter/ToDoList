@@ -136,9 +136,10 @@
     <form #newTaskForm="ngForm" (ngSubmit)="onAddTask(newTaskForm)">
       <div class="input-group mb-3">
         <span class="input-group-text" id="Title">Title</span>
-        <input type="text" #title="ngModel" class="form-control" [class]="title.valid ? 'is-valid' : 'is-invalid'"
-          placeholder="max 40 chars" aria-label="Title" aria-describedby="Title" name="title" maxlength="30"
-          [(ngModel)]="newTask.content" required>
+        <input type="text" #title="ngModel" class="form-control"
+          [class]="title.valid || title.pristine ? 'is-valid' : 'is-invalid'" placeholder="max 40 chars"
+          aria-label="Title" aria-describedby="Title" name="title" maxlength="30" [(ngModel)]="newTask.content"
+          required>
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text" id="Note">Note</span>
@@ -187,7 +188,17 @@
         </div>
       </div>
       <div class="input-group mb-3">
+        <span class="input-group-text" id="DueDate">Due Date</span>
+        <input *ngIf="newTask.due_string === ''" type="date" class="form-control" id="dueDate" name="dueDate"
+          [value]="currentDate | date: 'YYYY-MM-DD'" min="2024-06-25" [(ngModel)]="newTask.due_date">
+        <span class="input-group-text" id="DueString">Due String</span>
+        <input *ngIf="newTask.due_date === ''" type="text" id="dueString" name="dueString" class="form-control"
+          placeholder="type time like Tomorrow, next monday" [(ngModel)]="newTask.due_string">
+      </div>
+      <div class="input-group mb-3">
+
         <button type="submit" class="btn btn-success">Add Task</button>
+        <button type="button" class="btn btn-danger" (click)="newTaskForm.resetForm(defaultValue)">Reset</button>
       </div>
     </form>
 
