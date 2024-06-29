@@ -17,6 +17,7 @@ import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
 import { Form, FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
+import { Modals } from './types/modals';
 
 @Component({
   selector: 'app-root',
@@ -28,17 +29,19 @@ import { Task } from './interfaces/task.interface';
 export class AppComponent implements OnInit {
   currentDate: string = new Date().toISOString()
   clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
+  menuEvent = new EventEmitter<Modals[]>()
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
   showCompletedTasks?: boolean = false
   descriptionOpenHandler?: string;
   labels?: Label[]
   projects?: SyncProject[]
-  clickObservable$: Observable<Tasks>;
-
+  // clickObservable$: Observable<Tasks>;
+  showModal: Modals[] = ['none']
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
+  // noneTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
   addTaskModal: boolean = false
   newTask = <Task>{
     content: '',
@@ -58,8 +61,10 @@ export class AppComponent implements OnInit {
     priority: 1,
     project_id: ''
   }
+  menuObservable$: any;
 
   constructor(private readonly http: HttpClient) {
+
 
     this.uncompletedTasks$ = this.http.get<SyncItem>("https://api.todoist.com/sync/v9/sync",
       {
@@ -69,11 +74,6 @@ export class AppComponent implements OnInit {
           resource_types: '["items"]'
         }
       }).pipe(
-        tap(() => {
-          this.addTaskModal = false
-          this.showTasks = true
-          this.showCompletedTasks = false
-        }),
         map(data => { return { uncompleted: data.items, completed: null } }),
       )
 
@@ -81,43 +81,36 @@ export class AppComponent implements OnInit {
       {
         headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
       }).pipe(
-        tap(() => {
-          this.addTaskModal = false
-          this.showTasks = false
-          this.showCompletedTasks = true
-        }),
         map(data => { return { uncompleted: null, completed: data.items } }),
 
       )
 
     this.allTasks$ = combineLatest([this.uncompletedTasks$, this.completedTasks$]).pipe(
       startWith([null, null]),
-      tap(() => {
-        this.addTaskModal = false
-        this.showTasks = true
-        this.showCompletedTasks = true
-      }),
       map(([uncompletedTasks, completedTasks]) => {
         return { uncompleted: uncompletedTasks?.uncompleted, completed: completedTasks?.completed }
       })
     )
 
-    this.clickObservable$ = from(this.clickEvent).pipe(
+    this.menuObservable$ = from(this.menuEvent).pipe(
+      tap(data => {
+        // console.log(data)
+        this.showModal = data
+      }),
       switchMap(data => {
-        if (data === 'uncompleted') {
-          return this.uncompletedTasks$
-        } else if (data === 'completed') {
-          return this.completedTasks$
-        } else if (data === 'all') {
-          return this.allTasks$
-        } else if (data === 'none') {
-          this.showTasks = false
-          this.showCompletedTasks = false
-          return EMPTY
+        if (data[1]) {
+          if (data[1] === 'uncompleted') {
+            return this.uncompletedTasks$
+          } else if (data[1] === 'completed') {
+            return this.completedTasks$
+          } else if (data[1] === 'all') {
+            return this.allTasks$
+          } return EMPTY
         }
         return EMPTY
       }),
-    )
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe()
   }
 
   ngOnInit() {
@@ -126,16 +119,37 @@ export class AppComponent implements OnInit {
   }
 
   getCompletedTasks() {
-    this.clickEvent.emit('completed');
+    this.menuEvent.emit(['listOfTasks', 'completed']);
+    // this.clickEvent.emit('completed');
   }
   getUncompletedTasks() {
-    this.clickEvent.emit('uncompleted');
+    this.menuEvent.emit(['listOfTasks', 'uncompleted']);
+    // this.clickEvent.emit('uncompleted');
   }
   getAllTasks() {
-    this.clickEvent.emit('all');
+    this.menuEvent.emit(['listOfTasks', 'all']);
+    // this.clickEvent.emit('all');
   }
   getNoneTasks() {
-    this.clickEvent.emit('none');
+    this.menuEvent.emit(['none'])
+  }
+  addTask() {
+    this.menuEvent.emit(['addTask']);
+    // this.addTaskModal = !this.addTaskModal
+  }
+  addProject() {
+    this.menuEvent.emit(['addProject']);
+    // this.addTaskModal = !this.addTaskModal
+  }
+  addLabel() {
+    this.menuEvent.emit(['addLabel']);
+    // this.addTaskModal = !this.addTaskModal
+  }
+  getLabels() {
+    this.menuEvent.emit(['listOfLabels']);
+  }
+  getProjects() {
+    this.menuEvent.emit(['listOfProjects']);
   }
   badgeClass(priority: number | undefined) {
     switch (priority) {
@@ -193,19 +207,11 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
-  // getProjectById(id: string) {
-  //   return this.projects?.find(project => project.id === id)
-  // }
 
-  addTask() {
-    this.getNoneTasks()
-    this.addTaskModal = !this.addTaskModal
-
-    console.log('toggle adddTask')
-  }
   selectLabel(name: string) {
     console.log('Label ', name, ' selected')
   }
+
   fetchProjectsList() {
     this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
       {
@@ -221,8 +227,6 @@ export class AppComponent implements OnInit {
   }
 
   onAddTask(form: NgForm) {
-    // console.log(form);
-    // console.dir(this.newTask)
     // REST API
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken },

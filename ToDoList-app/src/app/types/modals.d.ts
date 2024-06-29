@@ -1,0 +1,1 @@
+export type Modals = 'addTask' | 'listOfTasks' | 'addProject' | 'listOfProjects' | 'addLabel' | 'listOfLabels' | 'none' | 'completed' | 'uncompleted' | 'all'
