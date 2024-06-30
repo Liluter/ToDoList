@@ -49,6 +49,7 @@
   <h2 class="d-flex justify-content-center">
     Welcome!
   </h2>
+  <h4 class="d-flex justify-content-center">... in the best To-Do-List app!</h4>
   }
   @if(showModal[0] === 'listOfTasks'){
   @if(showModal[1] === "uncompleted" || showModal[1] === 'all' ){
@@ -143,17 +144,17 @@
 
       <select class="form-select" multiple aria-label="Multiple select example" id="labels" name='labels'
         [(ngModel)]="newTask.labels">
-        <option *ngFor="let label of labels;  index as i" [ngValue]="label.name">{{label.name}}
+        <option [class]="label.color" *ngFor="let label of labels;  index as i" [ngValue]="label.name">{{label.name}}
         </option>
       </select>
     </div>
-    <div class="input-group mb-3">
-      <div class="btn-group" role="group" aria-label="Basic radio toggle button group"
+    <div class="input-group mb-3 ">
+      <div class="btn-group m-1" role="group" aria-label="Basic radio toggle button group"
         *ngFor="let project of projects; index as i">
         <ng-container *ngIf="i !== 0">
           <input type="radio" class="btn-check" [value]="project.id" name="btnradio" id="{{project.id}}"
             autocomplete="off" [(ngModel)]="newTask.project_id">
-          <label class="btn btn-outline-primary" for="{{project.id}}">{{project.name}}</label>
+          <label [class]="project.color" class="btn btn-outline-secondary" for="{{project.id}}">{{project.name}}</label>
         </ng-container>
       </div>
 

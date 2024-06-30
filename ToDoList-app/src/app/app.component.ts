@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of, shareReplay } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of, shareReplay, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -87,8 +87,9 @@ export class AppComponent implements OnInit {
     name: '',
     is_favorite: false,
   }
-  allLabels$: Observable<Label[]>;
-  allProjects$: Observable<[SyncProject]>;
+  allLabels$?: Observable<Label[]>;
+  allProjects$?: Observable<[SyncProject]>;
+
 
   constructor(private readonly http: HttpClient) {
 
@@ -136,12 +137,12 @@ export class AppComponent implements OnInit {
       }).pipe(
         map(data => data.projects),
         tap(projects => this.projects = projects),
+        shareReplay()
       )
 
 
     this.menuObservable$ = from(this.menuEvent).pipe(
       tap(data => {
-        // console.log(data)
         this.showModal = data
       }),
       switchMap(data => {
@@ -158,6 +159,7 @@ export class AppComponent implements OnInit {
           return combineLatest([this.allLabels$, this.allProjects$])
         }
 
+
         return EMPTY
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -170,30 +172,24 @@ export class AppComponent implements OnInit {
 
   getCompletedTasks() {
     this.menuEvent.emit(['listOfTasks', 'completed']);
-    // this.clickEvent.emit('completed');
   }
   getUncompletedTasks() {
     this.menuEvent.emit(['listOfTasks', 'uncompleted']);
-    // this.clickEvent.emit('uncompleted');
   }
   getAllTasks() {
     this.menuEvent.emit(['listOfTasks', 'all']);
-    // this.clickEvent.emit('all');
   }
   getNoneTasks() {
     this.menuEvent.emit(['none'])
   }
   addTask() {
     this.menuEvent.emit(['addTask']);
-    // this.addTaskModal = !this.addTaskModal
   }
   addProject() {
     this.menuEvent.emit(['addProject']);
-    // this.addTaskModal = !this.addTaskModal
   }
   addLabel() {
     this.menuEvent.emit(['addLabel']);
-    // this.addTaskModal = !this.addTaskModal
   }
   getLabels() {
     this.menuEvent.emit(['listOfLabels']);
@@ -252,13 +248,7 @@ export class AppComponent implements OnInit {
     return this.projects.find(project => project.name === projectName)?.color
   }
 
-
-  selectLabel(name: string) {
-    console.log('Label ', name, ' selected')
-  }
-
   onAddTask(form: NgForm) {
-    // REST API
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
@@ -268,9 +258,6 @@ export class AppComponent implements OnInit {
     }, error => console.log('ERROR :', error))
   }
   onAddProject(form: NgForm) {
-    // REST APIqq
-    console.log(this.newProject)
-    console.log(form.control)
     this.http.post('https://api.todoist.com/rest/v2/projects', this.newProject, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
