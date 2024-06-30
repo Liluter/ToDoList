@@ -191,16 +191,86 @@
   </form>
 
   }
+
+  @if ( showModal[0]=== 'addProject' ){
+  <h4 class=" text-body-secondary">Add new Project:</h4>
+  <form #newProjectForm="ngForm" (ngSubmit)="onAddProject(newProjectForm)">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="Title">Name</span>
+      <input type="text" #name="ngModel" class="form-control"
+        [class]="name.valid || name.pristine ? 'is-valid' : 'is-invalid'" placeholder="max 30 chars" aria-label="Title"
+        aria-describedby="Title" name="name" maxlengtqh="30" [(ngModel)]="newProject.name" required>
+    </div>
+    <div class="input-group mb-3 d-flex justify-content-center" [class]="newProject.name">
+
+      <select class="form-select" aria-label="Default select example" id="colors" name='colors'
+        [(ngModel)]="newProject.color" [class]="newProject.color">
+        <option [ngClass]="color.name" *ngFor="let color of colors" [ngValue]="color.name">{{color.name}}
+        </option>
+      </select>
+    </div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" name="favourite" id="favourite"
+        [(ngModel)]="newProject.is_favorite">
+      <label class="form-check-label" for="favourite">Add to favourite</label>
+    </div>
+    <div class="input-group mb-3">
+
+      <button type="submit" class="btn btn-success">Add Task</button>
+      <button type="button" class="btn btn-danger"
+        (click)="newProjectForm.resetForm(defaultProjectValue)">Reset</button>
+    </div>
+  </form>
+
+  }
+
   @if( showModal[0] === 'listOfProjects'){
-  {{'list of Projects'}}
+  <h4>Projects list:</h4>
+  <ul class="list-group">
+    <li class="list-group-item d-flex justify-content-between" [ngClass]="getProjectColor(project.name)"
+      *ngFor="let project of projects">
+      {{project.name}} <i class="bi bi-star-fill star-filled" *ngIf="project.is_favorite"></i>
+    </li>
+  </ul>
+
   }
   @if( showModal[0] === 'listOfLabels'){
-  {{'list of Labels'}}
-  }
-  @if( showModal[0] === 'addProject'){
-  {{'Add project'}}
+  <h4>Labels list:</h4>
+  <ul class="list-group">
+    <li class="list-group-item d-flex justify-content-between" [ngClass]="getLabelColor(label.name)"
+      *ngFor="let label of labels">
+      {{label.name}} <i class="bi bi-star-fill star-filled" *ngIf="label.is_favorite"></i>
+    </li>
+  </ul>
+
   }
   @if( showModal[0] === 'addLabel'){
-  {{'Add label'}}
+  <h4 class=" text-body-secondary">Add new Label:</h4>
+  <form #newLabelForm="ngForm" (ngSubmit)="onAddLabel(newLabelForm)">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="Title">Name</span>
+      <input type="text" #name="ngModel" class="form-control"
+        [class]="name.valid || name.pristine ? 'is-valid' : 'is-invalid'" placeholder="max 30 chars" aria-label="Title"
+        aria-describedby="Title" name="name" maxlengtqh="30" [(ngModel)]="newLabel.name" required>
+    </div>
+    <div class="input-group mb-3 d-flex justify-content-center" [class]="newLabel.name">
+
+      <select class="form-select" aria-label="Default select example" id="colors" name='colors'
+        [(ngModel)]="newLabel.color" [class]="newLabel.color">
+        <option [ngClass]="color.name" *ngFor="let color of colors" [ngValue]="color.name">{{color.name}}
+        </option>
+      </select>
+    </div>
+    <div class="form-check form-switch mb-3">
+      <input class="form-check-input" type="checkbox" role="switch" name="favourite" id="favourite"
+        [(ngModel)]="newLabel.is_favorite">
+      <label class="form-check-label" for="favourite">Add to favourite</label>
+    </div>
+    <div class="input-group mb-3">
+
+      <button type="submit" class="btn btn-success">Add Task</button>
+      <button type="button" class="btn btn-danger" (click)="newLabelForm.resetForm(defaultLabelValue)">Reset</button>
+    </div>
+  </form>
   }
 </div>

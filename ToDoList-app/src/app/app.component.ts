@@ -18,7 +18,7 @@ import { SyncProject } from './interfaces/syncProject.interface';
 import { Form, FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 import { Modals } from './types/modals';
-
+import { colors } from './varibles/env';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -43,6 +43,8 @@ export class AppComponent implements OnInit {
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
   // noneTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
   addTaskModal: boolean = false
+  menuObservable$: any;
+  readonly colors = colors
   newTask = <Task>{
     content: '',
     description: '',
@@ -61,7 +63,29 @@ export class AppComponent implements OnInit {
     priority: 1,
     project_id: ''
   }
-  menuObservable$: any;
+
+  newProject = <Project>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+  readonly defaultProjectValue = <Project>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+
+  newLabel = <Label>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+
+  readonly defaultLabelValue = <Label>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
 
   constructor(private readonly http: HttpClient) {
 
@@ -207,6 +231,13 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
+  getProjectColor(projectName: string) {
+    if (!this.projects) {
+      return
+    }
+    return this.projects.find(project => project.name === projectName)?.color
+  }
+
 
   selectLabel(name: string) {
     console.log('Label ', name, ' selected')
@@ -229,13 +260,34 @@ export class AppComponent implements OnInit {
   onAddTask(form: NgForm) {
     // REST API
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
-      headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-      params: {
-        sync_token: '*'
-      }
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
       if (data) {
         form.resetForm(this.defaultValue)
+      }
+    }, error => console.log('ERROR :', error))
+  }
+  onAddProject(form: NgForm) {
+    // REST APIqq
+    console.log(this.newProject)
+    console.log(form.control)
+    this.http.post('https://api.todoist.com/rest/v2/projects', this.newProject, {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).subscribe(data => {
+      if (data) {
+        form.resetForm(this.defaultProjectValue)
+      }
+    }, error => console.log('ERROR :', error))
+  }
+  onAddLabel(form: NgForm) {
+    // REST APIqq
+    console.log(this.newLabel)
+    console.log(form)
+    this.http.post('https://api.todoist.com/rest/v2/labels', this.newLabel, {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).subscribe(data => {
+      if (data) {
+        form.resetForm(this.defaultLabelValue)
       }
     }, error => console.log('ERROR :', error))
   }
