@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of, shareReplay, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -15,9 +15,11 @@ import { Tasks } from './interfaces/tasks.interface';
 import { Project } from './interfaces/project.interface';
 import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
-import { Form, FormsModule } from '@angular/forms';
+import { Form, FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
-
+import { Modals } from './types/modals';
+import { colors } from './varibles/env';
+import { RestLabel } from './interfaces/restLabel.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -28,29 +30,69 @@ import { Task } from './interfaces/task.interface';
 export class AppComponent implements OnInit {
   currentDate: string = new Date().toISOString()
   clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
+  menuEvent = new EventEmitter<Modals[]>()
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
   showCompletedTasks?: boolean = false
   descriptionOpenHandler?: string;
   labels?: Label[]
   projects?: SyncProject[]
-  clickObservable$: Observable<Tasks>;
-
+  // clickObservable$: Observable<Tasks>;
+  showModal: Modals[] = ['none']
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
+  // noneTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
   addTaskModal: boolean = false
+  menuObservable$: any;
+  readonly colors = colors
   newTask = <Task>{
     content: '',
     description: '',
-    due: { date: '', string: '' },
+    due_date: '',
+    due_string: '',
     labels: [''],
     priority: 1,
     project_id: '' // inbox"2334294385"
   }
+  readonly defaultValue = <Task>{
+    content: '',
+    description: '',
+    due_date: '',
+    due_string: '',
+    labels: [''],
+    priority: 1,
+    project_id: ''
+  }
+
+  newProject = <Project>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+  readonly defaultProjectValue = <Project>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+
+  newLabel = <Label>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+
+  readonly defaultLabelValue = <Label>{
+    color: 'charcoal',
+    name: '',
+    is_favorite: false,
+  }
+  allLabels$?: Observable<Label[]>;
+  allProjects$?: Observable<[SyncProject]>;
 
 
   constructor(private readonly http: HttpClient) {
+
 
     this.uncompletedTasks$ = this.http.get<SyncItem>("https://api.todoist.com/sync/v9/sync",
       {
@@ -60,11 +102,6 @@ export class AppComponent implements OnInit {
           resource_types: '["items"]'
         }
       }).pipe(
-        tap(() => {
-          this.addTaskModal = false
-          this.showTasks = true
-          this.showCompletedTasks = false
-        }),
         map(data => { return { uncompleted: data.items, completed: null } }),
       )
 
@@ -72,61 +109,93 @@ export class AppComponent implements OnInit {
       {
         headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
       }).pipe(
-        tap(() => {
-          this.addTaskModal = false
-          this.showTasks = false
-          this.showCompletedTasks = true
-        }),
         map(data => { return { uncompleted: null, completed: data.items } }),
 
       )
 
     this.allTasks$ = combineLatest([this.uncompletedTasks$, this.completedTasks$]).pipe(
       startWith([null, null]),
-      tap(() => {
-        this.addTaskModal = false
-        this.showTasks = true
-        this.showCompletedTasks = true
-      }),
       map(([uncompletedTasks, completedTasks]) => {
         return { uncompleted: uncompletedTasks?.uncompleted, completed: completedTasks?.completed }
       })
     )
 
-    this.clickObservable$ = from(this.clickEvent).pipe(
-      switchMap(data => {
-        if (data === 'uncompleted') {
-          return this.uncompletedTasks$
-        } else if (data === 'completed') {
-          return this.completedTasks$
-        } else if (data === 'all') {
-          return this.allTasks$
-        } else if (data === 'none') {
-          this.showTasks = false
-          this.showCompletedTasks = false
-          return EMPTY
+    this.allLabels$ = this.http.get<Label[]>('https://api.todoist.com/rest/v2/labels', {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).pipe(
+      tap(data => this.labels = data),
+    )
+
+
+    this.allProjects$ = this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
+      {
+        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
+        params: {
+          sync_token: '*',
+          resource_types: '["projects"]'
         }
+      }).pipe(
+        map(data => data.projects),
+        tap(projects => this.projects = projects),
+        shareReplay()
+      )
+
+
+    this.menuObservable$ = from(this.menuEvent).pipe(
+      tap(data => {
+        this.showModal = data
+      }),
+      switchMap(data => {
+        if (data[1]) {
+          if (data[1] === 'uncompleted') {
+            return this.uncompletedTasks$
+          } else if (data[1] === 'completed') {
+            return this.completedTasks$
+          } else if (data[1] === 'all') {
+            return this.allTasks$
+          } return EMPTY
+        }
+        if (data[0] === 'addTask') {
+          return combineLatest([this.allLabels$, this.allProjects$])
+        }
+
+
         return EMPTY
       }),
-    )
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe()
   }
 
   ngOnInit() {
-    this.fetchLabelsList()
-    this.fetchProjectsList()
+
   }
 
   getCompletedTasks() {
-    this.clickEvent.emit('completed');
+    this.menuEvent.emit(['listOfTasks', 'completed']);
   }
   getUncompletedTasks() {
-    this.clickEvent.emit('uncompleted');
+    this.menuEvent.emit(['listOfTasks', 'uncompleted']);
   }
   getAllTasks() {
-    this.clickEvent.emit('all');
+    this.menuEvent.emit(['listOfTasks', 'all']);
   }
   getNoneTasks() {
-    this.clickEvent.emit('none');
+    this.menuEvent.emit(['none'])
+  }
+  addTask() {
+    this.menuEvent.emit(['addTask']);
+  }
+  addProject() {
+    this.menuEvent.emit(['addProject']);
+  }
+  addLabel() {
+    this.menuEvent.emit(['addLabel']);
+  }
+  getLabels() {
+    this.menuEvent.emit(['listOfLabels']);
+  }
+  getProjects() {
+    this.menuEvent.emit(['listOfProjects']);
   }
   badgeClass(priority: number | undefined) {
     switch (priority) {
@@ -156,19 +225,7 @@ export class AppComponent implements OnInit {
         return '4'
     }
   }
-  fetchLabelsList() {
-    this.http.get<SyncLabels>("https://api.todoist.com/sync/v9/sync",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-        params: {
-          sync_token: '*',
-          resource_types: '["labels"]'
-        }
-      }).pipe(
-        map(data => data.labels),
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe(data => this.labels = [...data])
-  }
+
   openDescription(id: string | undefined) {
 
     if (this.descriptionOpenHandler === id) {
@@ -184,44 +241,42 @@ export class AppComponent implements OnInit {
     }
     return this.labels.find(label => label.name === labelName)?.color
   }
-  // getProjectById(id: string) {
-  //   return this.projects?.find(project => project.id === id)
-  // }
-
-  addTask() {
-    this.getNoneTasks()
-    this.addTaskModal = !this.addTaskModal
-
-    console.log('toggle adddTask')
-  }
-  selectLabel(name: string) {
-    console.log('Label ', name, ' selected')
-  }
-  fetchProjectsList() {
-    this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-        params: {
-          sync_token: '*',
-          resource_types: '["projects"]'
-        }
-      }).pipe(
-        tap(data => console.dir(data)),
-        map(data => data.projects),
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe(data => this.projects = [...data])
+  getProjectColor(projectName: string) {
+    if (!this.projects) {
+      return
+    }
+    return this.projects.find(project => project.name === projectName)?.color
   }
 
-  onAddTask(form: Form) {
-    console.log(form);
-    console.dir(this.newTask)
-    // REST API
+  onAddTask(form: NgForm) {
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
-      headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-      params: {
-        sync_token: '*'
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).subscribe(data => {
+      if (data) {
+        form.resetForm(this.defaultValue)
       }
-    }).subscribe(data => console.log('Respose from server :', data), error => console.log(error))
+    }, error => console.log('ERROR :', error))
+  }
+  onAddProject(form: NgForm) {
+    this.http.post('https://api.todoist.com/rest/v2/projects', this.newProject, {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).subscribe(data => {
+      if (data) {
+        form.resetForm(this.defaultProjectValue)
+      }
+    }, error => console.log('ERROR :', error))
+  }
+  onAddLabel(form: NgForm) {
+    // REST APIqq
+    console.log(this.newLabel)
+    console.log(form)
+    this.http.post('https://api.todoist.com/rest/v2/labels', this.newLabel, {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).subscribe(data => {
+      if (data) {
+        form.resetForm(this.defaultLabelValue)
+      }
+    }, error => console.log('ERROR :', error))
   }
 
 }
