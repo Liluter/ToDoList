@@ -20,12 +20,12 @@ export const colors = [
   },
   {
     id: 33,
-    name: '	yellow',
+    name: 'yellow',
     hexadecimal: '#fad000'
   },
   {
     id: 34,
-    name: '	olive_green',
+    name: 'olive_green',
     hexadecimal: '#afb83b'
   },
   {
@@ -50,7 +50,7 @@ export const colors = [
   },
   {
     id: 38,
-    name: '	teal',
+    name: 'teal',
     hexadecimal: '#158fad'
   },
   {

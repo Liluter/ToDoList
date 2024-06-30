@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of, shareReplay } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -19,6 +19,7 @@ import { Form, FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 import { Modals } from './types/modals';
 import { colors } from './varibles/env';
+import { RestLabel } from './interfaces/restLabel.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -86,6 +87,8 @@ export class AppComponent implements OnInit {
     name: '',
     is_favorite: false,
   }
+  allLabels$: Observable<Label[]>;
+  allProjects$: Observable<[SyncProject]>;
 
   constructor(private readonly http: HttpClient) {
 
@@ -116,6 +119,26 @@ export class AppComponent implements OnInit {
       })
     )
 
+    this.allLabels$ = this.http.get<Label[]>('https://api.todoist.com/rest/v2/labels', {
+      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    }).pipe(
+      tap(data => this.labels = data),
+    )
+
+
+    this.allProjects$ = this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
+      {
+        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
+        params: {
+          sync_token: '*',
+          resource_types: '["projects"]'
+        }
+      }).pipe(
+        map(data => data.projects),
+        tap(projects => this.projects = projects),
+      )
+
+
     this.menuObservable$ = from(this.menuEvent).pipe(
       tap(data => {
         // console.log(data)
@@ -131,6 +154,10 @@ export class AppComponent implements OnInit {
             return this.allTasks$
           } return EMPTY
         }
+        if (data[0] === 'addTask') {
+          return combineLatest([this.allLabels$, this.allProjects$])
+        }
+
         return EMPTY
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -138,8 +165,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.fetchLabelsList()
-    this.fetchProjectsList()
+
   }
 
   getCompletedTasks() {
@@ -203,19 +229,7 @@ export class AppComponent implements OnInit {
         return '4'
     }
   }
-  fetchLabelsList() {
-    this.http.get<SyncLabels>("https://api.todoist.com/sync/v9/sync",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-        params: {
-          sync_token: '*',
-          resource_types: '["labels"]'
-        }
-      }).pipe(
-        map(data => data.labels),
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe(data => this.labels = [...data])
-  }
+
   openDescription(id: string | undefined) {
 
     if (this.descriptionOpenHandler === id) {
@@ -241,20 +255,6 @@ export class AppComponent implements OnInit {
 
   selectLabel(name: string) {
     console.log('Label ', name, ' selected')
-  }
-
-  fetchProjectsList() {
-    this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-        params: {
-          sync_token: '*',
-          resource_types: '["projects"]'
-        }
-      }).pipe(
-        map(data => data.projects),
-        takeUntilDestroyed(this.destroyRef),
-      ).subscribe(data => this.projects = [...data])
   }
 
   onAddTask(form: NgForm) {
