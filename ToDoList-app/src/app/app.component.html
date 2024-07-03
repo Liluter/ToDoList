@@ -139,7 +139,6 @@
       <input type="text" #title="ngModel" class="form-control" [class.is-valid]="title.valid"
         [class.is-invalid]="title.touched && title.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
         aria-describedby="Title" name="title" minlength="3" maxlength="30" [(ngModel)]="newTask.content" required>
-      {{title.valid}} {{title.pristine}}
     </div>
     <div class="input-group mb-3">
       <span class="input-group-text" id="Note">Note</span>
@@ -156,8 +155,8 @@
     </div>
     <div class="input-group mb-3 ">
       <div class="btn-group m-1" role="group" aria-label="Basic radio toggle button group"
-        *ngFor="let project of projects; index as i">
-        @if(i !== 0){
+        *ngFor="let project of projects; index as idx">
+        @if(idx !== 0){
         <input type="radio" class="btn-check" [value]="project.id" name="btnradio" id="{{project.id}}"
           autocomplete="off" [(ngModel)]="newTask.project_id">
         <label [class]="project.color" class="btn btn-outline-secondary" for="{{project.id}}">{{project.name}}</label>
@@ -201,7 +200,7 @@
     </div>
     <div class="input-group mb-3">
 
-      <button type="submit" class="btn btn-success">Add Task</button>
+      <button type="submit" class="btn btn-success" [disabled]="newTaskForm.invalid">Add Task</button>
       <button type="button" class="btn btn-danger" (click)="newTaskForm.resetForm(defaultValue)">Reset</button>
     </div>
   </form>
@@ -212,9 +211,9 @@
   <form #newProjectForm="ngForm" (ngSubmit)="onAddProject(newProjectForm)">
     <div class="input-group mb-3">
       <span class="input-group-text" id="Title">Name</span>
-      <input type="text" #name="ngModel" class="form-control"
-        [class]="name.valid || name.pristine ? 'is-valid' : 'is-invalid'" placeholder="max 30 chars" aria-label="Title"
-        aria-describedby="Title" name="name" maxlengtqh="30" [(ngModel)]="newProject.name" required>
+      <input type="text" #name="ngModel" class="form-control" [class.is-valid]="name.valid"
+        [class.is-invalid]="name.touched && name.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
+        aria-describedby="Title" name="name" minlength="3" maxlength="30" [(ngModel)]="newProject.name" required>
     </div>
     <div class="input-group mb-3 d-flex justify-content-center" [class]="newProject.name">
 
@@ -231,7 +230,7 @@
     </div>
     <div class="input-group mb-3">
 
-      <button type="submit" class="btn btn-success">Add Project</button>
+      <button type="submit" class="btn btn-success" [disabled]="newProjectForm.invalid">Add Project</button>
       <button type="button" class="btn btn-danger"
         (click)="newProjectForm.resetForm(defaultProjectValue)">Reset</button>
     </div>
@@ -270,9 +269,9 @@
   <form #newLabelForm="ngForm" (ngSubmit)="onAddLabel(newLabelForm)">
     <div class="input-group mb-3">
       <span class="input-group-text" id="Title">Name</span>
-      <input type="text" #name="ngModel" class="form-control"
-        [class]="name.valid || name.pristine ? 'is-valid' : 'is-invalid'" placeholder="max 30 chars" aria-label="Title"
-        aria-describedby="Title" name="name" maxlengtqh="30" [(ngModel)]="newLabel.name" required>
+      <input type="text" #name="ngModel" class="form-control" [class.is-valid]="name.valid"
+        [class.is-invalid]="name.touched && name.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
+        aria-describedby="Title" name="name" minlength="3" maxlength="30" [(ngModel)]="newLabel.name" required>
     </div>
     <div class="input-group mb-3 d-flex justify-content-center" [class]="newLabel.name">
 
@@ -289,7 +288,7 @@
     </div>
     <div class="input-group mb-3">
 
-      <button type="submit" class="btn btn-success">Add Label</button>
+      <button type="submit" class="btn btn-success" [disabled]="newLabelForm.invalid">Add Label</button>
       <button type="button" class="btn btn-danger" (click)="newLabelForm.resetForm(defaultLabelValue)">Reset</button>
     </div>
   </form>
