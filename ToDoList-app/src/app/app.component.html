@@ -45,14 +45,14 @@
   </div>
 </nav>
 <div class="container mx-auto my-3 ">
-  @if(showModal[0] === 'none') {
+  @if(showModal.page === 'none') {
   <h2 class="d-flex justify-content-center">
     Welcome!
   </h2>
   <h4 class="d-flex justify-content-center">... in the best To-Do-List app!</h4>
   }
-  @if(showModal[0] === 'listOfTasks'){
-  @if(showModal[1] === "uncompleted" || showModal[1] === 'all' ){
+  @if(showModal.page === 'listOfTasks'){
+  @if(showModal.subpage === "uncompleted" || showModal.subpage === 'all' ){
   @if (uncompletedTasks$ | async; as data){
   <h4 class="text-body-secondary">Uncompleted tasks:</h4>
   <ul class="list-group mb-3" *ngFor="let task of data?.uncompleted">
@@ -111,7 +111,7 @@
   </ul>
   }}
   <!-- @if(showModal.subpage === "completed" || showModal.subpage === 'all'){ -->
-  @if(showModal[1] === "completed" || showModal[1] === 'all'){
+  @if(showModal.subpage === "completed" || showModal.subpage === 'all'){
   @if (completedTasks$ | async ;as data){
   <h4 class="text-body-secondary">Completed tasks:</h4>
   <ul class="list-group mb-3" *ngFor="let task of data.completed ">
@@ -131,7 +131,7 @@
   }
   }
   }
-  @if ( showModal[0]=== 'addTask' ){
+  @if ( showModal.page=== 'addTask' ){
   <h4 class=" text-body-secondary">Add new Task:</h4>
   <form #newTaskForm="ngForm" (ngSubmit)="onAddTask(newTaskForm)">
     <div class="input-group mb-3">
@@ -206,7 +206,7 @@
   </form>
   }
 
-  @if ( showModal[0]=== 'addProject' ){
+  @if ( showModal.page === 'addProject' ){
   <h4 class=" text-body-secondary">Add new Project:</h4>
   <form #newProjectForm="ngForm" (ngSubmit)="onAddProject(newProjectForm)">
     <div class="input-group mb-3">
@@ -238,7 +238,7 @@
 
   }
 
-  @if( showModal[0] === 'listOfProjects'){
+  @if( showModal.page === 'listOfProjects'){
   <h4>Projects list:</h4>
   <ul class="list-group">
     <li class="list-group-item d-flex justify-content-between" [ngClass]="getProjectColor(project.name)"
@@ -251,7 +251,7 @@
   </ul>
 
   }
-  @if( showModal[0] === 'listOfLabels'){
+  @if( showModal.page === 'listOfLabels'){
   <h4>Labels list:</h4>
   <ul class="list-group">
     <li class="list-group-item d-flex justify-content-between" [ngClass]="getLabelColor(label.name)"
@@ -264,7 +264,7 @@
   </ul>
 
   }
-  @if( showModal[0] === 'addLabel'){
+  @if( showModal.page === 'addLabel'){
   <h4 class=" text-body-secondary">Add new Label:</h4>
   <form #newLabelForm="ngForm" (ngSubmit)="onAddLabel(newLabelForm)">
     <div class="input-group mb-3">

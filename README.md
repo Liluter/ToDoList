@@ -19,10 +19,14 @@
 - [x] UI Improvments, Add and fix interfaces, fix Description show issue.
 - [x] UI Improvments, Add Dates to tasks, to secret menu Add Edit mode. Change Dropdown button tag from description to shorter Note, Fixed padding in task cards
 
-===
+---
 
 - [x] Add new task feature with http.post method and Rest API endpoint.
 - [x] Add new Project feature with http.post method and Rest API endpoint.
 - [x] Add new Labels feature with http.post method and Rest API endpoint.
 - [x] Improve UI , add list of projects , and list of labels.
+
+---
+
+- [x] Fix readability by replace \*ngIf by @if.
 - [ ] next steps.

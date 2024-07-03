@@ -17,7 +17,7 @@ import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
 import { Form, FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
-import { Modals } from './types/modals';
+import { Modals, Page, Subpage } from './types/modals';
 import { colors } from './varibles/env';
 import { RestLabel } from './interfaces/restLabel.interface';
 @Component({
@@ -30,7 +30,7 @@ import { RestLabel } from './interfaces/restLabel.interface';
 export class AppComponent implements OnInit {
   currentDate: string = new Date().toISOString()
   clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
-  menuEvent = new EventEmitter<Modals[]>()
+  menuEvent = new EventEmitter<Modals>()
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
   showCompletedTasks?: boolean = false
@@ -38,7 +38,9 @@ export class AppComponent implements OnInit {
   labels?: Label[]
   projects?: SyncProject[]
   // clickObservable$: Observable<Tasks>;
-  showModal: Modals[] = ['none']
+  // showModal: Modals[] = ['none']
+  showModal: Modals = { page: 'none', subpage: 'none' }
+
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
@@ -46,7 +48,7 @@ export class AppComponent implements OnInit {
   addTaskModal: boolean = false
   menuObservable$: any;
   readonly colors = colors
-  newTask = <Task>{
+  newTask: Task = {
     content: '',
     description: '',
     due_date: '',
@@ -142,20 +144,20 @@ export class AppComponent implements OnInit {
 
 
     this.menuObservable$ = from(this.menuEvent).pipe(
-      tap(data => {
-        this.showModal = data
+      tap(menu => {
+        this.showModal = { ...menu }
       }),
-      switchMap(data => {
-        if (data[1]) {
-          if (data[1] === 'uncompleted') {
+      switchMap(menu => {
+        if (menu.subpage) {
+          if (menu.subpage === 'uncompleted') {
             return this.uncompletedTasks$
-          } else if (data[1] === 'completed') {
+          } else if (menu.subpage === 'completed') {
             return this.completedTasks$
-          } else if (data[1] === 'all') {
+          } else if (menu.subpage === 'all') {
             return this.allTasks$
           } return EMPTY
         }
-        if (data[0] === 'addTask') {
+        if (menu.page === 'addTask') {
           return combineLatest([this.allLabels$, this.allProjects$])
         }
 
@@ -171,31 +173,31 @@ export class AppComponent implements OnInit {
   }
 
   getCompletedTasks() {
-    this.menuEvent.emit(['listOfTasks', 'completed']);
+    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'completed' });
   }
   getUncompletedTasks() {
-    this.menuEvent.emit(['listOfTasks', 'uncompleted']);
+    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'uncompleted' });
   }
   getAllTasks() {
-    this.menuEvent.emit(['listOfTasks', 'all']);
+    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'all' });
   }
   getNoneTasks() {
-    this.menuEvent.emit(['none'])
+    this.menuEvent.emit({ page: 'none', subpage: 'none' })
   }
   addTask() {
-    this.menuEvent.emit(['addTask']);
+    this.menuEvent.emit({ page: 'addTask' });
   }
   addProject() {
-    this.menuEvent.emit(['addProject']);
+    this.menuEvent.emit({ page: 'addProject' });
   }
   addLabel() {
-    this.menuEvent.emit(['addLabel']);
+    this.menuEvent.emit({ page: 'addLabel' });
   }
   getLabels() {
-    this.menuEvent.emit(['listOfLabels']);
+    this.menuEvent.emit({ page: 'listOfLabels' });
   }
   getProjects() {
-    this.menuEvent.emit(['listOfProjects']);
+    this.menuEvent.emit({ page: 'listOfProjects' });
   }
   badgeClass(priority: number | undefined) {
     switch (priority) {
