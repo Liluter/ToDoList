@@ -131,14 +131,15 @@
   }
   }
   }
-  @if ( showModal.page=== 'addTask' ){
+  @if ( showModal.page === 'addTask' ){
   <h4 class=" text-body-secondary">Add new Task:</h4>
   <form #newTaskForm="ngForm" (ngSubmit)="onAddTask(newTaskForm)">
     <div class="input-group mb-3">
       <span class="input-group-text" id="Title">Title</span>
-      <input type="text" #title="ngModel" class="form-control"
-        [class]="title.valid || title.pristine ? 'is-valid' : 'is-invalid'" placeholder="max 40 chars"
-        aria-label="Title" aria-describedby="Title" name="title" maxlength="30" [(ngModel)]="newTask.content" required>
+      <input type="text" #title="ngModel" class="form-control" [class.is-valid]="title.valid"
+        [class.is-invalid]="title.touched && title.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
+        aria-describedby="Title" name="title" minlength="3" maxlength="30" [(ngModel)]="newTask.content" required>
+      {{title.valid}} {{title.pristine}}
     </div>
     <div class="input-group mb-3">
       <span class="input-group-text" id="Note">Note</span>
