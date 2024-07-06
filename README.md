@@ -29,4 +29,11 @@
 ---
 
 - [x] Fix readability by replace \*ngIf by @if.
+- [x] Fix readability by replace \*ngFor by @for.
+- [x] Add labels for labels and project list in addTask
+- [x] Fix addTask button validation.
+- [x] NgModel with object not array.
+- [x] Error handling of http.post requests.
+- [x] Fix readabiliy by replace \*ngIf by @if.
+- [x] Fix Forms reset.
 - [ ] next steps.

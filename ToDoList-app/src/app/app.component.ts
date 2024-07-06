@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of, shareReplay, Subject } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, shareReplay } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -10,16 +10,14 @@ import { SyncItem } from './interfaces/syncItem.interface';
 import { ItemCompleted } from './interfaces/item-completed.interface';
 import { AllCompleted } from './interfaces/all-completed.interface';
 import { Label } from './interfaces/label.interface';
-import { SyncLabels } from './interfaces/syncLabels.interface';
 import { Tasks } from './interfaces/tasks.interface';
 import { Project } from './interfaces/project.interface';
 import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
-import { Form, FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
-import { Modals, Page, Subpage } from './types/modals';
+import { Modals } from './types/modals';
 import { colors } from './varibles/env';
-import { RestLabel } from './interfaces/restLabel.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -55,16 +53,16 @@ export class AppComponent implements OnInit {
     due_string: '',
     labels: [''],
     priority: 1,
-    project_id: '' // inbox"2334294385"
+    project_id: '2334294385' // inbox"2334294385"
   }
-  readonly defaultValue = <Task>{
+  readonly defaultTaskValue = <Task>{
     content: '',
     description: '',
     due_date: '',
     due_string: '',
     labels: [''],
     priority: 1,
-    project_id: ''
+    project_id: '2334294385'
   }
 
   newProject = <Project>{
@@ -91,7 +89,10 @@ export class AppComponent implements OnInit {
   }
   allLabels$?: Observable<Label[]>;
   allProjects$?: Observable<[SyncProject]>;
-
+  loadingState: boolean = false
+  showCompletionMessage: boolean = false
+  completionSuccess?: boolean;
+  message?: string;
 
   constructor(private readonly http: HttpClient) {
 
@@ -251,34 +252,86 @@ export class AppComponent implements OnInit {
   }
 
   onAddTask(form: NgForm) {
+    this.loadingState = true
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
       if (data) {
-        form.resetForm(this.defaultValue)
+        this.loadingState = false
+        this.showMessage('complete', `Task "${form.form.controls['title'].value}"  added successfully`)
+        this.resetTask(form)
+        //show confirmation 
       }
-    }, error => console.log('ERROR :', error))
+    }, error => {
+      this.loadingState = false
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage('error', message)
+    })
   }
   onAddProject(form: NgForm) {
+    this.loadingState = true
     this.http.post('https://api.todoist.com/rest/v2/projects', this.newProject, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    }).subscribe(data => {
-      if (data) {
-        form.resetForm(this.defaultProjectValue)
-      }
-    }, error => console.log('ERROR :', error))
+    })
+      .subscribe(data => {
+        if (data) {
+          this.loadingState = false
+          this.showMessage('complete', `Project "${form.form.controls['name'].value}"  added successfully`)
+          this.resetProject(form)
+        }
+      }, error => {
+        this.loadingState = false
+        let message = error.message
+        if (error.status === 403 || error.status === 400) {
+          message = error.error
+        }
+        this.showMessage('error', message)
+      })
   }
   onAddLabel(form: NgForm) {
     // REST APIqq
-    console.log(this.newLabel)
-    console.log(form)
+    this.loadingState = true
     this.http.post('https://api.todoist.com/rest/v2/labels', this.newLabel, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
-      if (data) {
-        form.resetForm(this.defaultLabelValue)
-      }
-    }, error => console.log('ERROR :', error))
-  }
 
+      if (data) {
+        this.loadingState = false
+        this.showMessage('complete', `Label "${form.form.controls['name'].value}"  added successfully`)
+        this.resetLabel(form)
+      }
+    }, error => {
+      this.loadingState = false
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage('error', message)
+    })
+  }
+  showMessage(kind: string, message: string) {
+    this.message = message
+    if (kind === 'complete') {
+      this.completionSuccess = true
+      this.showCompletionMessage = true
+      setTimeout(() => { this.showCompletionMessage = false }, 6000)
+    }
+    if (kind === 'error') {
+      this.completionSuccess = false
+      this.showCompletionMessage = true
+      setTimeout(() => { this.showCompletionMessage = false }, 6000)
+    }
+  }
+  resetLabel(form: NgForm) {
+    form.resetForm({ colors: this.defaultLabelValue.color, name: this.defaultLabelValue.name, favourite: this.defaultLabelValue.is_favorite })
+  }
+  resetProject(form: NgForm) {
+    form.resetForm({ colors: this.defaultProjectValue.color, name: this.defaultProjectValue.name, favourite: this.defaultProjectValue.is_favorite })
+  }
+  resetTask(form: NgForm) {
+    form.resetForm({ btnradio: this.defaultTaskValue.project_id, dueDate: this.defaultTaskValue.due_date, dueString: this.defaultTaskValue.due_string, labels: this.defaultTaskValue.labels, note: this.defaultTaskValue.description, priority: this.defaultTaskValue.priority, title: this.defaultTaskValue.content })
+  }
 }

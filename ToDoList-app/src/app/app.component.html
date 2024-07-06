@@ -44,6 +44,7 @@
     </span>
   </div>
 </nav>
+
 <div class="container mx-auto my-3 ">
   @if(showModal.page === 'none') {
   <h2 class="d-flex justify-content-center">
@@ -55,12 +56,13 @@
   @if(showModal.subpage === "uncompleted" || showModal.subpage === 'all' ){
   @if (uncompletedTasks$ | async; as data){
   <h4 class="text-body-secondary">Uncompleted tasks:</h4>
-  <ul class="list-group mb-3" *ngFor="let task of data?.uncompleted">
+  @for(task of data?.uncompleted;track $index){
+  <ul class="list-group mb-3">
     <li class="list-group-item px-2 ">
       <div class="input-group input-group-sm">
         <span class="input-group-text">
           <input class="form-check-input mt-0" type="checkbox" value="" checked="{{task.completed_at ? 'true' : ''}}"
-            id="flexCheckDefault">
+            id="flexCheckDefault">qqq
         </span>
         <span class="input-group-text">
           <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
@@ -75,8 +77,10 @@
 
         <span class="input-group-text">
           <div class="d-flex justify-content-center">
-            <span class="badge rounded-pill text-black label mx-1 p-1 " ngClass="{{getLabelColor(label)}}"
-              *ngFor=" let label of task.labels" disabled><i class="bi bi-tag ">{{label}}</i></span>
+            @for(label of task.labels; track $index){
+            <span class="badge rounded-pill text-black label mx-1 p-1 " ngClass="{{getLabelColor(label)}}" disabled><i
+                class="bi bi-tag ">{{label}}</i></span>
+            }
           </div>
         </span>
       </div>
@@ -109,12 +113,14 @@
       }
     </li>
   </ul>
+  }
   }}
   <!-- @if(showModal.subpage === "completed" || showModal.subpage === 'all'){ -->
   @if(showModal.subpage === "completed" || showModal.subpage === 'all'){
   @if (completedTasks$ | async ;as data){
   <h4 class="text-body-secondary">Completed tasks:</h4>
-  <ul class="list-group mb-3" *ngFor="let task of data.completed ">
+  @for(task of data.completed; track $index){
+  <ul class="list-group mb-3">
     <li class="list-group-item px-2">
       <div class="input-group ">
         <span class="input-group-text"><input class="form-check-input" type="checkbox" value=""
@@ -128,6 +134,7 @@
       </div>
     </li>
   </ul>
+  }
   }
   }
   }
@@ -146,36 +153,56 @@
         [(ngModel)]="newTask.description"></textarea>
     </div>
     <div class="input-group mb-3 d-flex justify-content-center">
-
+      @if(labels){
+      <span class="input-group-text">Select Label/s</span>
       <select class="form-select" multiple aria-label="Multiple select example" id="labels" name='labels'
         [(ngModel)]="newTask.labels">
-        <option [class]="label.color" *ngFor="let label of labels;  index as i" [ngValue]="label.name">{{label.name}}
+        @for(label of labels;track $index; let i = $index ){
+
+        <option [class]="label.color" [ngValue]="label.name">
+          {{label.name}}
         </option>
+        }
       </select>
+      }@else {
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      }
     </div>
     <div class="input-group mb-3 ">
-      <div class="btn-group m-1" role="group" aria-label="Basic radio toggle button group"
-        *ngFor="let project of projects; index as idx">
-        @if(idx !== 0){
-        <input type="radio" class="btn-check" [value]="project.id" name="btnradio" id="{{project.id}}"
+      <span class="input-group-text">Choose project</span>
+      @if(projects){
+      @for(project of projects;track $index){
+      <div class="btn-group m-1" role="group" aria-label="Basic radio toggle button group">
+        <input type="radio" class="btn-check" [value]="project.id" q name="btnradio" id="{{project.id}}"
           autocomplete="off" [(ngModel)]="newTask.project_id">
-        <label [class]="project.color" class="btn btn-outline-secondary" for="{{project.id}}">{{project.name}}</label>
-        }
+        <label [class]="project.color" class="btn btn-outline-dark" for="{{project.id}}">{{project.name}}</label>
       </div>
+
+      }
+      }@else {
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      }
 
     </div>
     <div class="input-group mb-3">
       <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+        <span class="input-group-text" id="priority-set-label">Set Priority</span>
         <input type="radio" class="btn-check" name="priority" id="priority1" autocomplete="off"
           [(ngModel)]="newTask.priority" [value]="4">
         <label class="btn btn-outline-primary" for="priority1"><span class="badge rounded-pill"
             [ngClass]="badgeClass(4)">4</span></label>
-
         <input type="radio" class="btn-check" name="priority" id="priority2" autocomplete="off"
           [(ngModel)]="newTask.priority" [value]="3">
         <label class="btn btn-outline-primary" for="priority2"><span class="badge rounded-pill"
             [ngClass]="badgeClass(3)">3</span></label>
-
         <input type="radio" class="btn-check" name="priority" id="priority3" autocomplete="off"
           [(ngModel)]="newTask.priority" [value]="2">
         <label class="btn btn-outline-primary" for="priority3"><span class="badge rounded-pill"
@@ -200,8 +227,16 @@
     </div>
     <div class="input-group mb-3">
 
+
+      @if(loadingState){
+      <button class="btn btn-success" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span role="status">Loading...</span>
+      </button>
+      } @else{
       <button type="submit" class="btn btn-success" [disabled]="newTaskForm.invalid">Add Task</button>
-      <button type="button" class="btn btn-danger" (click)="newTaskForm.resetForm(defaultValue)">Reset</button>
+      }
+      <button type="button" class="btn btn-danger" (click)="resetTask(newTaskForm)">Reset</button>
     </div>
   </form>
   }
@@ -216,11 +251,13 @@
         aria-describedby="Title" name="name" minlength="3" maxlength="30" [(ngModel)]="newProject.name" required>
     </div>
     <div class="input-group mb-3 d-flex justify-content-center" [class]="newProject.name">
-
+      <span class="input-group-text">Select color</span>
       <select class="form-select" aria-label="Default select example" id="colors" name='colors'
         [(ngModel)]="newProject.color" [class]="newProject.color">
-        <option [ngClass]="color.name" *ngFor="let color of colors" [ngValue]="color.name">{{color.name}}
+        @for (color of colors; track $index){
+        <option [ngClass]="color.name" [ngValue]="color.name">{{color.name}}
         </option>
+        }
       </select>
     </div>
     <div class="form-check form-switch mb-3">
@@ -230,39 +267,61 @@
     </div>
     <div class="input-group mb-3">
 
+
+      @if(loadingState){
+      <button class="btn btn-success" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span role="status">Loading...</span>
+      </button>
+      }@else {
       <button type="submit" class="btn btn-success" [disabled]="newProjectForm.invalid">Add Project</button>
-      <button type="button" class="btn btn-danger"
-        (click)="newProjectForm.resetForm(defaultProjectValue)">Reset</button>
+      }
+      <button type="button" class="btn btn-danger" (click)="resetProject(newProjectForm)">Reset</button>
     </div>
   </form>
-
   }
 
   @if( showModal.page === 'listOfProjects'){
   <h4>Projects list:</h4>
   <ul class="list-group">
-    <li class="list-group-item d-flex justify-content-between" [ngClass]="getProjectColor(project.name)"
-      *ngFor="let project of allProjects$ | async">
+    @if(allProjects$ | async; as projects){
+    @for(project of projects;track project.id){
+    <li class="list-group-item d-flex justify-content-between" [ngClass]="getProjectColor(project.name)">
       {{project.name}}
       @if(project.is_favorite){
       <i class="bi bi-star-fill star-filled"></i>
       }
     </li>
+    }
+    }@else {
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    }
   </ul>
-
   }
   @if( showModal.page === 'listOfLabels'){
   <h4>Labels list:</h4>
   <ul class="list-group">
-    <li class="list-group-item d-flex justify-content-between" [ngClass]="getLabelColor(label.name)"
-      *ngFor="let label of allLabels$ | async">
+    @if(allLabels$ | async ; as labels ){
+    @for(label of labels;track $index){
+    <li class="list-group-item d-flex justify-content-between" [ngClass]="getLabelColor(label.name)">
       {{label.name}}
       @if(label.is_favorite){
       <i class="bi bi-star-fill star-filled"></i>
       }
     </li>
+    }
+    } @else {
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    }
   </ul>
-
   }
   @if( showModal.page === 'addLabel'){
   <h4 class=" text-body-secondary">Add new Label:</h4>
@@ -274,11 +333,13 @@
         aria-describedby="Title" name="name" minlength="3" maxlength="30" [(ngModel)]="newLabel.name" required>
     </div>
     <div class="input-group mb-3 d-flex justify-content-center" [class]="newLabel.name">
-
+      <span class="input-group-text">Select color</span>
       <select class="form-select" aria-label="Default select example" id="colors" name='colors'
         [(ngModel)]="newLabel.color" [class]="newLabel.color">
-        <option [ngClass]="color.name" *ngFor="let color of colors" [ngValue]="color.name">{{color.name}}
+        @for ( color of colors; track $index ; let idx = $index){
+        <option [ngClass]="color.name" [ngValue]="color.name">{{color.name}}
         </option>
+        }
       </select>
     </div>
     <div class="form-check form-switch mb-3">
@@ -288,9 +349,32 @@
     </div>
     <div class="input-group mb-3">
 
+
+      @if(loadingState){
+      <button class="btn btn-success" type="button" disabled>
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span role="status">Loading...</span>
+      </button>
+      } @else {
       <button type="submit" class="btn btn-success" [disabled]="newLabelForm.invalid">Add Label</button>
-      <button type="button" class="btn btn-danger" (click)="newLabelForm.resetForm(defaultLabelValue)">Reset</button>
+      }
+      <button type="button" class="btn btn-danger" (click)="resetLabel(newLabelForm)">Reset</button>
     </div>
   </form>
   }
 </div>
+@if(showCompletionMessage){
+<div class="toast-container bottom-0 end-0 p-3">
+  <div class="toast align-items-center  border-0 fade show "
+    [class]="completionSuccess ? 'bg-success-subtle' : 'bg-danger-subtle'" role="alert" aria-live="assertive"
+    aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <p>{{message}}</p>
+      </div>
+      <button type="button" class="btn-close btn-close-black me-2 m-auto" data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+}
