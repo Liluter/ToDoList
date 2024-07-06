@@ -2,7 +2,7 @@ import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/co
 import { RouterOutlet } from '@angular/router';
 import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
-import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, empty, of, shareReplay, Subject } from 'rxjs';
+import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, shareReplay } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
@@ -10,16 +10,14 @@ import { SyncItem } from './interfaces/syncItem.interface';
 import { ItemCompleted } from './interfaces/item-completed.interface';
 import { AllCompleted } from './interfaces/all-completed.interface';
 import { Label } from './interfaces/label.interface';
-import { SyncLabels } from './interfaces/syncLabels.interface';
 import { Tasks } from './interfaces/tasks.interface';
 import { Project } from './interfaces/project.interface';
 import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
-import { Form, FormsModule, NgForm } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 import { Modals } from './types/modals';
 import { colors } from './varibles/env';
-import { RestLabel } from './interfaces/restLabel.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -30,7 +28,7 @@ import { RestLabel } from './interfaces/restLabel.interface';
 export class AppComponent implements OnInit {
   currentDate: string = new Date().toISOString()
   clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
-  menuEvent = new EventEmitter<Modals[]>()
+  menuEvent = new EventEmitter<Modals>()
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
   showCompletedTasks?: boolean = false
@@ -38,7 +36,9 @@ export class AppComponent implements OnInit {
   labels?: Label[]
   projects?: SyncProject[]
   // clickObservable$: Observable<Tasks>;
-  showModal: Modals[] = ['none']
+  // showModal: Modals[] = ['none']
+  showModal: Modals = { page: 'none', subpage: 'none' }
+
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
@@ -46,23 +46,23 @@ export class AppComponent implements OnInit {
   addTaskModal: boolean = false
   menuObservable$: any;
   readonly colors = colors
-  newTask = <Task>{
+  newTask: Task = {
     content: '',
     description: '',
     due_date: '',
     due_string: '',
     labels: [''],
     priority: 1,
-    project_id: '' // inbox"2334294385"
+    project_id: '2334294385' // inbox"2334294385"
   }
-  readonly defaultValue = <Task>{
+  readonly defaultTaskValue = <Task>{
     content: '',
     description: '',
     due_date: '',
     due_string: '',
     labels: [''],
     priority: 1,
-    project_id: ''
+    project_id: '2334294385'
   }
 
   newProject = <Project>{
@@ -89,7 +89,10 @@ export class AppComponent implements OnInit {
   }
   allLabels$?: Observable<Label[]>;
   allProjects$?: Observable<[SyncProject]>;
-
+  loadingState: boolean = false
+  showCompletionMessage: boolean = false
+  completionSuccess?: boolean;
+  message?: string;
 
   constructor(private readonly http: HttpClient) {
 
@@ -142,20 +145,20 @@ export class AppComponent implements OnInit {
 
 
     this.menuObservable$ = from(this.menuEvent).pipe(
-      tap(data => {
-        this.showModal = data
+      tap(menu => {
+        this.showModal = { ...menu }
       }),
-      switchMap(data => {
-        if (data[1]) {
-          if (data[1] === 'uncompleted') {
+      switchMap(menu => {
+        if (menu.subpage) {
+          if (menu.subpage === 'uncompleted') {
             return this.uncompletedTasks$
-          } else if (data[1] === 'completed') {
+          } else if (menu.subpage === 'completed') {
             return this.completedTasks$
-          } else if (data[1] === 'all') {
+          } else if (menu.subpage === 'all') {
             return this.allTasks$
           } return EMPTY
         }
-        if (data[0] === 'addTask') {
+        if (menu.page === 'addTask') {
           return combineLatest([this.allLabels$, this.allProjects$])
         }
 
@@ -171,31 +174,31 @@ export class AppComponent implements OnInit {
   }
 
   getCompletedTasks() {
-    this.menuEvent.emit(['listOfTasks', 'completed']);
+    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'completed' });
   }
   getUncompletedTasks() {
-    this.menuEvent.emit(['listOfTasks', 'uncompleted']);
+    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'uncompleted' });
   }
   getAllTasks() {
-    this.menuEvent.emit(['listOfTasks', 'all']);
+    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'all' });
   }
   getNoneTasks() {
-    this.menuEvent.emit(['none'])
+    this.menuEvent.emit({ page: 'none', subpage: 'none' })
   }
   addTask() {
-    this.menuEvent.emit(['addTask']);
+    this.menuEvent.emit({ page: 'addTask' });
   }
   addProject() {
-    this.menuEvent.emit(['addProject']);
+    this.menuEvent.emit({ page: 'addProject' });
   }
   addLabel() {
-    this.menuEvent.emit(['addLabel']);
+    this.menuEvent.emit({ page: 'addLabel' });
   }
   getLabels() {
-    this.menuEvent.emit(['listOfLabels']);
+    this.menuEvent.emit({ page: 'listOfLabels' });
   }
   getProjects() {
-    this.menuEvent.emit(['listOfProjects']);
+    this.menuEvent.emit({ page: 'listOfProjects' });
   }
   badgeClass(priority: number | undefined) {
     switch (priority) {
@@ -249,34 +252,86 @@ export class AppComponent implements OnInit {
   }
 
   onAddTask(form: NgForm) {
+    this.loadingState = true
     this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
       if (data) {
-        form.resetForm(this.defaultValue)
+        this.loadingState = false
+        this.showMessage('complete', `Task "${form.form.controls['title'].value}"  added successfully`)
+        this.resetTask(form)
+        //show confirmation 
       }
-    }, error => console.log('ERROR :', error))
+    }, error => {
+      this.loadingState = false
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage('error', message)
+    })
   }
   onAddProject(form: NgForm) {
+    this.loadingState = true
     this.http.post('https://api.todoist.com/rest/v2/projects', this.newProject, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    }).subscribe(data => {
-      if (data) {
-        form.resetForm(this.defaultProjectValue)
-      }
-    }, error => console.log('ERROR :', error))
+    })
+      .subscribe(data => {
+        if (data) {
+          this.loadingState = false
+          this.showMessage('complete', `Project "${form.form.controls['name'].value}"  added successfully`)
+          this.resetProject(form)
+        }
+      }, error => {
+        this.loadingState = false
+        let message = error.message
+        if (error.status === 403 || error.status === 400) {
+          message = error.error
+        }
+        this.showMessage('error', message)
+      })
   }
   onAddLabel(form: NgForm) {
     // REST APIqq
-    console.log(this.newLabel)
-    console.log(form)
+    this.loadingState = true
     this.http.post('https://api.todoist.com/rest/v2/labels', this.newLabel, {
       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
     }).subscribe(data => {
-      if (data) {
-        form.resetForm(this.defaultLabelValue)
-      }
-    }, error => console.log('ERROR :', error))
-  }
 
+      if (data) {
+        this.loadingState = false
+        this.showMessage('complete', `Label "${form.form.controls['name'].value}"  added successfully`)
+        this.resetLabel(form)
+      }
+    }, error => {
+      this.loadingState = false
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage('error', message)
+    })
+  }
+  showMessage(kind: string, message: string) {
+    this.message = message
+    if (kind === 'complete') {
+      this.completionSuccess = true
+      this.showCompletionMessage = true
+      setTimeout(() => { this.showCompletionMessage = false }, 6000)
+    }
+    if (kind === 'error') {
+      this.completionSuccess = false
+      this.showCompletionMessage = true
+      setTimeout(() => { this.showCompletionMessage = false }, 6000)
+    }
+  }
+  resetLabel(form: NgForm) {
+    form.resetForm({ colors: this.defaultLabelValue.color, name: this.defaultLabelValue.name, favourite: this.defaultLabelValue.is_favorite })
+  }
+  resetProject(form: NgForm) {
+    form.resetForm({ colors: this.defaultProjectValue.color, name: this.defaultProjectValue.name, favourite: this.defaultProjectValue.is_favorite })
+  }
+  resetTask(form: NgForm) {
+    form.resetForm({ btnradio: this.defaultTaskValue.project_id, dueDate: this.defaultTaskValue.due_date, dueString: this.defaultTaskValue.due_string, labels: this.defaultTaskValue.labels, note: this.defaultTaskValue.description, priority: this.defaultTaskValue.priority, title: this.defaultTaskValue.content })
+  }
 }
