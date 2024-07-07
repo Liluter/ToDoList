@@ -97,25 +97,14 @@ export class AppComponent implements OnInit {
 
   constructor(private readonly http: HttpClient, private readonly api: ApiCallsService) {
 
+    this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
+      map(data => { return { uncompleted: data.items, completed: null } }),
+    )
 
-    this.uncompletedTasks$ = this.http.get<SyncItem>("https://api.todoist.com/sync/v9/sync",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-        params: {
-          sync_token: '*',
-          resource_types: '["items"]'
-        }
-      }).pipe(
-        map(data => { return { uncompleted: data.items, completed: null } }),
-      )
+    this.completedTasks$ = this.api.getCompletedTasks().pipe(
+      map(data => { return { uncompleted: null, completed: data.items } }),
 
-    this.completedTasks$ = this.http.get<AllCompleted>("https://api.todoist.com/sync/v9/completed/get_all",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-      }).pipe(
-        map(data => { return { uncompleted: null, completed: data.items } }),
-
-      )
+    )
 
     this.allTasks$ = combineLatest([this.uncompletedTasks$, this.completedTasks$]).pipe(
       startWith([null, null]),
@@ -123,29 +112,15 @@ export class AppComponent implements OnInit {
         return { uncompleted: uncompletedTasks?.uncompleted, completed: completedTasks?.completed }
       })
     )
-    // this.allLabels$ = this.http.get<Label[]>('https://api.todoist.com/rest/v2/labels', {
-    //   headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    // }).pipe(
-    //   tap(data => this.labels = data),
-    // )
-
     this.allLabels$ = this.api.getAllLabels().pipe(
       tap(data => this.labels = data),
     )
 
-    this.allProjects$ = this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
-      {
-        headers: { 'Authorization': 'Bearer ' + environment.restApitoken },
-        params: {
-          sync_token: '*',
-          resource_types: '["projects"]'
-        }
-      }).pipe(
-        map(data => data.projects),
-        tap(projects => this.projects = projects),
-        shareReplay()
-      )
-
+    this.allProjects$ = this.api.getAllProjects().pipe(
+      map(data => data.projects),
+      tap(projects => this.projects = projects),
+      shareReplay()
+    )
 
     this.menuObservable$ = from(this.menuEvent).pipe(
       tap(menu => {
@@ -256,14 +231,11 @@ export class AppComponent implements OnInit {
 
   onAddTask(form: NgForm) {
     this.loadingState = true
-    this.http.post('https://api.todoist.com/rest/v2/tasks', this.newTask, {
-      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    }).subscribe(data => {
+    this.api.postTask(this.newTask).subscribe(data => {
       if (data) {
         this.loadingState = false
         this.showMessage('complete', `Task "${form.form.controls['title'].value}"  added successfully`)
         this.resetTask(form)
-        //show confirmation 
       }
     }, error => {
       this.loadingState = false
@@ -276,9 +248,7 @@ export class AppComponent implements OnInit {
   }
   onAddProject(form: NgForm) {
     this.loadingState = true
-    this.http.post('https://api.todoist.com/rest/v2/projects', this.newProject, {
-      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    })
+    this.api.postProject(this.newProject)
       .subscribe(data => {
         if (data) {
           this.loadingState = false
@@ -294,12 +264,11 @@ export class AppComponent implements OnInit {
         this.showMessage('error', message)
       })
   }
+
   onAddLabel(form: NgForm) {
     // REST APIqq
     this.loadingState = true
-    this.http.post('https://api.todoist.com/rest/v2/labels', this.newLabel, {
-      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    }).subscribe(data => {
+    this.api.postLabel(this.newLabel).subscribe(data => {
 
       if (data) {
         this.loadingState = false
