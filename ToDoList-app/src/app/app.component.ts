@@ -15,6 +15,7 @@ import { Modals } from './types/modals.d';
 import { colors, task, project, label } from './varibles/env';
 import { ApiCallsService } from './api-calls.service';
 import { SimpleLabel } from './interfaces/simpleLabel.interface';
+import { badgeClass, priorityText } from './utilities/utility';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -44,7 +45,8 @@ export class AppComponent {
   showCompletionMessage: boolean = false
   completionSuccess?: boolean;
   message?: string;
-
+  badgeClass = badgeClass
+  priorityText = priorityText
   readonly colors = [...colors]
 
   newTask: Task = { ...task }
@@ -101,8 +103,6 @@ export class AppComponent {
         if (menu.page === 'addTask') {
           return combineLatest([this.allLabels$, this.allProjects$])
         }
-
-
         return EMPTY
       }),
       takeUntilDestroyed(this.destroyRef)
@@ -136,37 +136,8 @@ export class AppComponent {
   getProjects() {
     this.menuEvent.emit({ page: 'listOfProjects' });
   }
-  badgeClass(priority: number | undefined) {
-    switch (priority) {
-      case 1:
-        return 'text-bg-secondary'
-      case 2:
-        return 'text-bg-primary'
-      case 3:
-        return 'text-bg-warning'
-      case 4:
-        return 'text-bg-danger'
-      default:
-        return 'text-bg-secondary'
-    }
-  }
-  priorityText(priority: number) {
-    switch (priority) {
-      case 1:
-        return '4'
-      case 2:
-        return '3'
-      case 3:
-        return '2'
-      case 4:
-        return '1'
-      default:
-        return '4'
-    }
-  }
 
   openDescription(id: string | undefined) {
-
     if (this.descriptionOpenHandler === id) {
       this.descriptionOpenHandler = ''
       return
