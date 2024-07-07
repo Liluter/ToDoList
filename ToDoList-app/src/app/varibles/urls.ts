@@ -1,0 +1,1 @@
+export const labelsUrl = 'https://api.todoist.com/rest/v2/labels'

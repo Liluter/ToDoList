@@ -16,8 +16,9 @@ import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
-import { Modals } from './types/modals';
+import { Modals } from './types/modals.d';
 import { colors } from './varibles/env';
+import { ApiCallsService } from './api-calls.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -94,7 +95,7 @@ export class AppComponent implements OnInit {
   completionSuccess?: boolean;
   message?: string;
 
-  constructor(private readonly http: HttpClient) {
+  constructor(private readonly http: HttpClient, private readonly api: ApiCallsService) {
 
 
     this.uncompletedTasks$ = this.http.get<SyncItem>("https://api.todoist.com/sync/v9/sync",
@@ -122,13 +123,15 @@ export class AppComponent implements OnInit {
         return { uncompleted: uncompletedTasks?.uncompleted, completed: completedTasks?.completed }
       })
     )
+    // this.allLabels$ = this.http.get<Label[]>('https://api.todoist.com/rest/v2/labels', {
+    //   headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
+    // }).pipe(
+    //   tap(data => this.labels = data),
+    // )
 
-    this.allLabels$ = this.http.get<Label[]>('https://api.todoist.com/rest/v2/labels', {
-      headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-    }).pipe(
+    this.allLabels$ = this.api.getAllLabels().pipe(
       tap(data => this.labels = data),
     )
-
 
     this.allProjects$ = this.http.get<SyncProjects>("https://api.todoist.com/sync/v9/sync",
       {
