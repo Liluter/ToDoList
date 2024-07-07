@@ -1,24 +1,20 @@
 import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { environment } from './varibles/env'
 import { CommonModule } from '@angular/common';
 import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, shareReplay } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { HttpClient } from '@angular/common/http';
 import { Item } from './interfaces/item.interface';
-import { SyncItem } from './interfaces/syncItem.interface';
 import { ItemCompleted } from './interfaces/item-completed.interface';
-import { AllCompleted } from './interfaces/all-completed.interface';
 import { Label } from './interfaces/label.interface';
 import { Tasks } from './interfaces/tasks.interface';
 import { Project } from './interfaces/project.interface';
-import { SyncProjects } from './interfaces/syncProjects.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 import { Modals } from './types/modals.d';
-import { colors } from './varibles/env';
+import { colors, task, project, label } from './varibles/env';
 import { ApiCallsService } from './api-calls.service';
+import { SimpleLabel } from './interfaces/simpleLabel.interface';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -26,7 +22,7 @@ import { ApiCallsService } from './api-calls.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   currentDate: string = new Date().toISOString()
   clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
   menuEvent = new EventEmitter<Modals>()
@@ -36,58 +32,12 @@ export class AppComponent implements OnInit {
   descriptionOpenHandler?: string;
   labels?: Label[]
   projects?: SyncProject[]
-  // clickObservable$: Observable<Tasks>;
-  // showModal: Modals[] = ['none']
   showModal: Modals = { page: 'none', subpage: 'none' }
-
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
-  // noneTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
   addTaskModal: boolean = false
   menuObservable$: any;
-  readonly colors = colors
-  newTask: Task = {
-    content: '',
-    description: '',
-    due_date: '',
-    due_string: '',
-    labels: [''],
-    priority: 1,
-    project_id: '2334294385' // inbox"2334294385"
-  }
-  readonly defaultTaskValue = <Task>{
-    content: '',
-    description: '',
-    due_date: '',
-    due_string: '',
-    labels: [''],
-    priority: 1,
-    project_id: '2334294385'
-  }
-
-  newProject = <Project>{
-    color: 'charcoal',
-    name: '',
-    is_favorite: false,
-  }
-  readonly defaultProjectValue = <Project>{
-    color: 'charcoal',
-    name: '',
-    is_favorite: false,
-  }
-
-  newLabel = <Label>{
-    color: 'charcoal',
-    name: '',
-    is_favorite: false,
-  }
-
-  readonly defaultLabelValue = <Label>{
-    color: 'charcoal',
-    name: '',
-    is_favorite: false,
-  }
   allLabels$?: Observable<Label[]>;
   allProjects$?: Observable<[SyncProject]>;
   loadingState: boolean = false
@@ -95,7 +45,19 @@ export class AppComponent implements OnInit {
   completionSuccess?: boolean;
   message?: string;
 
-  constructor(private readonly http: HttpClient, private readonly api: ApiCallsService) {
+  readonly colors = [...colors]
+
+  newTask: Task = { ...task }
+  readonly defaultTaskValue: Task = { ...task }
+
+  newProject: Project = { ...project }
+  readonly defaultProjectValue: Project = { ...project }
+
+  newLabel: SimpleLabel = { ...label }
+  readonly defaultLabelValue: SimpleLabel = { ...label }
+
+
+  constructor(private readonly api: ApiCallsService) {
 
     this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
       map(data => { return { uncompleted: data.items, completed: null } }),
@@ -145,10 +107,6 @@ export class AppComponent implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe()
-  }
-
-  ngOnInit() {
-
   }
 
   getCompletedTasks() {

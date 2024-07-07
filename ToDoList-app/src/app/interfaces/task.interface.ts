@@ -3,7 +3,7 @@ export interface Task {
   description: string
   due_date: string
   due_string: string | "9 Jun"
-  labels: [string]
+  labels: string[]
   priority: number
   project_id: string
 }

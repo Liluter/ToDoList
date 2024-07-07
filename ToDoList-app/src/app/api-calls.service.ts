@@ -9,6 +9,7 @@ import { AllCompleted } from './interfaces/all-completed.interface';
 import { SyncProjects } from './interfaces/syncProjects.interface';
 import { Project } from './interfaces/project.interface';
 import { Task } from './interfaces/task.interface';
+import { SimpleLabel } from './interfaces/simpleLabel.interface';
 @Injectable({
   providedIn: 'root'
 })
@@ -50,7 +51,7 @@ export class ApiCallsService {
     return this.http.get<Label[]>(labelsUrl, { headers: this.authorization })
   }
 
-  postLabel(data: Label) {
+  postLabel(data: SimpleLabel) {
     return this.http.post(labelsUrl, data, {
       headers: this.authorization
     })
@@ -66,8 +67,3 @@ export class ApiCallsService {
     })
   }
 }
-// this.allLabels$ = this.http.get<Label[]>('https://api.todoist.com/rest/v2/labels', {
-//       headers: { 'Authorization': 'Bearer ' + environment.restApitoken }
-//     }).pipe(
-//       tap(data => this.labels = data),
-//     )
