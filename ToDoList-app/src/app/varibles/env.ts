@@ -1,5 +1,31 @@
+import { Label } from "../interfaces/label.interface"
+import { Project } from "../interfaces/project.interface"
+import { SimpleLabel } from "../interfaces/simpleLabel.interface"
+import { Task } from "../interfaces/task.interface"
+
 export const environment = {
   restApitoken: 'a06b19d79d9d93fe4467b74fa167b2872d29233a'
+}
+
+export const task: Task = {
+  content: '',
+  description: '',
+  due_date: '',
+  due_string: '',
+  labels: [''],
+  priority: 1,
+  project_id: '2334294385'
+}
+
+export const project: Project = {
+  color: 'charcoal',
+  name: '',
+  is_favorite: false,
+}
+export const label: SimpleLabel = {
+  color: 'charcoal',
+  name: '',
+  is_favorite: false,
 }
 
 export const colors = [
