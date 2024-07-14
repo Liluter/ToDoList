@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, OnInit, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable, from, tap, map, switchMap, EMPTY, combineLatest, startWith, shareReplay } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +19,7 @@ import { badgeClass, priorityText } from './utilities/utility';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -118,9 +118,9 @@ export class AppComponent {
   getAllTasks() {
     this.menuEvent.emit({ page: 'listOfTasks', subpage: 'all' });
   }
-  getNoneTasks() {
-    this.menuEvent.emit({ page: 'none', subpage: 'none' })
-  }
+  // getNoneTasks() {
+  //   this.menuEvent.emit({ page: 'none', subpage: 'none' })
+  // }
   addTask() {
     this.menuEvent.emit({ page: 'addTask' });
   }
