@@ -1,3 +1,5 @@
+import { Label } from "../interfaces/label.interface"
+
 export function badgeClass(priority: number | undefined) {
   switch (priority) {
     case 1:
@@ -26,4 +28,11 @@ export function priorityText(priority: number) {
     default:
       return '4'
   }
+}
+
+export function getLabelColor(labelName: string, labels?: Label[]) {
+  if (!labels) {
+    return
+  }
+  return labels.find(label => label.name === labelName)?.color
 }

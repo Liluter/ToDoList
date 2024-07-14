@@ -76,9 +76,9 @@ export class AppComponent {
         return { uncompleted: uncompletedTasks?.uncompleted, completed: completedTasks?.completed }
       })
     )
-    this.allLabels$ = this.api.getAllLabels().pipe(
-      tap(data => this.labels = data),
-    )
+    // this.allLabels$ = this.api.getAllLabels().pipe(
+    //   tap(data => this.labels = data),
+    // )
 
     this.allProjects$ = this.api.getAllProjects().pipe(
       map(data => data.projects),

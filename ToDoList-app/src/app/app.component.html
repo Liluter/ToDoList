@@ -35,7 +35,7 @@
           <a class="nav-link " aria-current="page" href="#" (click)="getProjects()">Projects</a>
         </li>
         <li>
-          <a class="nav-link " aria-current="page" href="#" (click)="getLabels()">Labels</a>
+          <a class="nav-link " aria-current="page" href="#" [routerLink]="'/labels'">Labels</a>
         </li>
       </ul>
     </div>
@@ -378,4 +378,6 @@
   </div>
 </div>
 }
-<router-outlet></router-outlet>
+<div class="container mx-auto my-3 ">
+  <router-outlet></router-outlet>
+</div>
