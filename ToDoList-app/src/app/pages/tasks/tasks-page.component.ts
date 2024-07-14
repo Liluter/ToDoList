@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
 
 @Component({
-  template: '',
+  templateUrl: './tasks-page.component.html',
   standalone: true
 })
 export class TasksPageComponent {
