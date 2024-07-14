@@ -130,12 +130,12 @@ export class AppComponent {
   addLabel() {
     this.menuEvent.emit({ page: 'addLabel' });
   }
-  getLabels() {
-    this.menuEvent.emit({ page: 'listOfLabels' });
-  }
-  getProjects() {
-    this.menuEvent.emit({ page: 'listOfProjects' });
-  }
+  // getLabels() {
+  //   this.menuEvent.emit({ page: 'listOfLabels' });
+  // }
+  // getProjects() {
+  //   this.menuEvent.emit({ page: 'listOfProjects' });
+  // }
 
   openDescription(id: string | undefined) {
     if (this.descriptionOpenHandler === id) {

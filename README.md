@@ -38,4 +38,8 @@
 - [x] Fix Forms reset.
 - [x] Loading for projects and labels in addTask
 - [x] Loading for projects and labels lists.
+
+---
+
+- [x] Routing implication
 - [ ] next steps.
