@@ -36,4 +36,6 @@
 - [x] Error handling of http.post requests.
 - [x] Fix readabiliy by replace \*ngIf by @if.
 - [x] Fix Forms reset.
+- [x] Loading for projects and labels in addTask
+- [x] Loading for projects and labels lists.
 - [ ] next steps.
