@@ -41,5 +41,9 @@
 
 ---
 
-- [x] Routing implication
+Routing implication:
+
+- [x] for Labels
+- [x] for Projects
+- [x] for Tasks.
 - [ ] next steps.

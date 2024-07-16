@@ -25,10 +25,12 @@
             Tasks
           </a>
           <ul class="dropdown-menu">
-            <li class="ps-3"><a class="dropdown-item " href="#" (click)="getUncompletedTasks()">Uncompleted</a></li>
-            <li class="ps-3"><a class="dropdown-item " href="#" (click)="getCompletedTasks()">Completed</a>
+            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks'"
+                (click)="getUncompletedTasks()">Uncompleted</a></li>
+            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks'"
+                (click)="getCompletedTasks()">Completed</a>
             </li>
-            <li class="ps-3"><a class="dropdown-item " href="#" (click)="getAllTasks()">All</a></li>
+            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks'" (click)="getAllTasks()">All</a></li>
           </ul>
         </li>
         <li>
@@ -46,99 +48,14 @@
 </nav>
 
 <div class="container mx-auto my-3 ">
-  @if(showModal.page === 'none') {
+  <!-- @if(showModal.page === 'none') {
   <h2 class="d-flex justify-content-center">
     Welcome!
   </h2>
   <h4 class="d-flex justify-content-center">... in the best To-Do-List app!</h4>
-  }
-  @if(showModal.page === 'listOfTasks'){
-  @if(showModal.subpage === "uncompleted" || showModal.subpage === 'all' ){
-  @if (uncompletedTasks$ | async; as data){
-  <h4 class="text-body-secondary">Uncompleted tasks:</h4>
-  @for(task of data?.uncompleted;track $index){
-  <ul class="list-group mb-3">
-    <li class="list-group-item px-2 ">
-      <div class="input-group input-group-sm">
-        <span class="input-group-text">
-          <input class="form-check-input mt-0" type="checkbox" value="" checked="{{task.completed_at ? 'true' : ''}}"
-            id="flexCheckDefault">
-        </span>
-        <span class="input-group-text">
-          <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
-        </span>
-        @if(task.due){
-        <span class="input-group-text">
-          Due:
-          <span class="badge rounded-pill text-bg-secondary ms-1">
-            {{task.due.date | date : 'EEEE, d MMMM'}}</span>
-        </span>
-        }
+  } -->
 
-        <span class="input-group-text">
-          <div class="d-flex justify-content-center">
-            @for(label of task.labels; track $index){
-            <span class="badge rounded-pill text-black label mx-1 p-1 " ngClass="{{getLabelColor(label)}}" disabled><i
-                class="bi bi-tag ">{{label}}</i></span>
-            }
-          </div>
-        </span>
-      </div>
-      <div class="input-group mt-1">
-        <span class="input-group-text">Title:</span>
-        <input type="text" class="form-control" value={{task.content}} readonly>
-        <!-- <button class="btn btn-outline-secondary" type="button">Open</button> -->
-        <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-          data-bs-toggle="dropdown" aria-expanded="false">
-          <span class="visually-hidden">Toggle Dropdown</span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><a class="dropdown-item" href="#">Edit</a></li>
-          <li><a class="dropdown-item" href="#">Add Label</a></li>
-          <li><a class="dropdown-item" href="#">Change Date</a></li>
-          <li><a class="dropdown-item" href="#">Share</a></li>
-          <li>
-            <hr class="dropdown-divider">
-          </li>
-          <li><a class="dropdown-item" href="#">Delete</a></li>
-        </ul>
-      </div>
-      @if(descriptionOpenHandler === task.id){
-      <div class="input-group col-12 mt-1" id="{{task.id}}">
-        <span class="input-group-text">Note:</span>
-        <textarea class="form-control" value="{{task.description}}" style="min-height: fit-content" readonly
-          aria-label="Description"></textarea>
-      </div>
-      }
-    </li>
-  </ul>
-  }
-  }}
-  <!-- @if(showModal.subpage === "completed" || showModal.subpage === 'all'){ -->
-  @if(showModal.subpage === "completed" || showModal.subpage === 'all'){
-  @if (completedTasks$ | async ;as data){
-  <h4 class="text-body-secondary">Completed tasks:</h4>
-  @for(task of data.completed; track $index){
-  <ul class="list-group mb-3">
-    <li class="list-group-item px-2">
-      <div class="input-group ">
-        <span class="input-group-text"><input class="form-check-input" type="checkbox" value=""
-            checked="{{task.completed_at ? 'true' : ''}}"></span>
-
-        <input type="text" class="form-control" value={{task.content}} readonly>
-        <span class="input-group-text">ended:<span class="badge rounded-pill text-bg-secondary ms-3">{{task.completed_at
-            |
-            date:
-            'dd-MM-YY hh:mm'}}</span></span>
-      </div>
-    </li>
-  </ul>
-  }
-  }
-  }
-  }
-  @if ( showModal.page === 'addTask' ){
+  @if ( showModal.add === 'addTask' ){
   <h4 class=" text-body-secondary">Add new Task:</h4>
   <form #newTaskForm="ngForm" (ngSubmit)="onAddTask(newTaskForm)">
     <div class="input-group mb-3">
@@ -241,7 +158,7 @@
   </form>
   }
 
-  @if ( showModal.page === 'addProject' ){
+  @if ( showModal.add === 'addProject' ){
   <h4 class=" text-body-secondary">Add new Project:</h4>
   <form #newProjectForm="ngForm" (ngSubmit)="onAddProject(newProjectForm)">
     <div class="input-group mb-3">
@@ -281,7 +198,7 @@
   </form>
   }
 
-  @if( showModal.page === 'addLabel'){
+  @if( showModal.add === 'addLabel'){
   <h4 class=" text-body-secondary">Add new Label:</h4>
   <form #newLabelForm="ngForm" (ngSubmit)="onAddLabel(newLabelForm)">
     <div class="input-group mb-3">

@@ -11,7 +11,7 @@ import { Project } from './interfaces/project.interface';
 import { SyncProject } from './interfaces/syncProject.interface';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
-import { Modals } from './types/modals.d';
+import { AddType, Modals, TasksType } from './types/modals.d';
 import { colors, task, project, label } from './varibles/env';
 import { ApiCallsService } from './api-calls.service';
 import { SimpleLabel } from './interfaces/simpleLabel.interface';
@@ -25,15 +25,16 @@ import { badgeClass, priorityText } from './utilities/utility';
 })
 export class AppComponent {
   currentDate: string = new Date().toISOString()
-  clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
-  menuEvent = new EventEmitter<Modals>()
+  // clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
+  tasksEvent: EventEmitter<TasksType>
+  addEvent: EventEmitter<AddType>
   destroyRef = inject(DestroyRef)
   showTasks?: boolean = false
   showCompletedTasks?: boolean = false
   descriptionOpenHandler?: string;
   labels?: Label[]
   projects?: SyncProject[]
-  showModal: Modals = { page: 'none', subpage: 'none' }
+  showModal: AddType = { add: 'none' }
   uncompletedTasks$: Observable<Tasks>;
   completedTasks$: Observable<Tasks>;
   allTasks$: Observable<{ uncompleted: Item[] | null | undefined; completed: ItemCompleted[] | null | undefined; }>;
@@ -60,7 +61,8 @@ export class AppComponent {
 
 
   constructor(private readonly api: ApiCallsService) {
-
+    this.tasksEvent = this.api.tasksEvent
+    this.addEvent = this.api.addEvent
     this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
       map(data => { return { uncompleted: data.items, completed: null } }),
     )
@@ -86,21 +88,12 @@ export class AppComponent {
       shareReplay()
     )
 
-    this.menuObservable$ = from(this.menuEvent).pipe(
+    this.menuObservable$ = from(this.addEvent).pipe(
       tap(menu => {
         this.showModal = { ...menu }
       }),
       switchMap(menu => {
-        if (menu.subpage) {
-          if (menu.subpage === 'uncompleted') {
-            return this.uncompletedTasks$
-          } else if (menu.subpage === 'completed') {
-            return this.completedTasks$
-          } else if (menu.subpage === 'all') {
-            return this.allTasks$
-          } return EMPTY
-        }
-        if (menu.page === 'addTask') {
+        if (menu.add === 'addTask') {
           return combineLatest([this.allLabels$, this.allProjects$])
         }
         return EMPTY
@@ -110,25 +103,25 @@ export class AppComponent {
   }
 
   getCompletedTasks() {
-    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'completed' });
+    this.tasksEvent.emit({ tasks: 'completed' });
   }
   getUncompletedTasks() {
-    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'uncompleted' });
+    this.tasksEvent.emit({ tasks: 'uncompleted' });
   }
   getAllTasks() {
-    this.menuEvent.emit({ page: 'listOfTasks', subpage: 'all' });
+    this.tasksEvent.emit({ tasks: 'all' });
   }
   // getNoneTasks() {
   //   this.menuEvent.emit({ page: 'none', subpage: 'none' })
   // }
   addTask() {
-    this.menuEvent.emit({ page: 'addTask' });
+    this.addEvent.emit({ add: 'addTask' });
   }
   addProject() {
-    this.menuEvent.emit({ page: 'addProject' });
+    this.addEvent.emit({ add: 'addProject' });
   }
   addLabel() {
-    this.menuEvent.emit({ page: 'addLabel' });
+    this.addEvent.emit({ add: 'addLabel' });
   }
   // getLabels() {
   //   this.menuEvent.emit({ page: 'listOfLabels' });
