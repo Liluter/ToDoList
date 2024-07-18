@@ -1,0 +1,116 @@
+<h1>New Task</h1>
+<h4 class=" text-body-secondary">Add new Task:</h4>
+<form #newTaskForm="ngForm" (ngSubmit)="onAddTask(newTaskForm)">
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="Title">Title</span>
+    <input type="text" #title="ngModel" class="form-control" [class.is-valid]="title.valid"
+      [class.is-invalid]="title.touched && title.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
+      aria-describedby="Title" name="title" minlength="3" maxlength="30" [(ngModel)]="newTask.content" required>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="Note">Note</span>
+    <textarea class="form-control" placeholder="add description" name="note" aria-label="Add description"
+      [(ngModel)]="newTask.description"></textarea>
+  </div>
+  <div class="input-group mb-3 d-flex justify-content-center">
+    @if(allLabels$ | async; as labels){
+    <span class="input-group-text">Select Label/s</span>
+    <select class="form-select" multiple aria-label="Multiple select example" id="labels" name='labels'
+      [(ngModel)]="newTask.labels">
+      @for(label of labels;track $index; let i = $index ){
+
+      <option [class]="label.color" [ngValue]="label.name">
+        {{label.name}}
+      </option>
+      }
+    </select>
+    }@else {
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    }
+  </div>
+  <div class="input-group mb-3 ">
+    <span class="input-group-text">Choose project</span>
+    @if(allProjects$ | async; as projects){
+    @for(project of projects;track $index){
+    <div class="btn-group m-1" role="group" aria-label="Basic radio toggle button group">
+      <input type="radio" class="btn-check" [value]="project.id" q name="btnradio" id="{{project.id}}"
+        autocomplete="off" [(ngModel)]="newTask.project_id">
+      <label [class]="project.color" class="btn btn-outline-dark" for="{{project.id}}">{{project.name}}</label>
+    </div>
+
+    }
+    }@else {
+    <div class="d-flex justify-content-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    }
+
+  </div>
+  <div class="input-group mb-3">
+    <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+      <span class="input-group-text" id="priority-set-label">Set Priority</span>
+      <input type="radio" class="btn-check" name="priority" id="priority1" autocomplete="off"
+        [(ngModel)]="newTask.priority" [value]="4">
+      <label class="btn btn-outline-primary" for="priority1"><span class="badge rounded-pill"
+          [ngClass]="badgeClass(4)">4</span></label>
+      <input type="radio" class="btn-check" name="priority" id="priority2" autocomplete="off"
+        [(ngModel)]="newTask.priority" [value]="3">
+      <label class="btn btn-outline-primary" for="priority2"><span class="badge rounded-pill"
+          [ngClass]="badgeClass(3)">3</span></label>
+      <input type="radio" class="btn-check" name="priority" id="priority3" autocomplete="off"
+        [(ngModel)]="newTask.priority" [value]="2">
+      <label class="btn btn-outline-primary" for="priority3"><span class="badge rounded-pill"
+          [ngClass]="badgeClass(2)">2</span></label>
+      <input type="radio" class="btn-check" name="priority" id="priority4" autocomplete="off"
+        [(ngModel)]="newTask.priority" [value]="1">
+      <label class="btn btn-outline-primary" for="priority4"><span class="badge rounded-pill"
+          [ngClass]="badgeClass(1)">1</span></label>
+    </div>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="DueDate">Due Date</span>
+    @if(newTask.due_string === ''){
+    <input type="date" class="form-control" id="dueDate" name="dueDate" [value]="currentDate | date: 'YYYY-MM-DD'"
+      min="2024-06-25" [(ngModel)]="newTask.due_date">
+    }
+    <span class="input-group-text" id="DueString">Due String</span>
+    @if(newTask.due_date === ''){
+    <input type="text" id="dueString" name="dueString" class="form-control"
+      placeholder="type time like Tomorrow, next monday" [(ngModel)]="newTask.due_string">
+    }
+  </div>
+  <div class="input-group mb-3">
+
+
+    @if(loadingState){
+    <button class="btn btn-success" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      <span role="status">Loading...</span>
+    </button>
+    } @else{
+    <button type="submit" class="btn btn-success" [disabled]="newTaskForm.invalid">Add Task</button>
+    }
+    <button type="button" class="btn btn-danger" (click)="resetTask(newTaskForm)">Reset</button>
+  </div>
+</form>
+@if(showCompletionMessage){
+<div class="toast-container bottom-0 end-0 p-3">
+  <div class="toast align-items-center  border-0 fade show "
+    [class]="completionSuccess ? 'bg-success-subtle' : 'bg-danger-subtle'" role="alert" aria-live="assertive"
+    aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <p>{{message}}</p>
+      </div>
+      <button type="button" class="btn-close btn-close-black me-2 m-auto" data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+}

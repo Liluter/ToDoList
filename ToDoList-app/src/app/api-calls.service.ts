@@ -23,8 +23,13 @@ export class ApiCallsService {
 
   tasksEvent = new EventEmitter<TasksType>()
   addEvent = new EventEmitter<AddType>()
+  allProjects$?: Observable<SyncProjects>
   constructor(private readonly http: HttpClient) {
-
+    this.allProjects$ = this.http.get<SyncProjects>(syncUrl,
+      {
+        headers: this.authorization,
+        params: this.projectsParams
+      })
   }
 
   getUncompletedTasks(): Observable<SyncItem> {
