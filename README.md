@@ -46,4 +46,9 @@ Routing implication:
 - [x] for Labels
 - [x] for Projects
 - [x] for Tasks.
+
+- [x] distinguish Add Task
+- [x] distinguish Add Project
+- [x] distinguish Add Label
+
 - [ ] next steps.
