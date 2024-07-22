@@ -1,6 +1,4 @@
-<h1>This is Tasks space</h1>
 @if (allLabels$ | async; as labels) {
-@if(showModal.tasks === "uncompleted" || showModal.tasks === 'all' ){
 @if (uncompletedTasks$ | async; as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
 @for(task of data?.uncompleted;track $index){
@@ -28,16 +26,13 @@
           @for(label of task.labels; track $index){
           <span class="badge rounded-pill text-black label mx-1 p-1 " [ngClass]="getLabelColor(label, labels )"
             disabled><i class="bi bi-tag ">{{label}}</i></span>
-
           }
-
         </div>
       </span>
     </div>
     <div class="input-group mt-1">
       <span class="input-group-text">Title:</span>
       <input type="text" class="form-control" value={{task.content}} readonly>
-      <!-- <button class="btn btn-outline-secondary" type="button">Open</button> -->
       <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
       <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
         data-bs-toggle="dropdown" aria-expanded="false">
@@ -63,43 +58,7 @@
     }
   </li>
 </ul>
-}
-}@else {
-<div class="d-flex justify-content-center">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</div>
-}
-}
-<!-- @if(showModal.tasks === "completed" || showModal.tasks === 'all'){ -->
-@if(showModal.tasks === "completed" || showModal.tasks === 'all'){
-@if (completedTasks$ | async ;as data){
-<h4 class="text-body-secondary">Completed tasks:</h4>
-@for(task of data.completed; track $index){
-<ul class="list-group mb-3">
-  <li class="list-group-item px-2">
-    <div class="input-group ">
-      <span class="input-group-text"><input class="form-check-input" type="checkbox" value=""
-          checked="{{task.completed_at ? 'true' : ''}}"></span>
-
-      <input type="text" class="form-control" value={{task.content}} readonly>
-      <span class="input-group-text">ended:<span class="badge rounded-pill text-bg-secondary ms-3">{{task.completed_at
-          |
-          date:
-          'dd-MM-YY hh:mm'}}</span></span>
-    </div>
-  </li>
-</ul>
-}
-}@else {
-<div class="d-flex justify-content-center">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</div>
-}
-}
+}}
 }@else {
 <div class="d-flex justify-content-center">
   <div class="spinner-border text-primary" role="status">

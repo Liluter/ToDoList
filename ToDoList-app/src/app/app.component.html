@@ -25,12 +25,10 @@
             Tasks
           </a>
           <ul class="dropdown-menu">
-            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks'"
-                (click)="getUncompletedTasks()">Uncompleted</a></li>
-            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks'"
-                (click)="getCompletedTasks()">Completed</a>
+            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks/uncompleted'">Uncompleted</a></li>
+            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks/completed'">Completed</a>
             </li>
-            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks'" (click)="getAllTasks()">All</a></li>
+            <li class="ps-3"><a class="dropdown-item " [routerLink]="'tasks/all'">All</a></li>
           </ul>
         </li>
         <li>

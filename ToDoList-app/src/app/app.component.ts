@@ -102,12 +102,12 @@ export class AppComponent {
     ).subscribe()
   }
 
-  getCompletedTasks() {
-    this.tasksEvent.emit({ tasks: 'completed' });
-  }
-  getUncompletedTasks() {
-    this.tasksEvent.emit({ tasks: 'uncompleted' });
-  }
+  // getCompletedTasks() {
+  //   this.tasksEvent.emit({ tasks: 'completed' });
+  // }
+  // getUncompletedTasks() {
+  //   this.tasksEvent.emit({ tasks: 'uncompleted' });
+  // }
   getAllTasks() {
     this.tasksEvent.emit({ tasks: 'all' });
   }
