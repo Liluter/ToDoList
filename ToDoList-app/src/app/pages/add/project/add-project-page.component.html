@@ -1,1 +1,53 @@
 <h1>New Project</h1>
+<h4 class=" text-body-secondary">Add new Project:</h4>
+<form #newProjectForm="ngForm" (ngSubmit)="onAddProject(newProjectForm)">
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="Title">Name</span>
+    <input type="text" #name="ngModel" class="form-control" [class.is-valid]="name.valid"
+      [class.is-invalid]="name.touched && name.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
+      aria-describedby="Title" name="name" minlength="3" maxlength="30" [(ngModel)]="newProject.name" required>
+  </div>
+  <div class="input-group mb-3 d-flex justify-content-center" [class]="newProject.name">
+    <span class="input-group-text">Select color</span>
+    <select class="form-select" aria-label="Default select example" id="colors" name='colors'
+      [(ngModel)]="newProject.color" [class]="newProject.color">
+      @for (color of colors; track $index){
+      <option [ngClass]="color.name" [ngValue]="color.name">{{color.name}}
+      </option>
+      }
+    </select>
+  </div>
+  <div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" role="switch" name="favourite" id="favourite"
+      [(ngModel)]="newProject.is_favorite">
+    <label class="form-check-label" for="favourite">Add to favourite</label>
+  </div>
+  <div class="input-group mb-3">
+
+
+    @if(loadingState){
+    <button class="btn btn-success" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      <span role="status">Loading...</span>
+    </button>
+    }@else {
+    <button type="submit" class="btn btn-success" [disabled]="newProjectForm.invalid">Add Project</button>
+    }
+    <button type="button" class="btn btn-danger" (click)="resetProject(newProjectForm)">Reset</button>
+  </div>
+</form>
+@if(showCompletionMessage){
+<div class="toast-container bottom-0 end-0 p-3">
+  <div class="toast align-items-center  border-0 fade show "
+    [class]="completionSuccess ? 'bg-success-subtle' : 'bg-danger-subtle'" role="alert" aria-live="assertive"
+    aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body">
+        <p>{{message}}</p>
+      </div>
+      <button type="button" class="btn-close btn-close-black me-2 m-auto" data-bs-dismiss="toast"
+        aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+}
