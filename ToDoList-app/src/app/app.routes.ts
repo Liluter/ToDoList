@@ -9,6 +9,7 @@ import { UncompletedPageComponent } from './pages/tasks/uncompleted/uncompleted-
 import { CompletedPageComponent } from './pages/tasks/completed/completed-page.component';
 import { AllPageComponent } from './pages/tasks/all/all-page.component';
 import { DetailComponent } from './pages/detail/detail.component';
+import { EditComponent } from './pages/edit/edit.component';
 
 export const routes: Routes = [
   {
@@ -55,5 +56,9 @@ export const routes: Routes = [
   {
     path: 'detail',
     component: DetailComponent
+  },
+  {
+    path: 'edit',
+    component: EditComponent
   }
 ];
