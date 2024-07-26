@@ -1,7 +1,7 @@
 import { Component, DestroyRef, EventEmitter, inject } from "@angular/core";
 import { TasksType } from "../../../types/modals";
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
-import { ApiCallsService } from "../../../api-calls.service";
+import { ApiCallsService } from "../../../services/api-calls.service";
 import { combineLatest, map, Observable, startWith } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { Item } from "@angular/fire/analytics";

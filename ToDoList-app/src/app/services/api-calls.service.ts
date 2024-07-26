@@ -1,16 +1,16 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Label } from './interfaces/label.interface';
-import { environment } from './varibles/env';
+import { Label } from '../interfaces/label.interface';
+import { environment } from '../varibles/env';
 import { Observable } from 'rxjs';
-import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl } from './varibles/urls';
-import { SyncItem } from './interfaces/syncItem.interface';
-import { AllCompleted } from './interfaces/all-completed.interface';
-import { SyncProjects } from './interfaces/syncProjects.interface';
-import { Project } from './interfaces/project.interface';
-import { Task } from './interfaces/task.interface';
-import { SimpleLabel } from './interfaces/simpleLabel.interface';
-import { AddType, Modals, TasksType } from './types/modals';
+import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl } from '../varibles/urls';
+import { SyncItem } from '../interfaces/syncItem.interface';
+import { AllCompleted } from '../interfaces/all-completed.interface';
+import { SyncProjects } from '../interfaces/syncProjects.interface';
+import { Project } from '../interfaces/project.interface';
+import { Task } from '../interfaces/task.interface';
+import { SimpleLabel } from '../interfaces/simpleLabel.interface';
+import { AddType, Modals, TasksType } from '../types/modals';
 @Injectable({
   providedIn: 'root'
 })

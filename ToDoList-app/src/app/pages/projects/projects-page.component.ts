@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { ApiCallsService } from "../../api-calls.service";
+import { ApiCallsService } from "../../services/api-calls.service";
 import { SyncProject } from "../../interfaces/syncProject.interface";
 import { map, Observable, shareReplay, tap } from "rxjs";
 import { AsyncPipe, NgClass } from "@angular/common";

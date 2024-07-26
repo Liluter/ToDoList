@@ -50,5 +50,5 @@ Routing implication:
 - [x] distinguish Add Task
 - [x] distinguish Add Project
 - [x] distinguish Add Label
-
+- [x] separate componentes for routes for task uncompleted completed all
 - [ ] next steps.

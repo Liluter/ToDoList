@@ -2,7 +2,7 @@ import { Component, ViewEncapsulation } from "@angular/core";
 import { Label } from "../../interfaces/label.interface";
 import { Observable, tap } from "rxjs";
 import { AsyncPipe, NgClass } from "@angular/common";
-import { ApiCallsService } from "../../api-calls.service";
+import { ApiCallsService } from "../../services/api-calls.service";
 import { getLabelColor } from "../../utilities/utility";
 
 @Component({

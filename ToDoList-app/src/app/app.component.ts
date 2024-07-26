@@ -13,9 +13,10 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 import { AddType, Modals, TasksType } from './types/modals.d';
 import { colors, task, project, label } from './varibles/env';
-import { ApiCallsService } from './api-calls.service';
+import { ApiCallsService } from './services/api-calls.service';
 import { SimpleLabel } from './interfaces/simpleLabel.interface';
 import { badgeClass, priorityText } from './utilities/utility';
+import { ShowMessageService } from './services/showMessage.service';
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -45,7 +46,6 @@ export class AppComponent {
   loadingState: boolean = false
   showCompletionMessage: boolean = false
   completionSuccess?: boolean;
-  message?: string;
   badgeClass = badgeClass
   priorityText = priorityText
   readonly colors = [...colors]
@@ -59,7 +59,10 @@ export class AppComponent {
   newLabel: SimpleLabel = { ...label }
   readonly defaultLabelValue: SimpleLabel = { ...label }
 
-
+  service = inject(ShowMessageService)
+  notification$?: Observable<boolean> = this.service.notification$
+  message$: Observable<string> = this.service.message$
+  type$: Observable<string> = this.service.type$
   constructor(private readonly api: ApiCallsService) {
     this.tasksEvent = this.api.tasksEvent
     this.addEvent = this.api.addEvent
@@ -151,81 +154,81 @@ export class AppComponent {
     return this.projects.find(project => project.name === projectName)?.color
   }
 
-  onAddTask(form: NgForm) {
-    this.loadingState = true
-    this.api.postTask(this.newTask).subscribe(data => {
-      if (data) {
-        this.loadingState = false
-        this.showMessage('complete', `Task "${form.form.controls['title'].value}"  added successfully`)
-        this.resetTask(form)
-      }
-    }, error => {
-      this.loadingState = false
-      let message = error.message
-      if (error.status === 403 || error.status === 400) {
-        message = error.error
-      }
-      this.showMessage('error', message)
-    })
-  }
-  onAddProject(form: NgForm) {
-    this.loadingState = true
-    this.api.postProject(this.newProject)
-      .subscribe(data => {
-        if (data) {
-          this.loadingState = false
-          this.showMessage('complete', `Project "${form.form.controls['name'].value}"  added successfully`)
-          this.resetProject(form)
-        }
-      }, error => {
-        this.loadingState = false
-        let message = error.message
-        if (error.status === 403 || error.status === 400) {
-          message = error.error
-        }
-        this.showMessage('error', message)
-      })
-  }
+  // onAddTask(form: NgForm) {
+  //   this.loadingState = true
+  //   this.api.postTask(this.newTask).subscribe(data => {
+  //     if (data) {
+  //       this.loadingState = false
+  //       this.showMessage('complete', `Task "${form.form.controls['title'].value}"  added successfully`)
+  //       this.resetTask(form)
+  //     }
+  //   }, error => {
+  //     this.loadingState = false
+  //     let message = error.message
+  //     if (error.status === 403 || error.status === 400) {
+  //       message = error.error
+  //     }
+  //     this.showMessage('error', message)
+  //   })
+  // }
+  // onAddProject(form: NgForm) {
+  //   this.loadingState = true
+  //   this.api.postProject(this.newProject)
+  //     .subscribe(data => {
+  //       if (data) {
+  //         this.loadingState = false
+  //         this.showMessage('complete', `Project "${form.form.controls['name'].value}"  added successfully`)
+  //         this.resetProject(form)
+  //       }
+  //     }, error => {
+  //       this.loadingState = false
+  //       let message = error.message
+  //       if (error.status === 403 || error.status === 400) {
+  //         message = error.error
+  //       }
+  //       this.showMessage('error', message)
+  //     })
+  // }
 
-  onAddLabel(form: NgForm) {
-    // REST APIqq
-    this.loadingState = true
-    this.api.postLabel(this.newLabel).subscribe(data => {
+  // onAddLabel(form: NgForm) {
+  //   // REST APIqq
+  //   this.loadingState = true
+  //   this.api.postLabel(this.newLabel).subscribe(data => {
 
-      if (data) {
-        this.loadingState = false
-        this.showMessage('complete', `Label "${form.form.controls['name'].value}"  added successfully`)
-        this.resetLabel(form)
-      }
-    }, error => {
-      this.loadingState = false
-      let message = error.message
-      if (error.status === 403 || error.status === 400) {
-        message = error.error
-      }
-      this.showMessage('error', message)
-    })
-  }
-  showMessage(kind: string, message: string) {
-    this.message = message
-    if (kind === 'complete') {
-      this.completionSuccess = true
-      this.showCompletionMessage = true
-      setTimeout(() => { this.showCompletionMessage = false }, 6000)
-    }
-    if (kind === 'error') {
-      this.completionSuccess = false
-      this.showCompletionMessage = true
-      setTimeout(() => { this.showCompletionMessage = false }, 6000)
-    }
-  }
-  resetLabel(form: NgForm) {
-    form.resetForm({ colors: this.defaultLabelValue.color, name: this.defaultLabelValue.name, favourite: this.defaultLabelValue.is_favorite })
-  }
-  resetProject(form: NgForm) {
-    form.resetForm({ colors: this.defaultProjectValue.color, name: this.defaultProjectValue.name, favourite: this.defaultProjectValue.is_favorite })
-  }
-  resetTask(form: NgForm) {
-    form.resetForm({ btnradio: this.defaultTaskValue.project_id, dueDate: this.defaultTaskValue.due_date, dueString: this.defaultTaskValue.due_string, labels: this.defaultTaskValue.labels, note: this.defaultTaskValue.description, priority: this.defaultTaskValue.priority, title: this.defaultTaskValue.content })
-  }
+  //     if (data) {
+  //       this.loadingState = false
+  //       this.showMessage('complete', `Label "${form.form.controls['name'].value}"  added successfully`)
+  //       this.resetLabel(form)
+  //     }
+  //   }, error => {
+  //     this.loadingState = false
+  //     let message = error.message
+  //     if (error.status === 403 || error.status === 400) {
+  //       message = error.error
+  //     }
+  //     this.showMessage('error', message)
+  //   })
+  // }
+  // showMessage(kind: string, message: string) {
+  //   this.message = message
+  //   if (kind === 'complete') {
+  //     this.completionSuccess = true
+  //     this.showCompletionMessage = true
+  //     setTimeout(() => { this.showCompletionMessage = false }, 6000)
+  //   }
+  //   if (kind === 'error') {
+  //     this.completionSuccess = false
+  //     this.showCompletionMessage = true
+  //     setTimeout(() => { this.showCompletionMessage = false }, 6000)
+  //   }
+  // }
+  // resetLabel(form: NgForm) {
+  //   form.resetForm({ colors: this.defaultLabelValue.color, name: this.defaultLabelValue.name, favourite: this.defaultLabelValue.is_favorite })
+  // }
+  // resetProject(form: NgForm) {
+  //   form.resetForm({ colors: this.defaultProjectValue.color, name: this.defaultProjectValue.name, favourite: this.defaultProjectValue.is_favorite })
+  // }
+  // resetTask(form: NgForm) {
+  //   form.resetForm({ btnradio: this.defaultTaskValue.project_id, dueDate: this.defaultTaskValue.due_date, dueString: this.defaultTaskValue.due_string, labels: this.defaultTaskValue.labels, note: this.defaultTaskValue.description, priority: this.defaultTaskValue.priority, title: this.defaultTaskValue.content })
+  // }
 }

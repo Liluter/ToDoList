@@ -1,9 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { FormsModule, NgForm } from "@angular/forms";
-import { ApiCallsService } from "../../../api-calls.service";
+import { ApiCallsService } from "../../../services/api-calls.service";
 import { Project } from "../../../interfaces/project.interface";
 import { project, colors } from "../../../varibles/env";
 import { CommonModule } from '@angular/common';
+import { ShowMessageService } from "../../../services/showMessage.service";
+import { Message } from "../../../types/message.interface";
 @Component({
   templateUrl: './add-project-page.component.html',
   styleUrl: './add-project-page.component.scss',
@@ -18,6 +20,7 @@ export class AddProjectPageComponent {
   message?: string;
   readonly defaultProjectValue: Project = { ...project }
   readonly colors = [...colors]
+  showMessageService: ShowMessageService = inject(ShowMessageService)
   constructor(private readonly api: ApiCallsService) {
 
   }
@@ -28,7 +31,7 @@ export class AddProjectPageComponent {
       .subscribe(data => {
         if (data) {
           this.loadingState = false
-          this.showMessage('complete', `Project "${form.form.controls['name'].value}"  added successfully`)
+          this.showMessage({ type: 'success', text: `Project "${form.form.controls['name'].value}"  added successfully` })
           this.resetProject(form)
         }
       }, error => {
@@ -37,21 +40,11 @@ export class AddProjectPageComponent {
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage('error', message)
+        this.showMessage({ type: 'error', text: message })
       })
   }
-  showMessage(kind: string, message: string) {
-    this.message = message
-    if (kind === 'complete') {
-      this.completionSuccess = true
-      this.showCompletionMessage = true
-      setTimeout(() => { this.showCompletionMessage = false }, 6000)
-    }
-    if (kind === 'error') {
-      this.completionSuccess = false
-      this.showCompletionMessage = true
-      setTimeout(() => { this.showCompletionMessage = false }, 6000)
-    }
+  showMessage(message: Message) {
+    this.showMessageService.showMessage(message)
   }
   resetProject(form: NgForm) {
     form.resetForm({ colors: this.defaultProjectValue.color, name: this.defaultProjectValue.name, favourite: this.defaultProjectValue.is_favorite })

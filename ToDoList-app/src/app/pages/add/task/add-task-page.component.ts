@@ -1,5 +1,5 @@
 import { Component, DestroyRef, EventEmitter, inject } from "@angular/core";
-import { ApiCallsService } from "../../../api-calls.service";
+import { ApiCallsService } from "../../../services/api-calls.service";
 import { AddType } from "../../../types/modals";
 import { combineLatest, EMPTY, from, map, Observable, shareReplay, switchMap, tap } from "rxjs";
 import { SyncProjects } from "../../../interfaces/syncProjects.interface";
@@ -11,6 +11,8 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Label } from "../../../interfaces/label.interface";
 import { AsyncPipe, DatePipe, NgClass } from "@angular/common";
 import { badgeClass } from "../../../utilities/utility";
+import { ShowMessageService } from "../../../services/showMessage.service";
+import { Message } from "../../../types/message.interface";
 @Component({
   templateUrl: './add-task-page.component.html',
   styleUrl: './add-task-page.component.scss',
@@ -33,6 +35,7 @@ export class AddTaskPageComponent {
   menuObservable$: any;
   currentDate: string = new Date().toISOString()
   badgeClass = badgeClass
+  showMessageService: ShowMessageService = inject(ShowMessageService)
   constructor(private readonly api: ApiCallsService) {
     this.addEvent = this.api.addEvent
 
@@ -66,7 +69,7 @@ export class AddTaskPageComponent {
     this.api.postTask(this.newTask).subscribe(data => {
       if (data) {
         this.loadingState = false
-        this.showMessage('complete', `Task "${form.form.controls['title'].value}"  added successfully`)
+        this.showMessage({ type: 'success', text: `Task "${form.form.controls['title'].value}"  added successfully` })
         this.resetTask(form)
       }
     }, error => {
@@ -75,21 +78,11 @@ export class AddTaskPageComponent {
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage('error', message)
+      this.showMessage({ type: 'error', text: message })
     })
   }
-  showMessage(kind: string, message: string) {
-    this.message = message
-    if (kind === 'complete') {
-      this.completionSuccess = true
-      this.showCompletionMessage = true
-      setTimeout(() => { this.showCompletionMessage = false }, 6000)
-    }
-    if (kind === 'error') {
-      this.completionSuccess = false
-      this.showCompletionMessage = true
-      setTimeout(() => { this.showCompletionMessage = false }, 6000)
-    }
+  showMessage(message: Message) {
+    this.showMessageService.showMessage(message)
   }
   resetTask(form: NgForm) {
     form.resetForm({ btnradio: this.defaultTaskValue.project_id, dueDate: this.defaultTaskValue.due_date, dueString: this.defaultTaskValue.due_string, labels: this.defaultTaskValue.labels, note: this.defaultTaskValue.description, priority: this.defaultTaskValue.priority, title: this.defaultTaskValue.content })
