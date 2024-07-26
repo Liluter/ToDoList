@@ -45,22 +45,6 @@
   </div>
 </nav>
 
-<!-- @if(showCompletionMessage){
-<div class="toast-container bottom-0 end-0 p-3">
-  <div class="toast align-items-center  border-0 fade show "
-    [class]="completionSuccess ? 'bg-success-subtle' : 'bg-danger-subtle'" role="alert" aria-live="assertive"
-    aria-atomic="true">
-    <div class="d-flex">
-      <div class="toast-body">
-        <p>{{message}}</p>
-      </div>
-      <button type="button" class="btn-close btn-close-black me-2 m-auto" data-bs-dismiss="toast"
-        aria-label="Close"></button>
-    </div>
-  </div>
-</div>
-} -->
-
 @if(notification$ | async){
 <div class="toast-container bottom-0 end-0 p-3">
   <div class="toast align-items-center  border-0 fade show "
@@ -75,7 +59,6 @@
     </div>
   </div>
 </div>
-
 }
 
 
