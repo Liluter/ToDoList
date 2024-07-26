@@ -54,11 +54,11 @@ export const routes: Routes = [
     component: WelcomePageComponent
   },
   {
-    path: 'detail',
+    path: 'detail/:id',
     component: DetailComponent
   },
   {
-    path: 'edit',
+    path: 'edit/:id',
     component: EditComponent
   }
 ];
