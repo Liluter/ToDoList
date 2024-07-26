@@ -6,11 +6,12 @@ import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
+import { RouterModule } from "@angular/router";
 @Component({
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
   styleUrl: './uncompleted-page.component.scss',
-  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe]
+  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule]
 })
 export class UncompletedPageComponent {
   destroyRef = inject(DestroyRef)

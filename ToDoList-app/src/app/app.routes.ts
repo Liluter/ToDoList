@@ -8,6 +8,7 @@ import { AddLabelPageComponent } from './pages/add/label/add-label-page.componen
 import { UncompletedPageComponent } from './pages/tasks/uncompleted/uncompleted-page.component';
 import { CompletedPageComponent } from './pages/tasks/completed/completed-page.component';
 import { AllPageComponent } from './pages/tasks/all/all-page.component';
+import { DetailComponent } from './pages/detail/detail.component';
 
 export const routes: Routes = [
   {
@@ -50,5 +51,9 @@ export const routes: Routes = [
   {
     path: 'welcome',
     component: WelcomePageComponent
+  },
+  {
+    path: 'detail',
+    component: DetailComponent
   }
 ];
