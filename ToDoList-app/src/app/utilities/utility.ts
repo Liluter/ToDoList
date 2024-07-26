@@ -1,3 +1,6 @@
+import { Label } from "../interfaces/label.interface"
+import { SyncProject } from "../interfaces/syncProject.interface"
+
 export function badgeClass(priority: number | undefined) {
   switch (priority) {
     case 1:
@@ -26,4 +29,18 @@ export function priorityText(priority: number) {
     default:
       return '4'
   }
+}
+
+export function getLabelColor(labelName: string, labels?: Label[]) {
+  if (!labels) {
+    return
+  }
+  return labels.find(label => label.name === labelName)?.color
+}
+
+export function getProjectColor(projectName: string, projects?: SyncProject[]) {
+  if (!projects) {
+    return
+  }
+  return projects.find(project => project.name === projectName)?.color
 }

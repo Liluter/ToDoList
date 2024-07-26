@@ -1,15 +1,16 @@
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Label } from './interfaces/label.interface';
-import { environment } from './varibles/env';
+import { Label } from '../interfaces/label.interface';
+import { environment } from '../varibles/env';
 import { Observable } from 'rxjs';
-import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl } from './varibles/urls';
-import { SyncItem } from './interfaces/syncItem.interface';
-import { AllCompleted } from './interfaces/all-completed.interface';
-import { SyncProjects } from './interfaces/syncProjects.interface';
-import { Project } from './interfaces/project.interface';
-import { Task } from './interfaces/task.interface';
-import { SimpleLabel } from './interfaces/simpleLabel.interface';
+import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl } from '../varibles/urls';
+import { SyncItem } from '../interfaces/syncItem.interface';
+import { AllCompleted } from '../interfaces/all-completed.interface';
+import { SyncProjects } from '../interfaces/syncProjects.interface';
+import { Project } from '../interfaces/project.interface';
+import { Task } from '../interfaces/task.interface';
+import { SimpleLabel } from '../interfaces/simpleLabel.interface';
+import { AddType, Modals, TasksType } from '../types/modals';
 @Injectable({
   providedIn: 'root'
 })
@@ -20,9 +21,15 @@ export class ApiCallsService {
   private itemsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["items"]' } })
   private projectsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["projects"]' } })
 
-
+  tasksEvent = new EventEmitter<TasksType>()
+  addEvent = new EventEmitter<AddType>()
+  allProjects$?: Observable<SyncProjects>
   constructor(private readonly http: HttpClient) {
-
+    this.allProjects$ = this.http.get<SyncProjects>(syncUrl,
+      {
+        headers: this.authorization,
+        params: this.projectsParams
+      })
   }
 
   getUncompletedTasks(): Observable<SyncItem> {

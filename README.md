@@ -38,4 +38,17 @@
 - [x] Fix Forms reset.
 - [x] Loading for projects and labels in addTask
 - [x] Loading for projects and labels lists.
+
+---
+
+Routing implication:
+
+- [x] for Labels
+- [x] for Projects
+- [x] for Tasks.
+
+- [x] distinguish Add Task
+- [x] distinguish Add Project
+- [x] distinguish Add Label
+- [x] separate componentes for routes for task uncompleted completed all
 - [ ] next steps.

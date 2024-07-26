@@ -1,0 +1,38 @@
+<h1>New Label</h1>
+<h4 class=" text-body-secondary">Add new Label:</h4>
+<form #newLabelForm="ngForm" (ngSubmit)="onAddLabel(newLabelForm)">
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="Title">Name</span>
+    <input type="text" #name="ngModel" class="form-control" [class.is-valid]="name.valid"
+      [class.is-invalid]="name.touched && name.invalid" placeholder="min 3, max 30 chars" aria-label="Title"
+      aria-describedby="Title" name="name" minlength="3" maxlength="30" [(ngModel)]="newLabel.name" required>
+  </div>
+  <div class="input-group mb-3 d-flex justify-content-center" [class]="newLabel.name">
+    <span class="input-group-text">Select color</span>
+    <select class="form-select" aria-label="Default select example" id="colors" name='colors'
+      [(ngModel)]="newLabel.color" [class]="newLabel.color">
+      @for ( color of colors; track $index){
+      <option [ngClass]="color.name" [ngValue]="color.name">{{color.name}}
+      </option>
+      }
+    </select>
+  </div>
+  <div class="form-check form-switch mb-3">
+    <input class="form-check-input" type="checkbox" role="switch" name="favourite" id="favourite"
+      [(ngModel)]="newLabel.is_favorite">
+    <label class="form-check-label" for="favourite">Add to favourite</label>
+  </div>
+  <div class="input-group mb-3">
+
+
+    @if(loadingState){
+    <button class="btn btn-success" type="button" disabled>
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      <span role="status">Loading...</span>
+    </button>
+    } @else {
+    <button type="submit" class="btn btn-success" [disabled]="newLabelForm.invalid">Add Label</button>
+    }
+    <button type="button" class="btn btn-danger" (click)="resetLabel(newLabelForm)">Reset</button>
+  </div>
+</form>
