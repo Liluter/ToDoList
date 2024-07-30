@@ -1,0 +1,87 @@
+@if (allLabels$ | async; as labels) {
+@if (task$ | async; as task ) {
+<h2>Task edition</h2>
+<form #formEdit="ngForm" (ngSubmit)="saveData(formEdit)">
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text">Title:</span>
+      <input type="text" name="title" class="form-control" id="title" [(ngModel)]="model.content">
+    </div>
+    <div class="form-text">Set your task title/content or leave it unchanged</div>
+  </div>
+  <div class="mb-3">
+    <div class="input-group">
+      <span class="input-group-text">Description:</span>
+      <input type="text" name="description" class="form-control" id="description" [(ngModel)]="model.description">
+    </div>
+    <div class="form-text">Set your task description or leave it unchanged</div>
+  </div>
+
+  <div class="mb-3">
+    <div class="input-group d-flex justify-content-center">
+      @if(allLabels$ | async; as labels){
+      <span class="input-group-text">Labels</span>
+      <select class="form-select" multiple aria-label="Multiple select example" autofocus id="labels" name='labels'
+        [(ngModel)]="model.labels">
+        @for(label of labels;track $index; let i = $index ){
+
+        <option [class]="label.color" [ngClass]="{'selected': model.labels.includes(label.name)}" [ngValue]="label.name"
+          [selected]="model.labels.includes(label.name)">
+          {{label.name}} </option>
+        }
+      </select>
+      }@else {
+      <div class="d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      }
+    </div>
+    <div class="form-text">Select multiple labels</div>
+  </div>
+
+  <div class="mb-3">
+    <div class="input-group ">
+      <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+        <span class="input-group-text" id="priority-set-label">Priority</span>
+        <input type="radio" class="btn-check" name="priority" id="priority1" autocomplete="off"
+          [(ngModel)]="model.priority" [value]="4">
+        <label class="btn btn-outline-primary" for="priority1"><span class="badge rounded-pill"
+            [ngClass]="badgeClass(4)">4</span></label>
+        <input type="radio" class="btn-check" name="priority" id="priority2" autocomplete="off"
+          [(ngModel)]="model.priority" [value]="3">
+        <label class="btn btn-outline-primary" for="priority2"><span class="badge rounded-pill"
+            [ngClass]="badgeClass(3)">3</span></label>
+        <input type="radio" class="btn-check" name="priority" id="priority3" autocomplete="off"
+          [(ngModel)]="model.priority" [value]="2">
+        <label class="btn btn-outline-primary" for="priority3"><span class="badge rounded-pill"
+            [ngClass]="badgeClass(2)">2</span></label>
+        <input type="radio" class="btn-check" name="priority" id="priority4" autocomplete="off"
+          [(ngModel)]="model.priority" [value]="1">
+        <label class="btn btn-outline-primary" for="priority4"><span class="badge rounded-pill"
+            [ngClass]="badgeClass(1)">1</span></label>
+      </div>
+    </div>
+    <div class="form-text">Set priority</div>
+  </div>
+
+  <div class="input-group mb-3">
+    <span class="input-group-text" id="DueDate">Due Date</span>
+    @if(model.due.date){
+    <input type="date" class="form-control" id="dueDate" name="dueDate" [value]="model.due.date"
+      [(ngModel)]="model.due.date">
+    }
+  </div>
+  @if(loadingState){
+  <button class="btn btn-success" type="button" disabled>
+    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+    <span role="status">Loading...</span>
+  </button>
+  } @else{
+  <div class=" d-flex justify-content-evenly">
+    <button type="button" class="btn btn-primary" [routerLink]="['/detail', task.id]">Back</button>
+    <button type="submit" class="btn btn-primary" [disabled]="formEdit.invalid">Save</button>
+  </div>}
+</form>
+}}

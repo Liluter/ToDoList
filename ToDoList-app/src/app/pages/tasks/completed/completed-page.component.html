@@ -13,6 +13,8 @@
           |
           date:
           'dd-MM-YY hh:mm'}}</span></span>
+      <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
+      <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
     </div>
   </li>
 </ul>

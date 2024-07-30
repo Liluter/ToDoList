@@ -51,4 +51,9 @@ Routing implication:
 - [x] distinguish Add Project
 - [x] distinguish Add Label
 - [x] separate componentes for routes for task uncompleted completed all
+
+  Refactoring
+
+- [x] showMessage service improve
+- [x] style imports implementation
 - [ ] next steps.

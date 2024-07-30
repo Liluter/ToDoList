@@ -5,7 +5,7 @@ export interface SyncProject {
   color: string
   created_at: string
   id: string
-  inbox_project: boolean
+  inbox_project?: boolean
   is_archived: boolean
   is_deleted: boolean
   is_favorite: boolean

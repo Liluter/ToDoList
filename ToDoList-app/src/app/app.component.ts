@@ -13,10 +13,11 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Task } from './interfaces/task.interface';
 import { AddType, Modals, TasksType } from './types/modals.d';
 import { colors, task, project, label } from './varibles/env';
-import { ApiCallsService } from './services/api-calls.service';
 import { SimpleLabel } from './interfaces/simpleLabel.interface';
 import { badgeClass, priorityText } from './utilities/utility';
 import { ShowMessageService } from './services/showMessage.service';
+import { ApiCallsService } from './services/api-calls.service';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -63,6 +64,7 @@ export class AppComponent {
   notification$?: Observable<boolean> = this.service.notification$
   message$: Observable<string> = this.service.message$
   type$: Observable<string> = this.service.type$
+
   constructor(private readonly api: ApiCallsService) {
     this.tasksEvent = this.api.tasksEvent
     this.addEvent = this.api.addEvent

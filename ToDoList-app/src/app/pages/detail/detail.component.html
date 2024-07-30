@@ -1,0 +1,81 @@
+<h2>Task Details </h2>
+@if (allLabels$ | async; as labels) {
+@if (task$ | async; as task ) {
+
+<ul class="list-group mb-3">
+  <li class="list-group-item px-2 ">
+    <div class="input-group input-group-sm">
+      <span class="input-group-text">Completed:</span>
+      <span class="input-group-text">
+        <input class="form-check-input mt-0" type="checkbox" value="" checked="{{task.completed_at ? 'true' : ''}}"
+          id="flexCheckDefault">
+      </span>
+    </div>
+    <div class="input-group mt-1">
+      <span class="input-group-text">Task Id:</span>
+      <input type="text" class="form-control" value={{task.id}} readonly>
+    </div>
+    <div class="input-group mt-1">
+      <span class="input-group-text">Title:</span>
+      <input type="text" class="form-control" value={{task.content}} readonly>
+    </div>
+    @if(project$ | async; as project){
+    <div class="input-group mt-1">
+      <span class="input-group-text">Project:</span>
+      @if(allProjects$ | async;as projectsAr){
+      <ul class="list-group list-group-horizontal">
+        <li class="list-group-item">
+          <span class="badge text-black label mx-1 p-2 " [ngClass]="getProjectColor(project.name, projectsAr)"
+            disabled>{{project.name}}</span>
+        </li>
+
+      </ul>
+
+      }
+      <span class="input-group-text">Project Id:</span>
+      <input type="text" class="form-control" value={{task.project_id}} readonly>
+    </div>
+    }
+
+    <div class="input-group  mt-1">
+      <span class="input-group-text">Priority:</span>
+      <ul class="list-group list-group-horizontal">
+        <li class="list-group-item">
+          <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="input-group  mt-1">
+      <span class="input-group-text">Labels:</span>
+      <ul class="list-group list-group-horizontal">
+        @for(label of task.labels; track $index){
+        <li class="list-group-item">
+          <span class="badge rounded-pill text-black label mx-1 p-1 " [ngClass]="getLabelColor(label, labels )"
+            disabled><i class="bi bi-tag ">{{label}}</i></span>
+        </li>
+        }
+      </ul>
+    </div>
+    @if (task.due){
+    <div class="input-group  mt-1">
+      <span class="input-group-text">Due:</span>
+      <input type="text" class="form-control" value="{{task.due.date | date : 'EEEE, d MMMM'}}" readonly>
+    </div>
+    }
+    <div class="input-group mt-1">
+      <span class="input-group-text">Description:</span>
+      <textarea class="form-control" value="{{task.description}}" style="min-height: fit-content" readonly
+        aria-label="Description"></textarea>
+    </div>
+
+  </li>
+  <li class="list-group-item px-2 ">
+    <div class="list-group mt-1">
+      <button type="button" class="list-group-item list-group-item-action active text-center" aria-current="true"
+        [routerLink]="['/edit',task.id]">
+        Edit
+      </button>
+    </div>
+  </li>
+</ul>
+}}

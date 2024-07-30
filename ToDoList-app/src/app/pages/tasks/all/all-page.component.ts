@@ -9,11 +9,12 @@ import { ItemCompleted } from "../../../interfaces/item-completed.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
+import { RouterModule } from "@angular/router";
 @Component({
   templateUrl: './all-page.component.html',
   standalone: true,
   styleUrl: './all-page.component.scss',
-  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe]
+  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule]
 })
 export class AllPageComponent {
   destroyRef = inject(DestroyRef)

@@ -11,6 +11,7 @@ import { getProjectColor } from "../../utilities/utility";
   styleUrl: './projects-page.component.scss'
 })
 export class ProjectsPageComponent {
+
   projects?: SyncProject[]
   allProjects$?: Observable<[SyncProject]>;
   getProjectColor = getProjectColor
