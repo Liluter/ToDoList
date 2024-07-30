@@ -21,7 +21,7 @@ export interface Item {
   is_deleted: boolean
   labels: [string]
   parent_id: string | number | null
-  priority: number
+  priority: 1 | 2 | 3 | 4
   project_id: string
   responsible_uid: string | null
   section_id: string | null

@@ -15,6 +15,9 @@ import { Item } from '../interfaces/item.interface';
 import { GetItem } from '../interfaces/getItem.interface';
 import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
+import { EditData } from '../interfaces/editData.interface';
+import { v4 as uuidv4 } from 'uuid';
+import { JsonPipe } from '@angular/common';
 @Injectable({
   providedIn: 'root'
 })
@@ -98,6 +101,30 @@ export class ApiCallsService {
           headers: this.authorization,
           params: itemParams
         })
+    } else {
+      return EMPTY
+    }
+  }
+  editTask(data: EditData) {
+    const myuuid = uuidv4();
+    console.log(myuuid)
+    const body = {
+      commands: [
+        {
+          "type": "item_update",
+          "uuid": myuuid,
+          "args": {
+            "id": data.id,
+            "priority": data.priority,
+            "description": data.description,
+            "content": data.content,
+            "due": data.due
+          }
+        }
+      ]
+    }
+    if (data) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
     }
