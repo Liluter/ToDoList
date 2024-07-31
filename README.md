@@ -56,4 +56,13 @@ Routing implication:
 
 - [x] showMessage service improve
 - [x] style imports implementation
+
+  Task edit
+
+- [x] add detail compoennt
+- [x] add edit compoennt
+- [x] new routes
+- [x] new service methode.
+- [x] make edit comp works
+- [x] redirect to detail after save on server
 - [ ] next steps.

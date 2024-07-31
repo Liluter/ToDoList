@@ -1,6 +1,6 @@
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
 import { Component, inject, Input } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { RouterModule, Router } from "@angular/router";
 import { badgeClass, getLabelColor, getProjectColor } from "../../utilities/utility";
 import { ApiCallsService } from "../../services/api-calls.service";
 import { map, Observable, tap } from "rxjs";
@@ -70,6 +70,7 @@ export class EditComponent {
   projects?: SyncProject[]
   allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
   showMessageService: ShowMessageService = inject(ShowMessageService)
+  router: Router = inject(Router)
   ngOnInit() {
     if (this.id) {
       this.task$ = this.apiService.getTaskById(this.id).pipe(
@@ -109,6 +110,7 @@ export class EditComponent {
       if (data) {
         this.loadingState = false
         this.showMessage({ type: 'success', text: `Task "${form.form.controls['title'].value}"  added successfully` })
+        this.router.navigate([`/detail/${this.id}`])
       }
     }, error => {
       this.loadingState = false

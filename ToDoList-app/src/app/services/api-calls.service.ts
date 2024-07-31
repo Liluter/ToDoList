@@ -118,7 +118,8 @@ export class ApiCallsService {
             "priority": data.priority,
             "description": data.description,
             "content": data.content,
-            "due": data.due
+            "due": data.due,
+            "labels": data.labels
           }
         }
       ]
