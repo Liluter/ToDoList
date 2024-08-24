@@ -6,8 +6,8 @@
   <li class="list-group-item px-2 ">
     <div class="input-group input-group-sm">
       <span class="input-group-text">
-        <input class="form-check-input mt-0" type="checkbox" value="" checked="{{task.completed_at ? 'true' : ''}}"
-          id="flexCheckDefault">
+        <input class="form-check-input mt-0" type="checkbox" disabled value=""
+          checked="{{task.completed_at ? 'true' : ''}}" id="flexCheckDefault">
       </span>
       <span class="input-group-text">
         <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
