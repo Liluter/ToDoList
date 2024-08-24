@@ -18,18 +18,24 @@
   </div>
 
   <div class="mb-3">
-    <div class="input-group d-flex justify-content-center">
+    <div class="input-group ">
       @if(allLabels$ | async; as labels){
-      <span class="input-group-text">Labels</span>
-      <select class="form-select" multiple aria-label="Multiple select example" autofocus id="labels" name='labels'
-        [(ngModel)]="model.labels">
-        @for(label of labels;track $index; let i = $index ){
-
-        <option [class]="label.color" [ngClass]="{'selected': model.labels.includes(label.name)}" [ngValue]="label.name"
-          [selected]="model.labels.includes(label.name)">
-          {{label.name}} </option>
-        }
-      </select>
+      <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+        <div class="btn-group d-flex flex-wrap" role="group">
+          <span class="input-group-text">Labels</span>
+          @for (label of labels; track $index; let i = $index){
+          <div [class]="label.color"
+            class="input-group-text lh-lg p-1 d-flex justify-content-center align-items-center">
+            <input class="form-check-input m-1" type="checkbox" [value]="label.name" id="label-{{i}}"
+              name="label{{$index}}" [(ngModel)]="model.labels[i]" (change)="onCheckBoxChange($event,i)">
+            <label class="form-check-label" for="label-{{i}}">
+              {{label.name}}
+            </label>
+          </div>
+          }
+        </div>
+        <div class="form-text">Select multiple labels</div>
+      </div>
       }@else {
       <div class="d-flex justify-content-center">
         <div class="spinner-border text-primary" role="status">
@@ -38,7 +44,6 @@
       </div>
       }
     </div>
-    <div class="form-text">Select multiple labels</div>
   </div>
 
   <div class="mb-3">

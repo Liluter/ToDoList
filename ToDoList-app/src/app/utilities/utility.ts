@@ -31,7 +31,7 @@ export function priorityText(priority: number) {
   }
 }
 
-export function getLabelColor(labelName: string, labels?: Label[]) {
+export function getLabelColor(labelName: string | boolean, labels?: Label[]) {
   if (!labels) {
     return
   }

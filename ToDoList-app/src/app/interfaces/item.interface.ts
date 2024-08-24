@@ -19,7 +19,7 @@ export interface Item {
   duration: number | string | null
   id: string
   is_deleted: boolean
-  labels: [string]
+  labels: string[] | boolean[]
   parent_id: string | number | null
   priority: 1 | 2 | 3 | 4
   project_id: string

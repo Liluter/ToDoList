@@ -10,5 +10,5 @@ export interface EditData {
     timezone: string | null
   }
   priority: 1 | 2 | 3 | 4
-  labels: [string],
+  labels: string[] | boolean[],
 }

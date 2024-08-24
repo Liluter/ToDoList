@@ -71,13 +71,17 @@ export class EditComponent {
   allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
+  labels?: string[]
   ngOnInit() {
+    this.allLabels$.subscribe(labels => this.labels = labels.map(label => label.name))
     if (this.id) {
       this.task$ = this.apiService.getTaskById(this.id).pipe(
         tap(data => {
           this.getProject(data.item.project_id);
           this.model = data.item
-          console.dir(this.model)
+          console.dir('model', this.model);
+          console.dir('labels', this.labels);
+
         }),
         map(data => data.item)
       )
@@ -96,14 +100,14 @@ export class EditComponent {
     )
   }
   saveData(form: NgForm) {
-    console.log(form.value,);
-    console.log(this.model)
+    console.log('form', form.value);
+    console.log('model', this.model)
     const taskEdited: EditData = {
       id: this.model.id,
       content: this.model.content,
       description: this.model.description,
       due: this.model.due,
-      labels: [...this.model.labels],
+      labels: this.model.labels,
       priority: this.model.priority
     }
     this.apiService.editTask(taskEdited).subscribe(data => {
@@ -124,5 +128,9 @@ export class EditComponent {
   }
   showMessage(message: Message) {
     this.showMessageService.showMessage(message)
+  }
+  onCheckBoxChange(event: any, idx: number) {
+    this.model.labels[idx] = event.target.checked ? event.target.value : ''
+    console.log('model', this.model)
   }
 }
