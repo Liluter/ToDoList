@@ -33,10 +33,10 @@ export class EditComponent {
     day_order: 0,
     due: {
       date: '',
-      is_recurring: false,
-      lang: "en",
-      string: "9 Jun",
-      timezone: null
+      // is_recurring: false,
+      // lang: "en",
+      // string: "9 Jun",
+      // timezone: null
     },
     duration: 0,
     id: '',
@@ -71,17 +71,28 @@ export class EditComponent {
   allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
-  labels?: string[]
+  labels: string[] = []
   ngOnInit() {
     this.allLabels$.subscribe(labels => this.labels = labels.map(label => label.name))
     if (this.id) {
       this.task$ = this.apiService.getTaskById(this.id).pipe(
         tap(data => {
           this.getProject(data.item.project_id);
-          this.model = data.item
-          console.dir('model', this.model);
-          console.dir('labels', this.labels);
+          if (data.item.due === null) {
+            this.model = data.item;
+            this.model.due = {
+              date: "",
+              // is_recurring: false,
+              // lang: "en",
+              // string: "",
+              // timezone: null
+            }
 
+          } else {
+
+            this.model = data.item;
+          }
+          this.convertLabelStrToBool()
         }),
         map(data => data.item)
       )
@@ -100,20 +111,19 @@ export class EditComponent {
     )
   }
   saveData(form: NgForm) {
-    console.log('form', form.value);
-    console.log('model', this.model)
+    this.handleDate()
     const taskEdited: EditData = {
       id: this.model.id,
       content: this.model.content,
       description: this.model.description,
       due: this.model.due,
-      labels: this.model.labels,
+      labels: this.convertLabelBoolToStr(),
       priority: this.model.priority
     }
     this.apiService.editTask(taskEdited).subscribe(data => {
       if (data) {
         this.loadingState = false
-        this.showMessage({ type: 'success', text: `Task "${form.form.controls['title'].value}"  added successfully` })
+        this.showMessage({ type: 'success', text: `Task "${form.form.controls['title'].value}"  editted successfully` })
         this.router.navigate([`/detail/${this.id}`])
       }
     }, error => {
@@ -130,7 +140,19 @@ export class EditComponent {
     this.showMessageService.showMessage(message)
   }
   onCheckBoxChange(event: any, idx: number) {
-    this.model.labels[idx] = event.target.checked ? event.target.value : ''
-    console.log('model', this.model)
+    this.model.labels[idx] = event.target.checked ? true : false
+  }
+  convertLabelStrToBool() {
+    this.model.labels = this.labels.map<boolean>(label => { return this.model.labels.includes(label) })
+  }
+  convertLabelBoolToStr() {
+    let labels = this.model.labels.map((bool, idx) => bool ? this.labels[idx] : '')
+    labels = labels.filter(label => label !== '')
+    return labels
+  }
+  handleDate() {
+    if (this.model.due?.date === "") {
+      this.model.due = null
+    }
   }
 }

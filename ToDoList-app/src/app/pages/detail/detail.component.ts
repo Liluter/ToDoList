@@ -27,11 +27,9 @@ export class DetailComponent implements OnInit {
   projects?: SyncProject[]
   allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
   ngOnInit() {
-
     if (this.id) {
       this.task$ = this.apiService.getTaskById(this.id).pipe(
         tap(data => {
-          console.log(data.item.project_id)
           this.getProject(data.item.project_id)
         }),
         map(data => data.item)

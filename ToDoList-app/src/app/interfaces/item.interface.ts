@@ -11,15 +11,15 @@ export interface Item {
   description: string
   due: {
     date: string
-    is_recurring: boolean
-    lang: string | "en"
-    string: string | "9 Jun"
-    timezone: string | null
-  }
+    // is_recurring: boolean
+    // lang: string | "en"
+    // string: string | "9 Jun"
+    // timezone: string | null
+  } | null
   duration: number | string | null
   id: string
   is_deleted: boolean
-  labels: string[] | boolean[]
+  labels: any[]
   parent_id: string | number | null
   priority: 1 | 2 | 3 | 4
   project_id: string

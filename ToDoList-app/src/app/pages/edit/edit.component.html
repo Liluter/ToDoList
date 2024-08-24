@@ -22,19 +22,19 @@
       @if(allLabels$ | async; as labels){
       <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
         <div class="btn-group d-flex flex-wrap" role="group">
-          <span class="input-group-text">Labels</span>
+          <span class="input-group-text">Labels :</span>
           @for (label of labels; track $index; let i = $index){
-          <div [class]="label.color"
-            class="input-group-text lh-lg p-1 d-flex justify-content-center align-items-center">
+          <div class="input-group-text lh-lg p-1 d-flex justify-content-center align-items-center">
             <input class="form-check-input m-1" type="checkbox" [value]="label.name" id="label-{{i}}"
               name="label{{$index}}" [(ngModel)]="model.labels[i]" (change)="onCheckBoxChange($event,i)">
-            <label class="form-check-label" for="label-{{i}}">
+            <!-- <label class="form-check-label" for="label-{{i}}">
               {{label.name}}
-            </label>
+            </label> -->
+            <span class="badge rounded-pill text-black label mx-1 p-1 " [ngClass]="getLabelColor(label.name, labels )"
+              disabled><i class="bi bi-tag ">{{label.name}}</i></span>
           </div>
           }
         </div>
-        <div class="form-text">Select multiple labels</div>
       </div>
       }@else {
       <div class="d-flex justify-content-center">
@@ -44,6 +44,7 @@
       </div>
       }
     </div>
+    <div class="form-text">Select multiple labels</div>
   </div>
 
   <div class="mb-3">
@@ -73,7 +74,7 @@
 
   <div class="input-group mb-3">
     <span class="input-group-text" id="DueDate">Due Date</span>
-    @if(model.due.date){
+    @if(model.due !== null){
     <input type="date" class="form-control" id="dueDate" name="dueDate" [value]="model.due.date"
       [(ngModel)]="model.due.date">
     }
