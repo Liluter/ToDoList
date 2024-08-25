@@ -65,7 +65,9 @@ export class ApiCallsService {
   getAllLabels(): Observable<Label[]> {
     return this.http.get<Label[]>(labelsUrl, { headers: this.authorization })
   }
-
+  getOneLabel(id: string): Observable<Label> {
+    return this.http.get<Label>(labelsUrl + `/${id}`, { headers: this.authorization })
+  }
   postLabel(data: SimpleLabel) {
     return this.http.post(labelsUrl, data, {
       headers: this.authorization
