@@ -132,4 +132,26 @@ export class ApiCallsService {
       return EMPTY
     }
   }
+  editLabel(data: Label) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "label_update",
+        "uuid": myuuid,
+        "args": {
+          "id": data.id,
+          "color": data.color,
+          "name": data.name,
+          "item_order": data.item_order,
+          "is_favourite": data.is_favorite
+        }
+      }
+      ]
+    }
+    if (data) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
 }
