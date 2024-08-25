@@ -1,1 +1,33 @@
 <h1>Project detail</h1>
+@if (project$ | async; as project ) {
+
+<ul class="list-group mb-3">
+  <li class="list-group-item px-2">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">Name</span>
+      <input type="text" class="form-control" placeholder="{{project.name}}" aria-label="Username"
+        aria-describedby="basic-addon1" readonly>
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Color</span>
+      <span class="input-group-text">
+        <span class="badge text-black label p-2 text-center d-flex justify-content-center align-items-center"
+          [ngClass]="project.color"><i class="bi bi-tag ">{{project.color}}</i></span>
+      </span>
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Is favourite</span>
+      <div class="input-group-text">
+        <input class="form-check-input mt-0" type="checkbox" value="" [checked]="project.is_favorite"
+          aria-label="Checkbox for following text input">
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item px-2 ">
+    <div class=" d-flex justify-content-evenly">
+      <button type="button" class="btn btn-primary" [routerLink]="['/projects']">Back</button>
+      <button type="button" class="btn btn-primary" [routerLink]="['/project/edit',project.id]">Edit</button>
+    </div>
+  </li>
+</ul>
+}
