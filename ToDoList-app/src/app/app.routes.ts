@@ -12,6 +12,8 @@ import { DetailComponent } from './pages/detail/detail.component';
 import { EditComponent } from './pages/edit/edit.component';
 import { LabelDetailsComponent } from './pages/labels/detail/label-details.component';
 import { LabelEditComponent } from './pages/labels/edit/label-edit.component';
+import { ProjectDetailComponent } from './pages/projects/detail/project-detail.component';
+import { ProjectEditCompoennt } from './pages/projects/edit/project-edit.component';
 
 export const routes: Routes = [
   {
@@ -46,6 +48,14 @@ export const routes: Routes = [
   {
     path: 'projects',
     component: ProjectsPageComponent
+  },
+  {
+    path: 'project/details/:id',
+    component: ProjectDetailComponent
+  },
+  {
+    path: 'project/edit/:id',
+    component: ProjectEditCompoennt
   },
   {
     path: 'labels',

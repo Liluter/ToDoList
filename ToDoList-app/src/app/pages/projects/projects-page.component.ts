@@ -4,10 +4,11 @@ import { SyncProject } from "../../interfaces/syncProject.interface";
 import { map, Observable, shareReplay, tap } from "rxjs";
 import { AsyncPipe, NgClass } from "@angular/common";
 import { getProjectColor } from "../../utilities/utility";
+import { RouterModule } from "@angular/router";
 @Component({
   templateUrl: './projects-page.component.html',
   standalone: true,
-  imports: [NgClass, AsyncPipe],
+  imports: [NgClass, AsyncPipe, RouterModule],
   styleUrl: './projects-page.component.scss'
 })
 export class ProjectsPageComponent {
