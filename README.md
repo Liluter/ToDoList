@@ -65,4 +65,13 @@ Routing implication:
 - [x] new service methode.
 - [x] make edit comp works
 - [x] redirect to detail after save on server
+
+  Label Edit
+
+- [x] add detail compoennt
+- [x] add edit compoennt
+- [x] new routes
+- [x] new service methode.
+- [x] make edit comp works
+- [x] redirect to detail after save on server
 - [ ] next steps.

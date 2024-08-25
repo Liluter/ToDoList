@@ -2,12 +2,25 @@
 <ul class="list-group">
   @if(allProjects$ | async; as projects){
   @for(project of projects;track project.id){
-  <li class="list-group-item d-flex justify-content-between" [ngClass]="getProjectColor(project.name, projects)">
-    {{project.name}}
-    @if(project.is_favorite){
-    <i class="bi bi-star-fill star-filled"></i>
-    }
-  </li>
+  <div class="input-group  mt-1 ">
+    <span class="input-group-text ">
+      @if(project.is_favorite){
+      <i class="bi bi-star-fill star-filled"></i>
+      }@else {
+      <i class="bi bi-star-fill star"></i>
+      }
+    </span>
+    <span class="input-group-text flex-fill d-flex justify-content-center  ">
+      <div class="d-flex justify-content-center">
+        <span class="badge text-black label mx-1 p-2  " [ngClass]="getProjectColor(project.name, projects )" disabled><i
+            class="bi bi-tag ">{{project.name}}</i></span>
+      </div>
+    </span>
+    <!-- <input type="text" class="form-control" [ngClass]="getLabelColor(label.name, labels)" value={{label.name}} readonly> -->
+    <button type="button" class="btn btn-outline-secondary ">Detail</button>
+    <button type="button" class="btn btn-outline-secondary ">Edit</button>
+  </div>
+
   }
   }@else {
   <div class="d-flex justify-content-center">
