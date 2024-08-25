@@ -1,7 +1,6 @@
 <h2>Task Details </h2>
 @if (allLabels$ | async; as labels) {
 @if (task$ | async; as task ) {
-
 <ul class="list-group mb-3">
   <li class="list-group-item px-2 ">
     <div class="input-group input-group-sm">
@@ -56,12 +55,12 @@
         }
       </ul>
     </div>
-    @if (task.due){
     <div class="input-group  mt-1">
       <span class="input-group-text">Due:</span>
+      @if (task.due){
       <input type="text" class="form-control" value="{{task.due.date | date : 'EEEE, d MMMM'}}" readonly>
+      }
     </div>
-    }
     <div class="input-group mt-1">
       <span class="input-group-text">Description:</span>
       <textarea class="form-control" value="{{task.description}}" style="min-height: fit-content" readonly

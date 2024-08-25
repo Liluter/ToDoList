@@ -10,6 +10,8 @@ import { CompletedPageComponent } from './pages/tasks/completed/completed-page.c
 import { AllPageComponent } from './pages/tasks/all/all-page.component';
 import { DetailComponent } from './pages/detail/detail.component';
 import { EditComponent } from './pages/edit/edit.component';
+import { LabelDetailsComponent } from './pages/labels/detail/label-details.component';
+import { LabelEditComponent } from './pages/labels/edit/label-edit.component';
 
 export const routes: Routes = [
   {
@@ -48,6 +50,14 @@ export const routes: Routes = [
   {
     path: 'labels',
     component: LabelsPageCompoent
+  },
+  {
+    path: 'label/details/:id',
+    component: LabelDetailsComponent
+  },
+  {
+    path: 'label/edit/:id',
+    component: LabelEditComponent
   },
   {
     path: 'welcome',

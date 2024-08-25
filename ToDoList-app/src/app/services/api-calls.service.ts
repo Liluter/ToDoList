@@ -65,7 +65,9 @@ export class ApiCallsService {
   getAllLabels(): Observable<Label[]> {
     return this.http.get<Label[]>(labelsUrl, { headers: this.authorization })
   }
-
+  getOneLabel(id: string): Observable<Label> {
+    return this.http.get<Label>(labelsUrl + `/${id}`, { headers: this.authorization })
+  }
   postLabel(data: SimpleLabel) {
     return this.http.post(labelsUrl, data, {
       headers: this.authorization
@@ -118,9 +120,32 @@ export class ApiCallsService {
             "priority": data.priority,
             "description": data.description,
             "content": data.content,
-            "due": data.due
+            "due": data.due,
+            "labels": data.labels
           }
         }
+      ]
+    }
+    if (data) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
+  editLabel(data: Label) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "label_update",
+        "uuid": myuuid,
+        "args": {
+          "id": data.id,
+          "color": data.color,
+          "name": data.name,
+          "item_order": data.item_order,
+          "is_favourite": data.is_favorite
+        }
+      }
       ]
     }
     if (data) {

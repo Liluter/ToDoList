@@ -5,7 +5,7 @@
 <ul class="list-group mb-3">
   <li class="list-group-item px-2">
     <div class="input-group ">
-      <span class="input-group-text"><input class="form-check-input" type="checkbox" value=""
+      <span class="input-group-text"><input class="form-check-input" type="checkbox" disabled value=""
           checked="{{task.completed_at ? 'true' : ''}}"></span>
 
       <input type="text" class="form-control" value={{task.content}} readonly>
@@ -13,7 +13,7 @@
           |
           date:
           'dd-MM-YY hh:mm'}}</span></span>
-      <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
+      <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.task_id]">Detail</button>
       <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
     </div>
   </li>

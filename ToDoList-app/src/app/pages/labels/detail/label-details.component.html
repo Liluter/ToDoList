@@ -1,0 +1,34 @@
+<h1>Label details</h1>
+@if (label$ | async; as label ) {
+
+<ul class="list-group mb-3">
+  <li class="list-group-item px-2">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="basic-addon1">Label name</span>
+      <input type="text" class="form-control" placeholder="{{label.name}}" aria-label="Username"
+        aria-describedby="basic-addon1" readonly>
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Label color</span>
+      <span class="input-group-text">
+        <span
+          class="badge rounded-pill text-black label p-2 text-center d-flex justify-content-center align-items-center"
+          [ngClass]="label.color"><i class="bi bi-tag ">{{label.color}}</i></span>
+      </span>
+    </div>
+    <div class="input-group mb-3">
+      <span class="input-group-text">Is favourite</span>
+      <div class="input-group-text">
+        <input class="form-check-input mt-0" type="checkbox" value="" [checked]="label.is_favorite"
+          aria-label="Checkbox for following text input">
+      </div>
+    </div>
+  </li>
+  <li class="list-group-item px-2 ">
+    <div class=" d-flex justify-content-evenly">
+      <button type="button" class="btn btn-primary" [routerLink]="['/labels']">Back</button>
+      <button type="button" class="btn btn-primary" [routerLink]="['/label/edit',label.id]">Edit</button>
+    </div>
+  </li>
+</ul>
+}
