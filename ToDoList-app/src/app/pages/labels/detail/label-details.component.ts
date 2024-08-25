@@ -4,11 +4,12 @@ import { Label } from "../../../interfaces/label.interface"
 import { Observable } from "rxjs"
 import { AsyncPipe, NgClass } from "@angular/common"
 import { getLabelColor } from "../../../utilities/utility"
+import { RouterModule } from "@angular/router"
 
 @Component({
   templateUrl: './label-details.component.html',
   standalone: true,
-  imports: [AsyncPipe, NgClass]
+  imports: [AsyncPipe, NgClass, RouterModule]
 })
 export class LabelDetailsComponent implements OnInit {
   @Input() id?: string
