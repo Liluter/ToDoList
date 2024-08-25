@@ -19,7 +19,7 @@
     <!-- <input type="text" class="form-control" [ngClass]="getLabelColor(label.name, labels)" value={{label.name}} readonly> -->
     <button type="button" class="btn btn-outline-secondary "
       [routerLink]="['/project/details/', project.id]">Detail</button>
-    <button type="button" class="btn btn-outline-secondary ">Edit</button>
+    <button type="button" class="btn btn-outline-secondary " [routerLink]="['/project/edit/', project.id]">Edit</button>
   </div>
 
   }

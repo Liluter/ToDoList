@@ -1,16 +1,17 @@
-<h1 class="text-center">Label edit</h1>
-@if (label$ | async; as label ) {
-<form #formLabelEdit="ngForm" (ngSubmit)="saveData(formLabelEdit)">
+<h1 class="text-center">Project edit</h1>
+@if (project$ | async; as project ) {
+<form #formProjectEdit="ngForm" (ngSubmit)="saveData(formProjectEdit)">
   <ul class="list-group mb-3">
     <li class="list-group-item px-2">
       <div class="input-group mb-3">
-        <span class="input-group-text" id="labelname">Name</span>
-        <input type="text" class="form-control" name="labelname" [(ngModel)]="model.name">
+        <span class="input-group-text" id="projectname">Name</span>
+        <input type="text" class="form-control" name="projectname" [(ngModel)]="model.name" minlength="4"
+          maxlength="40">
       </div>
-      <div class="input-group mb-3 d-flex justify-content-center" [class]="label.name">
+      <div class="input-group mb-3 d-flex justify-content-center" [class]="project.name">
         <span class="input-group-text">Color</span>
         <select class="form-select" aria-label="Default select example" id="colors" name='colors'
-          [(ngModel)]="label.color" [class]="label.color">
+          [(ngModel)]="model.color" [class]="project.color">
           @for ( color of colors; track $index){
           <option [ngClass]="color.name" [ngValue]="color.name">{{color.name}}
           </option>
@@ -20,7 +21,7 @@
       <div class="input-group mb-3">
         <span class="input-group-text">Is favourite</span>
         <div class="input-group-text">
-          <input class="form-check-input mt-0" type="checkbox" value="" [checked]="label.is_favorite"
+          <input class="form-check-input mt-0" type="checkbox" value="" [checked]="project.is_favorite"
             aria-label="Checkbox for following text input">
         </div>
       </div>
@@ -33,8 +34,8 @@
       </button>
       } @else{
       <div class=" d-flex justify-content-evenly">
-        <button type="button" class="btn btn-primary" [routerLink]="['/label/details', label.id]">Back</button>
-        <button type="submit" class="btn btn-primary" [disabled]="formLabelEdit.invalid">Save</button>
+        <button type="button" class="btn btn-primary" [routerLink]="['/project/details', project.id]">Back</button>
+        <button type="submit" class="btn btn-primary" [disabled]="formProjectEdit.invalid">Save</button>
       </div>}
     </li>
   </ul>
