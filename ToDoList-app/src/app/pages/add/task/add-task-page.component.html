@@ -12,18 +12,17 @@
     <textarea class="form-control" placeholder="add description" name="note" aria-label="Add description"
       [(ngModel)]="newTask.description"></textarea>
   </div>
-  <div class="input-group mb-3 d-flex justify-content-center">
+  <div class="input-group mb-3 d-flex ">
     @if(allLabels$ | async; as labels){
-    <span class="input-group-text">Select Label/s</span>
-    <select class="form-select" multiple aria-label="Multiple select example" id="labels" name='labels'
-      [(ngModel)]="newTask.labels">
-      @for(label of labels;track $index; let i = $index ){
-
-      <option [class]="label.color" [ngValue]="label.name">
-        {{label.name}}
-      </option>
-      }
-    </select>
+    <span class="input-group-text">Select Label(s)</span>
+    @for(label of labels;track $index; let i = $index ){
+    <div class="input-group-text lh-lg p-1 d-flex justify-content-center align-items-center">
+      <input class="form-check-input m-1 " type="checkbox" [value]="label.name" id="label-{{i}}" name="label{{$index}}"
+        [(ngModel)]="newTask.labels[i]" (change)="onCheckBoxChange($event,i)">
+      <span class="badge rounded-pill text-black label mx-1 p-2 " [ngClass]="getLabelColor(label.name, labels )"
+        disabled><i class="bi bi-tag ">{{label.name}}</i></span>
+    </div>
+    }
     }@else {
     <div class="d-flex justify-content-center">
       <div class="spinner-border text-primary" role="status">

@@ -10,7 +10,7 @@ import { task } from "../../../varibles/env";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Label } from "../../../interfaces/label.interface";
 import { AsyncPipe, DatePipe, NgClass } from "@angular/common";
-import { badgeClass } from "../../../utilities/utility";
+import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message } from "../../../types/message.interface";
 @Component({
@@ -21,7 +21,6 @@ import { Message } from "../../../types/message.interface";
 })
 export class AddTaskPageComponent {
   addEvent: EventEmitter<AddType>
-  // projects?: [SyncProject]
   allProjects$?: Observable<[SyncProject]>
   loadingState: boolean = false
   newTask: Task = { ...task }
@@ -31,15 +30,17 @@ export class AddTaskPageComponent {
   completionSuccess?: boolean;
   destroyRef = inject(DestroyRef)
   allLabels$?: Observable<Label[]>;
-  // labels?: Label[]
   menuObservable$: any;
   currentDate: string = new Date().toISOString()
   badgeClass = badgeClass
+  getLabelColor = getLabelColor
   showMessageService: ShowMessageService = inject(ShowMessageService)
+  labels: string[] = []
   constructor(private readonly api: ApiCallsService) {
     this.addEvent = this.api.addEvent
 
-    this.allLabels$ = this.api.getAllLabels()
+    this.allLabels$ = this.api.getAllLabels().pipe(
+      tap(labels => this.labels = labels.map(label => label.name)))
 
     this.allProjects$ = this.api.allProjects$?.pipe(
       map(data => data.projects),
@@ -66,7 +67,9 @@ export class AddTaskPageComponent {
 
   onAddTask(form: NgForm) {
     this.loadingState = true
-    this.api.postTask(this.newTask).subscribe(data => {
+    let newTask = { ...this.newTask }
+    newTask.labels = this.convertLabelBoolToStr()
+    this.api.postTask(newTask).subscribe(data => {
       if (data) {
         this.loadingState = false
         this.showMessage({ type: 'success', text: `Task "${form.form.controls['title'].value}"  added successfully` })
@@ -86,5 +89,13 @@ export class AddTaskPageComponent {
   }
   resetTask(form: NgForm) {
     form.resetForm({ btnradio: this.defaultTaskValue.project_id, dueDate: this.defaultTaskValue.due_date, dueString: this.defaultTaskValue.due_string, labels: this.defaultTaskValue.labels, note: this.defaultTaskValue.description, priority: this.defaultTaskValue.priority, title: this.defaultTaskValue.content })
+  }
+  onCheckBoxChange(event: any, idx: number) {
+    this.newTask.labels[idx] = event.target.checked ? true : false
+  }
+  convertLabelBoolToStr() {
+    let labels = this.newTask.labels.map((bool, idx) => bool ? this.labels[idx] : '')
+    labels = labels.filter(label => label !== '')
+    return labels
   }
 }

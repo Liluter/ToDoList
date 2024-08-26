@@ -84,3 +84,5 @@ Routing implication:
 - [x] make edit comp works
 - [x] redirect to detail after save on server
 - [ ] next steps.
+
+- [x] fix labels selection by multi checboxes.
