@@ -175,4 +175,7 @@ export class ApiCallsService {
       return EMPTY
     }
   }
+  completeTask(id: string) {
+    console.log('Task id :', id, 'completed')
+  }
 }

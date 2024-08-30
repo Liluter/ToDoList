@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, Subject, tap } from "rxjs";
 import { Message } from "../types/message.interface";
 
 
@@ -9,25 +9,20 @@ export class ShowModalService {
   private modalShow = new BehaviorSubject<boolean>(false)
   public message = new BehaviorSubject<string>('')
   private type = new BehaviorSubject<string>('')
-
+  private target = new BehaviorSubject<HTMLInputElement | null>(null)
   modalShow$ = this.modalShow.asObservable();
   message$ = this.message.asObservable();
+  target$ = this.target.asObservable();
   type$ = this.type.asObservable()
 
   showModal(message: string, input: HTMLInputElement): void {
+    this.target.next(input)
     this.message.next(message)
-    // this.type.next(message.type)
     this.modalShow.next(true)
-    setTimeout(() => {
-      this.modalShow.next(false);
-      input.checked = false
-    }, 6000)
   }
-  closeModal(input?: HTMLInputElement): void {
+  closeModal(): void {
     this.modalShow.next(false)
-    if (input) {
-      input.checked = false
-    }
+    this.target.getValue()!.checked = false
   }
 }
 
