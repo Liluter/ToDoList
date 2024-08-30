@@ -6,8 +6,9 @@
   <li class="list-group-item px-2 ">
     <div class="input-group input-group-sm">
       <span class="input-group-text">
-        <input class="form-check-input mt-0" #complCheck type="checkbox" value="" name="{{'completed-task-'+$index}}"
-          id="{{'completed-task-'+$index}}" (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[i]">
+        <input class="form-check-input mt-0" #complCheck type="checkbox" title="Add to completed" value=""
+          name="{{'completed-task-'+$index}}" id="{{'completed-task-'+$index}}"
+          (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[i]">
       </span>
       <span class="input-group-text">
         <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
