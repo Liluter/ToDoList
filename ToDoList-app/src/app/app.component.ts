@@ -17,6 +17,7 @@ import { SimpleLabel } from './interfaces/simpleLabel.interface';
 import { badgeClass, priorityText } from './utilities/utility';
 import { ShowMessageService } from './services/showMessage.service';
 import { ApiCallsService } from './services/api-calls.service';
+import { ShowModalService } from './services/showModal.service';
 
 @Component({
   selector: 'app-root',
@@ -64,6 +65,10 @@ export class AppComponent {
   notification$?: Observable<boolean> = this.service.notification$
   message$: Observable<string> = this.service.message$
   type$: Observable<string> = this.service.type$
+
+  modalService = inject(ShowModalService)
+  modalShow$: Observable<boolean> = this.modalService.modalShow$
+  messageModal$: Observable<string> = this.modalService.message$
 
   constructor(private readonly api: ApiCallsService) {
     this.tasksEvent = this.api.tasksEvent
@@ -156,6 +161,13 @@ export class AppComponent {
     return this.projects.find(project => project.name === projectName)?.color
   }
 
+  closeModal() {
+    this.modalService.closeModal()
+  }
+  completeTask() {
+    const taskId: string = this.modalService.message.getValue()
+    console.log('Send task id :', taskId, 'to service for completion process');
+  }
   // onAddTask(form: NgForm) {
   //   this.loadingState = true
   //   this.api.postTask(this.newTask).subscribe(data => {

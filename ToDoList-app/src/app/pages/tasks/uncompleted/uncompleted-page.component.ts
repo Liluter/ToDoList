@@ -7,6 +7,7 @@ import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
 import { RouterModule } from "@angular/router";
+import { ShowModalService } from "../../../services/showModal.service";
 @Component({
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
@@ -23,6 +24,10 @@ export class UncompletedPageComponent {
   allLabels$?: Observable<Label[]>;
   allProjects$?: Observable<[SyncProject]>;
   menuObservable$: any;
+
+  service = inject(ShowModalService)
+  modalShow$: Observable<boolean> = this.service.modalShow$
+
   constructor(private readonly api: ApiCallsService) {
     this.allLabels$ = this.api.getAllLabels()
     this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
@@ -37,4 +42,12 @@ export class UncompletedPageComponent {
     }
     this.descriptionOpenHandler = id;
   }
+  openModal(id: string, input: HTMLInputElement) {
+    if (input.checked) {
+      this.service.showModal(id, input)
+    } else {
+      this.service.closeModal(input)
+    }
+  }
+
 }

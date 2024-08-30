@@ -1,4 +1,5 @@
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
+
 @Component({
   templateUrl: './welcome-page.component.html',
   standalone: true,
