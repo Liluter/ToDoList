@@ -20,7 +20,7 @@ import { Message } from "../../../types/message.interface";
   imports: [FormsModule, DatePipe, NgClass, AsyncPipe]
 })
 export class AddTaskPageComponent {
-  addEvent: EventEmitter<AddType>
+  // addEvent: EventEmitter<AddType>
   allProjects$?: Observable<[SyncProject]>
   loadingState: boolean = false
   newTask: Task = { ...task }
@@ -37,7 +37,7 @@ export class AddTaskPageComponent {
   showMessageService: ShowMessageService = inject(ShowMessageService)
   labels: string[] = []
   constructor(private readonly api: ApiCallsService) {
-    this.addEvent = this.api.addEvent
+    // this.addEvent = this.api.addEvent
 
     this.allLabels$ = this.api.getAllLabels().pipe(
       tap(labels => this.labels = labels.map(label => label.name)))
@@ -48,22 +48,22 @@ export class AddTaskPageComponent {
       shareReplay()
     )
 
-    this.menuObservable$ = from(this.addEvent).pipe(
-      tap(menu => {
-        // this.showModal = { ...menu }
-      }),
-      switchMap(menu => {
-        if (menu.add === 'addTask') {
-          return combineLatest([this.allLabels$, this.allProjects$])
-        }
-        return EMPTY
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe()
+    // this.menuObservable$ = from(this.addEvent).pipe(
+    //   tap(menu => {
+    //     // this.showModal = { ...menu }
+    //   }),
+    //   switchMap(menu => {
+    //     if (menu.add === 'addTask') {
+    //       return combineLatest([this.allLabels$, this.allProjects$])
+    //     }
+    //     return EMPTY
+    //   }),
+    //   takeUntilDestroyed(this.destroyRef)
+    // ).subscribe()
   }
-  addTask() {
-    this.addEvent.emit({ add: 'addTask' });
-  }
+  // addTask() {
+  //   this.addEvent.emit({ add: 'addTask' });
+  // }
 
   onAddTask(form: NgForm) {
     this.loadingState = true

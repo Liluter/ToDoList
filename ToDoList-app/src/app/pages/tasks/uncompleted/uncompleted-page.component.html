@@ -1,17 +1,54 @@
 @if (allLabels$ | async; as labels) {
 @if (uncompletedTasks$ | async; as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
-@for(task of data?.uncompleted;track $index){
-<ul class="list-group mb-3">
-  <li class="list-group-item px-2 ">
+@for(task of data?.uncompleted;track $index; let idx = $index){
+<ul class="list-group mb-3 ">
+  <li class="list-group-item px-2">
     <div class="input-group input-group-sm">
       <span class="input-group-text">
-        <input class="form-check-input mt-0" type="checkbox" disabled value=""
-          checked="{{task.completed_at ? 'true' : ''}}" id="flexCheckDefault">
+        <input class="form-check-input mt-0" #complCheck type="checkbox" title="Add to completed" value=""
+          name="{{'completed-task-'+$index}}" id="{{'completed-task-'+$index}}"
+          (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[idx]">
       </span>
       <span class="input-group-text">
-        <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
+        <span class="badge rounded-pill mt-0 " [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
       </span>
+      @if(modalShow$ | async){
+      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+        <div class="card text-center">
+          <div class="card-header">
+            Need your action
+          </div>
+          <div class="card-body">
+            <h5 class="card-title ">Are you sure you want to complete this task?</h5>
+            <p class="card-text">When you confirm this task will be archived.</p>
+            <p class="card-text">{{messageModal$ | async}}</p>
+            <div>
+              <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
+              <button class="btn btn-danger" (click)="closeModal()">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      @if(modalDeleteShow$ | async){
+      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+        <div class="card text-center">
+          <div class="card-header">
+            Need your action
+          </div>
+          <div class="card-body">
+            <h5 class="card-title ">Are you sure you want to delete this task?</h5>
+            <p class="card-text">When you confirm this task will be deleted permanently.</p>
+            <p class="card-text">{{messageModal$ | async}}</p>
+            <div>
+              <button class="btn btn-primary me-3" (click)="deleteTask()">Yes</button>
+              <button class="btn btn-danger" (click)="closeDeleteModal()">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
       @if(task.due){
       <span class="input-group-text">
         Due:
@@ -36,20 +73,8 @@
       <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
       <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
       <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
-      <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-        data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="visually-hidden">Toggle Dropdown</span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#">Edit</a></li>
-        <li><a class="dropdown-item" href="#">Add Label</a></li>
-        <li><a class="dropdown-item" href="#">Change Date</a></li>
-        <li><a class="dropdown-item" href="#">Share</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="dropdown-item" href="#">Delete</a></li>
-      </ul>
+      <button type="button" class="btn btn-outline-secondary" (click)="openDeleteModal(task.id)"><i
+          class="bi bi-trash"></i></button>
     </div>
     @if(descriptionOpenHandler === task.id){
     <div class="input-group col-12 mt-1" id="{{task.id}}">
@@ -60,7 +85,14 @@
     }
   </li>
 </ul>
-}}
+}
+}@else {
+<div class="d-flex justify-content-center">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+}
 }@else {
 <div class="d-flex justify-content-center">
   <div class="spinner-border text-primary" role="status">

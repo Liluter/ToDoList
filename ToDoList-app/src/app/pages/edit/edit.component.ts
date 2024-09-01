@@ -155,4 +155,21 @@ export class EditComponent {
       this.model.due = null
     }
   }
+  deleteTask(id: string) {
+
+    this.apiService.deleteTask(id).subscribe(data => {
+      if (data) {
+        this.loadingState = false
+        this.showMessage({ type: 'success', text: `Task "${id}"  deleted successfully` })
+        this.router.navigate([`/welcome`])
+      }
+    }, error => {
+      this.loadingState = false
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage({ type: 'error', text: message })
+    })
+  }
 }

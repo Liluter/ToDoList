@@ -1,8 +1,8 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Label } from '../interfaces/label.interface';
 import { environment } from '../varibles/env';
-import { EMPTY, map, Observable, switchMap } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl, itemUrl, getProjectUrl } from '../varibles/urls';
 import { SyncItem } from '../interfaces/syncItem.interface';
 import { AllCompleted } from '../interfaces/all-completed.interface';
@@ -10,14 +10,11 @@ import { SyncProjects } from '../interfaces/syncProjects.interface';
 import { Project } from '../interfaces/project.interface';
 import { Task } from '../interfaces/task.interface';
 import { SimpleLabel } from '../interfaces/simpleLabel.interface';
-import { AddType, Modals, TasksType } from '../types/modals';
-import { Item } from '../interfaces/item.interface';
 import { GetItem } from '../interfaces/getItem.interface';
 import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
 import { EditData } from '../interfaces/editData.interface';
 import { v4 as uuidv4 } from 'uuid';
-import { JsonPipe } from '@angular/common';
 @Injectable({
   providedIn: 'root'
 })
@@ -29,8 +26,6 @@ export class ApiCallsService {
 
   private projectsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["projects"]' } })
 
-  tasksEvent = new EventEmitter<TasksType>()
-  addEvent = new EventEmitter<AddType>()
   allProjects$?: Observable<SyncProjects>
   constructor(private readonly http: HttpClient) {
     this.allProjects$ = this.http.get<SyncProjects>(syncUrl,
@@ -170,6 +165,57 @@ export class ApiCallsService {
       ]
     }
     if (data) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
+  completeTask(id: string) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "item_complete",
+        "uuid": myuuid,
+        "args": {
+          "id": id,
+        }
+      }]
+    }
+    if (id) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
+  uncompleteTask(id: string) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "item_uncomplete",
+        "uuid": myuuid,
+        "args": {
+          "id": id,
+        }
+      }]
+    }
+    if (id) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
+  deleteTask(id: string) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "item_delete",
+        "uuid": myuuid,
+        "args": {
+          "id": id,
+        }
+      }]
+    }
+    if (id) {
       return this.http.post(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
