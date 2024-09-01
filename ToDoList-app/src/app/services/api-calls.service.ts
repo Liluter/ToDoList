@@ -190,4 +190,21 @@ export class ApiCallsService {
       return EMPTY
     }
   }
+  uncompleteTask(id: string) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "item_uncomplete",
+        "uuid": myuuid,
+        "args": {
+          "id": id,
+        }
+      }]
+    }
+    if (id) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
 }

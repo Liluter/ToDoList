@@ -27,7 +27,7 @@ export class UncompletedPageComponent implements OnInit {
   tasks: boolean[] = []
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
-  uncompletedTasks$!: Observable<Tasks>;
+  uncompletedTasks$!: Observable<Tasks>
   modalShow$: Observable<boolean> = this.modalService.modalShow$
   messageModal$: Observable<string> = this.modalService.message$
   target$: Observable<HTMLInputElement | null> = this.modalService.target$
@@ -67,7 +67,7 @@ export class UncompletedPageComponent implements OnInit {
       this.modalService.nextCheck(newTasks)
       this.modalService.showModal(id, input)
     } else {
-      this.modalService.closeModal(idx)
+      this.modalService.closeModal(idx, false)
     }
   }
 
@@ -75,7 +75,7 @@ export class UncompletedPageComponent implements OnInit {
   closeModal() {
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)
-    this.modalService.closeModal(idx)
+    this.modalService.closeModal(idx, false)
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
@@ -85,7 +85,7 @@ export class UncompletedPageComponent implements OnInit {
     this.refresh()
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)
-    this.modalService.closeModal(idx)
+    this.modalService.closeModal(idx, true)
   }
   refresh() {
     setTimeout(() => {
@@ -96,7 +96,7 @@ export class UncompletedPageComponent implements OnInit {
         }),
         map(data => { return { uncompleted: data.items, completed: null } }),
       )
-    }, 1000)
+    }, 500)
 
   }
 }

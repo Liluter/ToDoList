@@ -26,12 +26,12 @@ export class ShowModalService {
   nextCheck(array: boolean[]) {
     this.checkArray.next(array)
   }
-  closeModal(idx: number): void {
+  closeModal(idx: number, check: boolean): void {
     this.modalShow.next(false)
     // this.target.getValue()!.checked = false
     if (idx >= 0) {
       let arr = this.checkArray.getValue()
-      arr[idx] = false
+      arr[idx] = check
       this.checkArray.next(arr)
     }
   }
