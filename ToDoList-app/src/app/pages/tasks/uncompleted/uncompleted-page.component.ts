@@ -9,6 +9,8 @@ import { SyncProject } from "../../../interfaces/syncProject.interface";
 import { RouterModule } from "@angular/router";
 import { ShowModalService } from "../../../services/showModal.service";
 import { FormsModule } from "@angular/forms";
+import { ShowMessageService } from "../../../services/showMessage.service";
+import { Message } from "../../../types/message.interface";
 @Component({
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
@@ -29,12 +31,15 @@ export class UncompletedPageComponent implements OnInit {
   api: ApiCallsService = inject(ApiCallsService)
   uncompletedTasks$!: Observable<Tasks>
   modalShow$: Observable<boolean> = this.modalService.modalShow$
+  modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
   messageModal$: Observable<string> = this.modalService.message$
   target$: Observable<HTMLInputElement | null> = this.modalService.target$
   openModalBool: boolean = false
   target!: HTMLInputElement | null
   checkArray$: Observable<boolean[]> = this.modalService.checkArray$
   refreshSubject = new Subject<void>()
+  loadingState: boolean = false
+  showMessageService: ShowMessageService = inject(ShowMessageService)
   // data$: Observable<unknown>;/
   ngOnInit(): void {
     this.target$.subscribe(data => this.target = data)
@@ -70,12 +75,17 @@ export class UncompletedPageComponent implements OnInit {
       this.modalService.closeModal(idx, false)
     }
   }
-
+  openDeleteModal(id: string) {
+    this.modalService.showDeleteModal(id)
+  }
 
   closeModal() {
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, false)
+  }
+  closeDeleteModal() {
+    this.modalService.closeDeleteModal()
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
@@ -98,5 +108,28 @@ export class UncompletedPageComponent implements OnInit {
       )
     }, 500)
 
+  }
+  deleteTask() {
+    const taskId: string = this.modalService.message.getValue()
+    this.api.deleteTask(taskId).subscribe(
+      data => {
+        if (data) {
+          this.loadingState = false
+          this.showMessage({ type: 'success', text: `Task "${taskId}"  deleted successfully` })
+          this.modalService.closeDeleteModal()
+          this.refresh()
+        }
+      }, error => {
+        this.loadingState = false
+        let message = error.message
+        if (error.status === 403 || error.status === 400) {
+          message = error.error
+        }
+        this.showMessage({ type: 'error', text: message })
+      }
+    )
+  }
+  showMessage(message: Message) {
+    this.showMessageService.showMessage(message)
   }
 }
