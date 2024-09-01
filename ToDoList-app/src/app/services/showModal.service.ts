@@ -34,7 +34,6 @@ export class ShowModalService {
   }
   closeModal(idx?: number, check?: boolean): void {
     this.modalShow.next(false)
-    // this.target.getValue()!.checked = false
     if ((idx !== undefined) && (check !== undefined)) {
 
       if (idx >= 0) {

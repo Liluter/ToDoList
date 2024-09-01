@@ -1,4 +1,4 @@
-import { Component, DestroyRef, EventEmitter, inject } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
 import { TasksType } from "../../../types/modals";
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
@@ -29,10 +29,7 @@ export class AllPageComponent {
   allLabels$?: Observable<Label[]>;
   allProjects$?: Observable<[SyncProject]>;
   menuObservable$: any;
-  clickEvent = new EventEmitter<'uncompleted' | 'completed' | 'all' | 'none'>()
-  tasksEvent: EventEmitter<TasksType>
   constructor(private readonly api: ApiCallsService) {
-    this.tasksEvent = this.api.tasksEvent
     this.allLabels$ = this.api.getAllLabels()
     this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
       map(data => { return { uncompleted: data.items, completed: null } }),

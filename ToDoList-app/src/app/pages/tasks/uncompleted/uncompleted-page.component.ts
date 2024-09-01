@@ -1,7 +1,7 @@
-import { AfterContentInit, AfterViewInit, Component, DestroyRef, inject, OnInit } from "@angular/core";
+import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, Subject, switchMap, tap } from "rxjs";
+import { map, Observable, Subject, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
@@ -40,7 +40,6 @@ export class UncompletedPageComponent implements OnInit {
   refreshSubject = new Subject<void>()
   loadingState: boolean = false
   showMessageService: ShowMessageService = inject(ShowMessageService)
-  // data$: Observable<unknown>;/
   ngOnInit(): void {
     this.target$.subscribe(data => this.target = data)
     this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
@@ -89,9 +88,7 @@ export class UncompletedPageComponent implements OnInit {
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
-    console.log('Send task id :', taskId, 'to service for completion process');
-    this.api.completeTask(taskId).subscribe(); //!!!!
-    // this.data$ = this.uncompletedTasks$.pipe(refresh())
+    this.api.completeTask(taskId).subscribe();
     this.refresh()
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)

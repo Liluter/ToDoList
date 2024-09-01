@@ -62,24 +62,6 @@
 </div>
 }
 
-<!-- @if(modalShow$ | async){
-<div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
-  <div class="card text-center">
-    <div class="card-header">
-      Need your action
-    </div>
-    <div class="card-body">
-      <h5 class="card-title ">Are you sure you want to complete this task?</h5>
-      <p class="card-text">When you confirm this task will be archived.</p>
-      <p class="card-text">{{messageModal$ | async}}</p>
-      <div>
-        <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
-        <button class="btn btn-danger" (click)="closeModal()">No</button>
-      </div>
-    </div>
-  </div>
-</div>
-} -->
 
 <div class="container mx-auto my-3 ">
   <router-outlet></router-outlet>

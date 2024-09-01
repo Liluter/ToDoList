@@ -1,4 +1,4 @@
-import { EventEmitter, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Label } from '../interfaces/label.interface';
 import { environment } from '../varibles/env';
@@ -10,7 +10,6 @@ import { SyncProjects } from '../interfaces/syncProjects.interface';
 import { Project } from '../interfaces/project.interface';
 import { Task } from '../interfaces/task.interface';
 import { SimpleLabel } from '../interfaces/simpleLabel.interface';
-import { AddType, TasksType } from '../types/modals';
 import { GetItem } from '../interfaces/getItem.interface';
 import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
@@ -27,8 +26,6 @@ export class ApiCallsService {
 
   private projectsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["projects"]' } })
 
-  tasksEvent = new EventEmitter<TasksType>()
-  addEvent = new EventEmitter<AddType>()
   allProjects$?: Observable<SyncProjects>
   constructor(private readonly http: HttpClient) {
     this.allProjects$ = this.http.get<SyncProjects>(syncUrl,
