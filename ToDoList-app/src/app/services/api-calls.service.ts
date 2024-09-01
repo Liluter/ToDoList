@@ -2,7 +2,7 @@ import { EventEmitter, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Label } from '../interfaces/label.interface';
 import { environment } from '../varibles/env';
-import { EMPTY, map, Observable, switchMap } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl, itemUrl, getProjectUrl } from '../varibles/urls';
 import { SyncItem } from '../interfaces/syncItem.interface';
 import { AllCompleted } from '../interfaces/all-completed.interface';
@@ -10,14 +10,12 @@ import { SyncProjects } from '../interfaces/syncProjects.interface';
 import { Project } from '../interfaces/project.interface';
 import { Task } from '../interfaces/task.interface';
 import { SimpleLabel } from '../interfaces/simpleLabel.interface';
-import { AddType, Modals, TasksType } from '../types/modals';
-import { Item } from '../interfaces/item.interface';
+import { AddType, TasksType } from '../types/modals';
 import { GetItem } from '../interfaces/getItem.interface';
 import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
 import { EditData } from '../interfaces/editData.interface';
 import { v4 as uuidv4 } from 'uuid';
-import { JsonPipe } from '@angular/common';
 @Injectable({
   providedIn: 'root'
 })
@@ -176,9 +174,20 @@ export class ApiCallsService {
     }
   }
   completeTask(id: string) {
-    console.log('Task id :', id, 'completed')
-    //
-    //
-    //
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "item_complete",
+        "uuid": myuuid,
+        "args": {
+          "id": id,
+        }
+      }]
+    }
+    if (id) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
   }
 }

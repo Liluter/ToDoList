@@ -1,7 +1,7 @@
 import { AfterContentInit, AfterViewInit, Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, tap } from "rxjs";
+import { map, Observable, Subject, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
@@ -34,6 +34,8 @@ export class UncompletedPageComponent implements OnInit {
   openModalBool: boolean = false
   target!: HTMLInputElement | null
   checkArray$: Observable<boolean[]> = this.modalService.checkArray$
+  refreshSubject = new Subject<void>()
+  // data$: Observable<unknown>;/
   ngOnInit(): void {
     this.target$.subscribe(data => this.target = data)
     this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
@@ -78,9 +80,23 @@ export class UncompletedPageComponent implements OnInit {
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
     console.log('Send task id :', taskId, 'to service for completion process');
-    this.api.completeTask(taskId); //!!!!
+    this.api.completeTask(taskId).subscribe(); //!!!!
+    // this.data$ = this.uncompletedTasks$.pipe(refresh())
+    this.refresh()
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx)
+  }
+  refresh() {
+    setTimeout(() => {
+      this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
+        tap(data => {
+          this.tasks = data.items.map(item => false)
+          this.modalService.initCheckArray(this.tasks)
+        }),
+        map(data => { return { uncompleted: data.items, completed: null } }),
+      )
+    }, 1000)
+
   }
 }
