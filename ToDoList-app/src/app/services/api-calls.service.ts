@@ -207,4 +207,21 @@ export class ApiCallsService {
       return EMPTY
     }
   }
+  deleteTask(id: string) {
+    const myuuid = uuidv4();
+    const body = {
+      commands: [{
+        "type": "item_delete",
+        "uuid": myuuid,
+        "args": {
+          "id": id,
+        }
+      }]
+    }
+    if (id) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
 }
