@@ -1,17 +1,17 @@
 @if (allLabels$ | async; as labels) {
 @if (uncompletedTasks$ | async; as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
-@for(task of data?.uncompleted;track $index; let i = $index){
-<ul class="list-group mb-3">
-  <li class="list-group-item px-2 ">
+@for(task of data?.uncompleted;track $index; let idx = $index){
+<ul class="list-group mb-3 ">
+  <li class="list-group-item px-2">
     <div class="input-group input-group-sm">
       <span class="input-group-text">
         <input class="form-check-input mt-0" #complCheck type="checkbox" title="Add to completed" value=""
           name="{{'completed-task-'+$index}}" id="{{'completed-task-'+$index}}"
-          (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[i]">
+          (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[idx]">
       </span>
       <span class="input-group-text">
-        <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
+        <span class="badge rounded-pill mt-0 " [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
       </span>
       @if(modalShow$ | async){
       <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
