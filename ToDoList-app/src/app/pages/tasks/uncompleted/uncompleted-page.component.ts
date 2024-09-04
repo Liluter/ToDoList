@@ -1,7 +1,7 @@
 import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, Subject, tap } from "rxjs";
+import { combineLatest, map, Observable, Subject, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
@@ -30,6 +30,8 @@ export class UncompletedPageComponent implements OnInit {
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
   uncompletedTasks$!: Observable<Tasks>
+  uncompletedTasks2$!: Observable<Tasks>
+  refreshTriger$ = this.api.refreshTrigger$
   modalShow$: Observable<boolean> = this.modalService.modalShow$
   modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
   messageModal$: Observable<string> = this.modalService.message$
@@ -49,6 +51,7 @@ export class UncompletedPageComponent implements OnInit {
       }),
       map(data => { return { uncompleted: data.items, completed: null } }),
     )
+    this.uncompletedTasks2$ = combineLatest([this.refreshTriger$]).pipe(switchMap(() => this.uncompletedTasks$))
     this.allLabels$ = this.api.getAllLabels()
     this.checkArray$.subscribe(data => {
       this.tasks = data
@@ -88,23 +91,24 @@ export class UncompletedPageComponent implements OnInit {
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
-    this.api.completeTask(taskId).subscribe();
-    this.refresh()
+    // this.api.completeTask(taskId).subscribe();
+    this.api.completeTask(taskId).pipe(tap(() => this.refreshData())).subscribe();
+    // this.refresh()
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, true)
   }
-  refresh() {
-    setTimeout(() => {
-      this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
-        tap(data => {
-          this.tasks = data.items.map(item => false)
-          this.modalService.initCheckArray(this.tasks)
-        }),
-        map(data => { return { uncompleted: data.items, completed: null } }),
-      )
-    }, 500)
-
+  refreshData() {
+    // setTimeout(() => {
+    //   this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
+    //     tap(data => {
+    //       this.tasks = data.items.map(item => false)
+    //       this.modalService.initCheckArray(this.tasks)
+    //     }),
+    //     map(data => { return { uncompleted: data.items, completed: null } }),
+    //   )
+    // }, 500)
+    this.refreshTriger$.next(null)
   }
   deleteTask() {
     const taskId: string = this.modalService.message.getValue()
@@ -114,7 +118,7 @@ export class UncompletedPageComponent implements OnInit {
           this.loadingState = false
           this.showMessage({ type: 'success', text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
-          this.refresh()
+          this.refreshData()
         }
       }, error => {
         this.loadingState = false

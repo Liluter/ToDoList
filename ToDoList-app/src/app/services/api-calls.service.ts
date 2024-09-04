@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Label } from '../interfaces/label.interface';
 import { environment } from '../varibles/env';
-import { EMPTY, Observable } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
 import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl, itemUrl, getProjectUrl } from '../varibles/urls';
 import { SyncItem } from '../interfaces/syncItem.interface';
 import { AllCompleted } from '../interfaces/all-completed.interface';
@@ -25,7 +25,7 @@ export class ApiCallsService {
   private itemsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["items"]' } })
 
   private projectsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["projects"]' } })
-
+  refreshTrigger$ = new BehaviorSubject<null>(null)
   allProjects$?: Observable<SyncProjects>
   constructor(private readonly http: HttpClient) {
     this.allProjects$ = this.http.get<SyncProjects>(syncUrl,
@@ -33,6 +33,7 @@ export class ApiCallsService {
         headers: this.authorization,
         params: this.projectsParams
       })
+
   }
 
   getUncompletedTasks(): Observable<SyncItem> {
