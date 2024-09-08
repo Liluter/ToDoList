@@ -29,26 +29,32 @@
         </div>
       </span>
     </div>
-    <div class="input-group mt-1">
-      <span class="input-group-text">Title:</span>
-      <input type="text" class="form-control" value={{task.content}} readonly>
-      <button type="button" class="btn btn-outline-secondary" routerLink="/detail">Detail</button>
-      <button type="button" class="btn btn-outline-secondary" routerLink="/edit">Edit</button>
-      <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
-      <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-        data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="visually-hidden">Toggle Dropdown</span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#">Edit</a></li>
-        <li><a class="dropdown-item" href="#">Add Label</a></li>
-        <li><a class="dropdown-item" href="#">Change Date</a></li>
-        <li><a class="dropdown-item" href="#">Share</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="dropdown-item" href="#">Delete</a></li>
-      </ul>
+    <div class="input-group mt-1   ">
+
+      <span class="input-group-text flex-fill ">
+        <span class="input-group-text">Title:</span>
+        <input type="text" class="form-control" value={{task.content}} readonly>
+      </span>
+      <span class="input-group-text ">
+
+        <button type="button" class="btn btn-outline-secondary" routerLink="/detail">Detail</button>
+        <button type="button" class="btn btn-outline-secondary" routerLink="/edit">Edit</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="visually-hidden">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><a class="dropdown-item" href="#">Edit</a></li>
+          <li><a class="dropdown-item" href="#">Add Label</a></li>
+          <li><a class="dropdown-item" href="#">Change Date</a></li>
+          <li><a class="dropdown-item" href="#">Share</a></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><a class="dropdown-item" href="#">Delete</a></li>
+        </ul>
+      </span>
     </div>
     @if(descriptionOpenHandler === task.id){
     <div class="input-group col-12 mt-1" id="{{task.id}}">
