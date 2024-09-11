@@ -67,13 +67,11 @@
       </span>
     </div>
     <div class="input-group mt-1   ">
-
       <span class="input-group-text flex-fill ">
         <span class="input-group-text">Title:</span>
         <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
       <span class="input-group-text ">
-
         <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
         <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
         <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
