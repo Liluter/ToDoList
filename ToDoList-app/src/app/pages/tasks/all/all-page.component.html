@@ -1,6 +1,6 @@
 <h1>This is All Tasks space</h1>
 @if (allLabels$ | async; as labels) {
-@if (uncompletedTasks2$ | async; as data){
+@if (uncompletedTasks$ | async; as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
 @for(task of data?.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3">
@@ -8,8 +8,9 @@
     <div class="input-group input-group-sm">
       <span class="input-group-text fs-3">
         <input #complCheck class="form-check-input mt-0" type="checkbox" value=""
-          checked="{{task.completed_at ? 'true' : ''}}" name="{{'completed-task-'+$index}}"
-          id="{{'completed-task-'+$index}}" (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[idx]">
+          checked="{{task.completed_at ? 'true' : ''}}" name="{{'uncompleted-task-'+$index}}"
+          id="{{'uncompleted-task-'+$index}}" (change)="openModal(task.id, complCheck, 'complete')"
+          [(ngModel)]="tasks[idx]">
       </span>
       <span class="input-group-text">
         <span class="badge rounded-pill mt-0 fs-6" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
@@ -25,8 +26,14 @@
             <p class="card-text">When you confirm this task will be archived.</p>
             <p class="card-text">{{messageModal$ | async}}</p>
             <div>
+              @if((type$ | async) === 'complete'){
               <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
-              <button class="btn btn-danger" (click)="closeModal()">No</button>
+              <button class="btn btn-danger" (click)="closeModal('complete')">No</button>
+              }
+              @if((type$ | async) === 'uncomplete'){
+              <button class="btn btn-primary me-3" (click)="unCompleteTask()">Yes</button>
+              <button class="btn btn-danger" (click)="closeModal('uncomplete')">No</button>
+              }
             </div>
           </div>
         </div>
@@ -98,14 +105,16 @@
 }
 @if (completedTasks$ | async ;as data){
 <h4 class="text-body-secondary">Completed tasks:</h4>
-@for(task of data.completed; track $index){
+@for(task of data.completed; track $index; let idx = $index){
 <ul class="list-group mb-3">
   <li class="list-group-item px-2">
     <div class="input-group ">
       <span class="input-group-text flex-fill">
-
-        <span class="input-group-text fs-3"><input class="form-check-input " type="checkbox" disabled value=""
-            checked="{{task.completed_at ? 'true' : ''}}"></span>
+        <span class="input-group-text fs-3">
+          <input #completeCheck class="form-check-input " type="checkbox" value="" id="{{'completed-task-'+$index}}"
+            name="{{'completed-task-'+$index}}" checked="{{task.completed_at ? 'true' : ''}}"
+            (change)="openModal(task.id, completeCheck, 'uncomplete')" [(ngModel)]="tasks2[idx]">
+        </span>
 
         <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
