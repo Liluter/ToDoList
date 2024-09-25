@@ -1,7 +1,23 @@
 @if (allLabels$ | async; as labels) {
-@if (uncompletedTasks$ | async; as data){
+@if (sortedTasks(); as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
-@for(task of data?.uncompleted;track $index; let idx = $index){
+<div class="container mb-3">
+  <span>Sort by: </span>
+  @for (by of listSortBy | keyvalue; track $index) {
+  <button class="btn me-1" [ngClass]="{
+      'btn-outline-dark' : by.value !== sortBy(),
+      'btn-dark': by.value === sortBy()
+    }" (click)="sortOption(by.value)">{{by.value}}</button>
+  }
+  <span class="ms-1">Sort direction: </span>
+  @for (by of listSortDir | keyvalue; track $index) {
+  <button class="btn me-1" [ngClass]="{
+      'btn-outline-dark' : by.value !== sortDir(),
+      'btn-dark': by.value === sortDir()
+    }" (click)="sortDirection(by.value)">{{by.value}}</button>
+  }
+</div>
+@for(task of data.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3 ">
   <li class="list-group-item px-2">
     <div class="input-group input-group-sm">

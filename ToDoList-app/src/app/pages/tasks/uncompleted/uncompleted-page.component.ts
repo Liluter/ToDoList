@@ -1,5 +1,5 @@
-import { Component, DestroyRef, inject, OnInit } from "@angular/core";
-import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
+import { Component, computed, DestroyRef, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
+import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { combineLatest, map, Observable, Subject, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
@@ -11,13 +11,18 @@ import { ShowModalService } from "../../../services/showModal.service";
 import { FormsModule } from "@angular/forms";
 import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message } from "../../../types/message.interface";
+import { SortBy, SortDir } from "../../../types/sortBy";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { Item } from "@angular/fire/analytics";
+
 @Component({
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
   styleUrl: './uncompleted-page.component.scss',
-  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule]
+  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass]
 })
 export class UncompletedPageComponent implements OnInit {
+
   destroyRef = inject(DestroyRef)
   badgeClass = badgeClass
   getLabelColor = getLabelColor
@@ -41,15 +46,52 @@ export class UncompletedPageComponent implements OnInit {
   refreshSubject = new Subject<void>()
   loadingState: boolean = false
   showMessageService: ShowMessageService = inject(ShowMessageService)
+
+
+  listSortBy = SortBy
+  listSortDir = SortDir
+  sortBy: WritableSignal<SortBy> = signal(SortBy.date)
+  sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
+  uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
+    tap(data => {
+      this.tasks = data.items.map(item => false)
+      this.modalService.initCheckArray(this.tasks)
+    }),
+    map(data => { return { uncompleted: data.items, completed: null } }),
+  ))))
+  sortedTasks: Signal<Tasks | undefined> = computed(() => {
+    switch (this.sortBy()) {
+      case SortBy.priority:
+        return this.sortDir() === SortDir.asc ? {
+          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((a, b) => a.priority - b.priority), completed: this.uncompletedTasks()?.completed
+        } : {
+          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((a, b) => b.priority - a.priority), completed: this.uncompletedTasks()?.completed
+        }
+      case SortBy.date:
+        return this.sortDir() === SortDir.asc ? {
+          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((prim, sec) => {
+            return Date.parse(prim.due!.date) - Date.parse(sec.due!.date)
+          }), completed: this.uncompletedTasks()?.completed
+        } : {
+          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((prim, sec) => {
+            return Date.parse(sec.due!.date) - Date.parse(prim.due!.date)
+          }), completed: this.uncompletedTasks()?.completed
+        }
+      default:
+        return this.uncompletedTasks()
+    }
+  })
+
+
   ngOnInit(): void {
     this.target$.subscribe(data => this.target = data)
-    this.uncompletedTasks$ = this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
-      tap(data => {
-        this.tasks = data.items.map(item => false)
-        this.modalService.initCheckArray(this.tasks)
-      }),
-      map(data => { return { uncompleted: data.items, completed: null } }),
-    )))
+    // this.uncompletedTasks$ = this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
+    //   tap(data => {
+    //     this.tasks = data.items.map(item => false)
+    //     this.modalService.initCheckArray(this.tasks)
+    //   }),
+    //   map(data => { return { uncompleted: data.items, completed: null } }),
+    // )))
     this.allLabels$ = this.api.getAllLabels()
     this.checkArray$.subscribe(data => {
       this.tasks = data
@@ -135,5 +177,12 @@ export class UncompletedPageComponent implements OnInit {
   }
   showMessage(message: Message) {
     this.showMessageService.showMessage(message)
+  }
+
+  sortOption(sort: SortBy) {
+    this.sortBy.set(sort)
+  }
+  sortDirection(sort: SortDir) {
+    this.sortDir.set(sort)
   }
 }
