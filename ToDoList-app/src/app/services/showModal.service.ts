@@ -1,4 +1,5 @@
 import { Injectable } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 import { BehaviorSubject } from "rxjs";
 
 
@@ -13,8 +14,11 @@ export class ShowModalService {
   checkArray = new BehaviorSubject<boolean[]>([])
   checkArray2 = new BehaviorSubject<boolean[]>([])
   modalShow$ = this.modalShow.asObservable();
+  modalShowSignal = toSignal(this.modalShow)
   modalDeleteShow$ = this.modalDeleteShow.asObservable();
+  modalDeleteShowSignal = toSignal(this.modalDeleteShow)
   message$ = this.message.asObservable();
+  messageSignal = toSignal(this.message);
   target$ = this.target.asObservable();
   type$ = this.type.asObservable()
   checkArray$ = this.checkArray.asObservable();

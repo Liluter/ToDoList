@@ -1,7 +1,7 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { combineLatest, map, Observable, Subject, switchMap, tap } from "rxjs";
+import { map, Observable, startWith, Subject, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
@@ -13,7 +13,6 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message } from "../../../types/message.interface";
 import { SortBy, SortDir } from "../../../types/sortBy";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { Item } from "@angular/fire/analytics";
 
 @Component({
   templateUrl: './uncompleted-page.component.html',
@@ -21,7 +20,7 @@ import { Item } from "@angular/fire/analytics";
   styleUrl: './uncompleted-page.component.scss',
   imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass]
 })
-export class UncompletedPageComponent implements OnInit {
+export class UncompletedPageComponent {
 
   destroyRef = inject(DestroyRef)
   badgeClass = badgeClass
@@ -31,31 +30,35 @@ export class UncompletedPageComponent implements OnInit {
   allLabels$?: Observable<Label[]>;
   allProjects$?: Observable<[SyncProject]>;
   menuObservable$: any;
-  tasks: boolean[] = []
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
-  uncompletedTasks$!: Observable<Tasks>
+  // uncompletedTasks$!: Observable<Tasks>
   refreshTriger$ = this.api.refreshTrigger$
-  modalShow$: Observable<boolean> = this.modalService.modalShow$
-  modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
-  messageModal$: Observable<string> = this.modalService.message$
+  // modalShow$: Observable<boolean> = this.modalService.modalShow$
+  modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
+  // modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
+  modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
+  // messageModal$: Observable<string> = this.modalService.message$
+  messageModalSignal = this.modalService.messageSignal
   target$: Observable<HTMLInputElement | null> = this.modalService.target$
-  openModalBool: boolean = false
-  target!: HTMLInputElement | null
-  checkArray$: Observable<boolean[]> = this.modalService.checkArray$
-  refreshSubject = new Subject<void>()
+  // openModalBool: boolean = false
+  target = toSignal(this.modalService.target$)
+  // checkArray$: Observable<boolean[]> = this.modalService.checkArray$
+  // refreshSubject = new Subject<void>()
   loadingState: boolean = false
   showMessageService: ShowMessageService = inject(ShowMessageService)
 
 
+  tasks2: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
+  tasksModel: boolean[] | undefined = this.tasks2()
   listSortBy = SortBy
   listSortDir = SortDir
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
   uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
-      this.tasks = data.items.map(item => false)
-      this.modalService.initCheckArray(this.tasks)
+      this.tasksModel = data.items.map(item => false)
+      this.modalService.initCheckArray(this.tasksModel)
     }),
     map(data => { return { uncompleted: data.items, completed: null } }),
   ))))
@@ -81,22 +84,9 @@ export class UncompletedPageComponent implements OnInit {
         return this.uncompletedTasks()
     }
   })
+  allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
+  // checkArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray)
 
-
-  ngOnInit(): void {
-    this.target$.subscribe(data => this.target = data)
-    // this.uncompletedTasks$ = this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
-    //   tap(data => {
-    //     this.tasks = data.items.map(item => false)
-    //     this.modalService.initCheckArray(this.tasks)
-    //   }),
-    //   map(data => { return { uncompleted: data.items, completed: null } }),
-    // )))
-    this.allLabels$ = this.api.getAllLabels()
-    this.checkArray$.subscribe(data => {
-      this.tasks = data
-    })
-  }
 
   openDescription(id: string | undefined) {
     if (this.descriptionOpenHandler === id) {
@@ -108,8 +98,8 @@ export class UncompletedPageComponent implements OnInit {
   openModal(id: string, input: HTMLInputElement) {
     const lastIndexOf = input.id.lastIndexOf('-')
     const idx = +input.id.slice(lastIndexOf + 1)
-    const newTasks = this.tasks.map((task, index) => index === idx ? true : false)
-    if (input.checked) {
+    const newTasks = this.tasksModel?.map((task, index) => index === idx ? true : false)
+    if (input.checked && newTasks) {
       this.modalService.nextCheck(newTasks)
       this.modalService.showModal(id, input)
     } else {
@@ -121,8 +111,8 @@ export class UncompletedPageComponent implements OnInit {
   }
 
   closeModal() {
-    const lastIndexOf = this.target!.id.lastIndexOf('-')
-    const idx = +this.target!.id.slice(lastIndexOf + 1)
+    const lastIndexOf = this.target()!.id.lastIndexOf('-')
+    const idx = +this.target()!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, false)
   }
   closeDeleteModal() {
@@ -148,8 +138,8 @@ export class UncompletedPageComponent implements OnInit {
       }
     );
     // this.refresh()
-    const lastIndexOf = this.target!.id.lastIndexOf('-')
-    const idx = +this.target!.id.slice(lastIndexOf + 1)
+    const lastIndexOf = this.target()!.id.lastIndexOf('-')
+    const idx = +this.target()!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, true)
   }
   refreshData() {

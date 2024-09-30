@@ -1,4 +1,4 @@
-@if (allLabels$ | async; as labels) {
+@if (allLabels(); as labels) {
 @if (sortedTasks(); as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
 <div class="container mb-3">
@@ -17,6 +17,7 @@
     }" (click)="sortDirection(by.value)">{{by.value}}</button>
   }
 </div>
+@if(tasks2(); as taskarr){
 @for(task of data.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3 ">
   <li class="list-group-item px-2">
@@ -24,12 +25,12 @@
       <span class="input-group-text">
         <input class="form-check-input mt-0 fs-3" #complCheck type="checkbox" title="Add to completed" value=""
           name="{{'completed-task-'+$index}}" id="{{'completed-task-'+$index}}"
-          (change)="openModal(task.id, complCheck)" [(ngModel)]="tasks[idx]">
+          (change)="openModal(task.id, complCheck)" [(ngModel)]="taskarr[idx]">
       </span>
       <span class="input-group-text">
         <span class="badge rounded-pill mt-0 fs-6" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
       </span>
-      @if(modalShow$ | async){
+      @if(modalShowSignal()){
       <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
         <div class="card text-center">
           <div class="card-header">
@@ -38,7 +39,7 @@
           <div class="card-body">
             <h5 class="card-title ">Are you sure you want to complete this task?</h5>
             <p class="card-text">When you confirm this task will be archived.</p>
-            <p class="card-text">{{messageModal$ | async}}</p>
+            <p class="card-text">{{messageModalSignal()}}</p>
             <div>
               <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
               <button class="btn btn-danger" (click)="closeModal()">No</button>
@@ -47,7 +48,7 @@
         </div>
       </div>
       }
-      @if(modalDeleteShow$ | async){
+      @if(modalDeleteShowSignal()){
       <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
         <div class="card text-center">
           <div class="card-header">
@@ -56,7 +57,7 @@
           <div class="card-body">
             <h5 class="card-title ">Are you sure you want to delete this task?</h5>
             <p class="card-text">When you confirm this task will be deleted permanently.</p>
-            <p class="card-text">{{messageModal$ | async}}</p>
+            <p class="card-text">{{messageModalSignal()}}</p>
             <div>
               <button class="btn btn-primary me-3" (click)="deleteTask()">Yes</button>
               <button class="btn btn-danger" (click)="closeDeleteModal()">No</button>
@@ -105,6 +106,7 @@
     }
   </li>
 </ul>
+}
 }
 }@else {
 <div class="d-flex justify-content-center">
