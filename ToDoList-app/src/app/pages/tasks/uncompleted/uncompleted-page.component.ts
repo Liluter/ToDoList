@@ -47,9 +47,10 @@ export class UncompletedPageComponent {
   loadingState: boolean = false
   showMessageService: ShowMessageService = inject(ShowMessageService)
 
-
-  tasks2: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
-  tasksModel: boolean[] | undefined = this.tasks2()
+  allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
+  allProjects = toSignal(this.api.getAllProjects())
+  checksBoolArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
+  tasksModel: boolean[] | undefined = this.checksBoolArray()
   listSortBy = SortBy
   listSortDir = SortDir
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
@@ -61,33 +62,57 @@ export class UncompletedPageComponent {
     }),
     map(data => { return { uncompleted: data.items, completed: null } }),
   ))))
+
+  filterByTitle: WritableSignal<string> = signal('')
+  filterByPriority: WritableSignal<string> = signal('')
+  filterByLabel: WritableSignal<string> = signal('')
+  filterByProject: WritableSignal<string> = signal('')
+
   sortedTasks: Signal<Tasks | undefined> = computed(() => {
+    let tasks: Tasks = {
+      uncompleted: this.uncompletedTasks()?.uncompleted,
+      completed: this.uncompletedTasks()?.completed
+    }
+    if (this.filterByTitle().length > 0) {
+      tasks.uncompleted = tasks.uncompleted?.filter(item => item.content.includes(this.filterByTitle().trim()))
+    }
+    if (this.filterByPriority().length === 1) {
+      tasks.uncompleted = tasks.uncompleted?.filter(item => item.priority === +this.filterByPriority())
+    }
+    if (this.filterByLabel().length > 0) {
+      tasks.uncompleted = tasks.uncompleted?.filter(item => item.labels.some(el => el.toLowerCase().includes(this.filterByLabel().trim().toLowerCase())))
+    }
+    if (this.filterByProject().length > 0) {
+      tasks.uncompleted = tasks.uncompleted?.filter(item => this.projectNameById(item.project_id)?.toLowerCase().includes(this.filterByProject().trim().toLowerCase()))
+    }
+
+    console.log('tasks', tasks)
     switch (this.sortBy()) {
       case SortBy.priority:
         return this.sortDir() === SortDir.asc ? {
-          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((a, b) => a.priority - b.priority), completed: this.uncompletedTasks()?.completed
+          uncompleted: tasks.uncompleted?.sort((a, b) => a.priority - b.priority), completed: tasks?.completed
         } : {
-          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((a, b) => b.priority - a.priority), completed: this.uncompletedTasks()?.completed
+          uncompleted: tasks.uncompleted?.sort((a, b) => b.priority - a.priority), completed: tasks?.completed
         }
       case SortBy.date:
         return this.sortDir() === SortDir.asc ? {
-          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((prim, sec) => {
+          uncompleted: tasks.uncompleted?.sort((prim, sec) => {
             if (prim.due && sec.due) return Date.parse(prim.due!.date) - Date.parse(sec.due!.date)
             else return 1
           }
-          ), completed: this.uncompletedTasks()?.completed
+          ), completed: tasks?.completed
         } : {
-          uncompleted: this.uncompletedTasks()?.uncompleted?.sort((prim, sec) => {
+          uncompleted: tasks.uncompleted?.sort((prim, sec) => {
             if (prim.due && sec.due) return Date.parse(sec.due!.date) - Date.parse(prim.due!.date)
             else return 1
-          }), completed: this.uncompletedTasks()?.completed
+          }), completed: tasks?.completed
         }
       default:
-        return this.uncompletedTasks()
+        return tasks
     }
   })
-  allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
-  // checkArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray)
+
+
 
 
   openDescription(id: string | undefined) {
@@ -176,5 +201,10 @@ export class UncompletedPageComponent {
   }
   sortDirection(sort: SortDir) {
     this.sortDir.set(sort)
+  }
+  projectNameById(id: string) {
+    return this.allProjects()?.projects.find(el => el.id === id)?.name
+
+
   }
 }
