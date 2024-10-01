@@ -1,11 +1,10 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
+import { Component, computed, inject, signal, Signal, WritableSignal } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, startWith, Subject, switchMap, tap } from "rxjs";
+import { map, Observable, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
-import { SyncProject } from "../../../interfaces/syncProject.interface";
 import { RouterModule } from "@angular/router";
 import { ShowModalService } from "../../../services/showModal.service";
 import { FormsModule } from "@angular/forms";
@@ -22,14 +21,14 @@ import { toSignal } from "@angular/core/rxjs-interop";
 })
 export class UncompletedPageComponent {
 
-  destroyRef = inject(DestroyRef)
+  // destroyRef = inject(DestroyRef)
   badgeClass = badgeClass
   getLabelColor = getLabelColor
   descriptionOpenHandler?: string;
-  labels?: Label[]
-  allLabels$?: Observable<Label[]>;
-  allProjects$?: Observable<[SyncProject]>;
-  menuObservable$: any;
+  // labels?: Label[]
+  // allLabels$?: Observable<Label[]>;
+  // allProjects$?: Observable<[SyncProject]>;
+  // menuObservable$: any;
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
   // uncompletedTasks$!: Observable<Tasks>
@@ -40,9 +39,9 @@ export class UncompletedPageComponent {
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
   // messageModal$: Observable<string> = this.modalService.message$
   messageModalSignal = this.modalService.messageSignal
-  target$: Observable<HTMLInputElement | null> = this.modalService.target$
+  // target$: Observable<HTMLInputElement | null> = this.modalService.target$
   // openModalBool: boolean = false
-  target = toSignal(this.modalService.target$)
+  checkBoxElementSignal = toSignal(this.modalService.target$)
   // checkArray$: Observable<boolean[]> = this.modalService.checkArray$
   // refreshSubject = new Subject<void>()
   loadingState: boolean = false
@@ -73,11 +72,14 @@ export class UncompletedPageComponent {
       case SortBy.date:
         return this.sortDir() === SortDir.asc ? {
           uncompleted: this.uncompletedTasks()?.uncompleted?.sort((prim, sec) => {
-            return Date.parse(prim.due!.date) - Date.parse(sec.due!.date)
-          }), completed: this.uncompletedTasks()?.completed
+            if (prim.due && sec.due) return Date.parse(prim.due!.date) - Date.parse(sec.due!.date)
+            else return 1
+          }
+          ), completed: this.uncompletedTasks()?.completed
         } : {
           uncompleted: this.uncompletedTasks()?.uncompleted?.sort((prim, sec) => {
-            return Date.parse(sec.due!.date) - Date.parse(prim.due!.date)
+            if (prim.due && sec.due) return Date.parse(sec.due!.date) - Date.parse(prim.due!.date)
+            else return 1
           }), completed: this.uncompletedTasks()?.completed
         }
       default:
@@ -111,8 +113,8 @@ export class UncompletedPageComponent {
   }
 
   closeModal() {
-    const lastIndexOf = this.target()!.id.lastIndexOf('-')
-    const idx = +this.target()!.id.slice(lastIndexOf + 1)
+    const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
+    const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, false)
   }
   closeDeleteModal() {
@@ -138,8 +140,8 @@ export class UncompletedPageComponent {
       }
     );
     // this.refresh()
-    const lastIndexOf = this.target()!.id.lastIndexOf('-')
-    const idx = +this.target()!.id.slice(lastIndexOf + 1)
+    const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
+    const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, true)
   }
   refreshData() {
