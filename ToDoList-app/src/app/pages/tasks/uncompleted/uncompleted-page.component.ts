@@ -3,7 +3,7 @@ import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/c
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { map, Observable, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
-import { badgeClass, getLabelColor } from "../../../utilities/utility";
+import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
 import { RouterModule } from "@angular/router";
 import { ShowModalService } from "../../../services/showModal.service";
@@ -12,7 +12,6 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message } from "../../../types/message.interface";
 import { SortBy, SortDir } from "../../../types/sortBy";
 import { toSignal } from "@angular/core/rxjs-interop";
-
 @Component({
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
@@ -24,6 +23,7 @@ export class UncompletedPageComponent {
   // destroyRef = inject(DestroyRef)
   badgeClass = badgeClass
   getLabelColor = getLabelColor
+  getProjectColor = getProjectColor
   descriptionOpenHandler?: string;
   // labels?: Label[]
   // allLabels$?: Observable<Label[]>;
@@ -48,7 +48,7 @@ export class UncompletedPageComponent {
   showMessageService: ShowMessageService = inject(ShowMessageService)
 
   allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
-  allProjects = toSignal(this.api.getAllProjects())
+  allProjects = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)))
   checksBoolArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
   tasksModel: boolean[] | undefined = this.checksBoolArray()
   listSortBy = SortBy
@@ -203,7 +203,7 @@ export class UncompletedPageComponent {
     this.sortDir.set(sort)
   }
   projectNameById(id: string) {
-    return this.allProjects()?.projects.find(el => el.id === id)?.name
+    return this.allProjects()?.find(el => el.id === id)?.name
 
 
   }

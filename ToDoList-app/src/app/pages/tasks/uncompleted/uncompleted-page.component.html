@@ -58,6 +58,7 @@
   </div>
 
 </form>
+@if(allProjects(); as projects){
 @if(checksBoolArray(); as taskarr){
 @for(task of data.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3 ">
@@ -65,7 +66,8 @@
     <div class="input-group input-group-sm">
       <span class="input-group-text">
         Project:
-        <span class="badge rounded-pill text-bg-secondary ms-1 fs-6">
+        <span class="badge rounded-pill ms-1 fs-6"
+          [ngClass]="getProjectColor(projectNameById(task.project_id)!, projects)">
           {{projectNameById(task.project_id)}}</span>
       </span>
     </div>
@@ -155,7 +157,7 @@
   </li>
 </ul>
 }
-}
+}}
 }@else {
 <div class="d-flex justify-content-center">
   <div class="spinner-border text-primary" role="status">
