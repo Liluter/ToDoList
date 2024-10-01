@@ -23,7 +23,19 @@
       <h2 class="accordion-header">
         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
           data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
-          <span>Filter</span>
+          <span>Filter by :</span>
+          @if(filterByTitle().length > 0){
+          <span>&nbsp;title,</span>
+          }
+          @if(filterByPriority().length > 0){
+          <span>&nbsp;priority,</span>
+          }
+          @if(filterByLabel().length > 0){
+          <span>&nbsp;label,</span>
+          }
+          @if(filterByProject().length > 0){
+          <span>&nbsp;project,</span>
+          }
         </button>
       </h2>
       <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
