@@ -12,6 +12,10 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message } from "../../../types/message.interface";
 import { SortBy, SortDir } from "../../../types/sortBy";
 import { toSignal } from "@angular/core/rxjs-interop";
+import { FilterModel } from "../../../types/filter.interface";
+
+
+
 @Component({
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
@@ -67,6 +71,11 @@ export class UncompletedPageComponent {
   filterByPriority: WritableSignal<string> = signal('')
   filterByLabel: WritableSignal<string> = signal('')
   filterByProject: WritableSignal<string> = signal('')
+
+  filters: FilterModel[] = [{ filter: this.filterByTitle, name: 'title' },
+  { filter: this.filterByPriority, name: 'priority' },
+  { filter: this.filterByLabel, name: 'label' },
+  { filter: this.filterByProject, name: 'project' }]
 
   sortedTasks: Signal<Tasks | undefined> = computed(() => {
     let tasks: Tasks = {

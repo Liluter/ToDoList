@@ -20,50 +20,28 @@
 <form class="container mb-3 p-0">
   <div class="accordion " id="accordionFlushExample">
     <div class="accordion-item">
-      <h2 class="accordion-header">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+      <h2 class="accordion-header ">
+        <button class="accordion-button collapsed " type="button" data-bs-toggle="collapse"
           data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
           <span>Filter by :</span>
-          @if(filterByTitle().length > 0){
-          <span>&nbsp;title,</span>
-          }
-          @if(filterByPriority().length > 0){
-          <span>&nbsp;priority,</span>
-          }
-          @if(filterByLabel().length > 0){
-          <span>&nbsp;label,</span>
-          }
-          @if(filterByProject().length > 0){
-          <span>&nbsp;project,</span>
-          }
+          @for(element of filters; track $index){
+          @if(element.filter().length > 0){
+          <span>&nbsp;{{element.name}}</span>
+          @if($index !== $count){
+          <span>,</span>
+          }}}
         </button>
       </h2>
       <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
         <div class="accordion-body">
+          @for(element of filters; track $index){
           <div class="input-group mb-1">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <span class="input-group-text" id="basic-addon1">by Title</span>
-            <input type="text" class="form-control" name="titleFilter" id="titleFilter" placeholder="pass title"
-              [(ngModel)]="filterByTitle">
+            <span class="input-group-text">by {{element.name}}</span>
+            <input type="text" class="form-control" [name]="element.name+'Filter'" [id]="element.name+'Filter'"
+              [placeholder]="'pass '+element.name" [(ngModel)]="element.filter">
           </div>
-          <div class="input-group mb-1">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <span class="input-group-text">by Priority</span>
-            <input type="text" class="form-control" name="priorityFilter" id="priorityFilter"
-              placeholder="pass priority" [(ngModel)]="filterByPriority">
-          </div>
-          <div class="input-group mb-1">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <span class="input-group-text">by Label</span>
-            <input type="text" class="form-control" name="labelFilter" id="labelFilter" placeholder="pass label"
-              [(ngModel)]="filterByLabel">
-          </div>
-          <div class="input-group mb-1">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <span class="input-group-text">by Project</span>
-            <input type="text" class="form-control" name="projectFilter" id="projectFilter"
-              placeholder="pass project name" [(ngModel)]="filterByProject">
-          </div>
+          }
         </div>
       </div>
     </div>
