@@ -36,7 +36,13 @@
         <div class="accordion-body">
           @for(element of filters; track $index){
           <div class="input-group mb-1">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <span class="input-group-text">
+              @if(element.filter().length > 0){
+              <i class="bi bi-funnel-fill"></i>
+              } @else {
+              <i class="bi bi-funnel"></i>
+              }
+            </span>
             <span class="input-group-text">by {{element.name}}</span>
             <input type="text" class="form-control" [name]="element.name+'Filter'" [id]="element.name+'Filter'"
               [placeholder]="'pass '+element.name" [(ngModel)]="element.filter">
@@ -54,7 +60,7 @@
 <ul class="list-group mb-3 ">
   <li class="list-group-item px-2">
     <div class="input-group input-group-sm">
-      <span class="input-group-text">
+      <span class="input-group-text mb-1">
         Project:
         <span class="badge rounded-pill ms-1 fs-6"
           [ngClass]="getProjectColor(projectNameById(task.project_id)!, projects)">
