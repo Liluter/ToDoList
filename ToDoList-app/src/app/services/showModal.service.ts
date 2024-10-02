@@ -48,9 +48,6 @@ export class ShowModalService {
   }
   closeModal(idx?: number, check?: boolean, action?: 'complete' | 'uncomplete'): void {
     this.modalShow.next(false)
-    console.log(this.checkArray.getValue())
-    console.log(this.checkArray2.getValue())
-    console.log('action: ', action)
     if (action) {
       if (action === 'complete') {
         if ((idx !== undefined) && (check !== undefined)) {

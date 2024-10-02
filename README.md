@@ -86,3 +86,7 @@ Routing implication:
 - [ ] next steps.
 
 - [x] fix labels selection by multi checboxes.
+
+  Signals upgrade
+
+- [x] upgrade uncompleted task component with signals, and show.modal.service

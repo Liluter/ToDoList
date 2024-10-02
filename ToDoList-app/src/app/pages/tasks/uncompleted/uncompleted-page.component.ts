@@ -1,18 +1,23 @@
 import { Component, computed, inject, signal, Signal, WritableSignal } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
-import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, switchMap, tap } from "rxjs";
-import { Tasks } from "../../../interfaces/tasks.interface";
-import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
-import { Label } from "../../../interfaces/label.interface";
 import { RouterModule } from "@angular/router";
-import { ShowModalService } from "../../../services/showModal.service";
 import { FormsModule } from "@angular/forms";
-import { ShowMessageService } from "../../../services/showMessage.service";
-import { Message } from "../../../types/message.interface";
-import { SortBy, SortDir } from "../../../types/sortBy";
+
 import { toSignal } from "@angular/core/rxjs-interop";
+import { map, switchMap, tap } from "rxjs";
+
+import { ApiCallsService } from "../../../services/api-calls.service";
+import { ShowModalService } from "../../../services/showModal.service";
+import { ShowMessageService } from "../../../services/showMessage.service";
+
+import { Tasks } from "../../../interfaces/tasks.interface";
+import { Label } from "../../../interfaces/label.interface";
+
+import { Message } from "../../../types/message.interface";
 import { FilterModel } from "../../../types/filter.interface";
+import { SortBy, SortDir } from "../../../types/sortBy";
+
+import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
 
 
 
@@ -69,7 +74,7 @@ export class UncompletedPageComponent {
       completed: this.uncompletedTasks()?.completed
     }
     if (this.filterByTitle().length > 0) {
-      tasks.uncompleted = tasks.uncompleted?.filter(item => item.content.includes(this.filterByTitle().trim()))
+      tasks.uncompleted = tasks.uncompleted?.filter(item => item.content.toLowerCase().includes(this.filterByTitle().trim().toLowerCase()))
     }
     if (this.filterByPriority().length === 1) {
       tasks.uncompleted = tasks.uncompleted?.filter(item => item.priority === +this.filterByPriority())
@@ -81,7 +86,6 @@ export class UncompletedPageComponent {
       tasks.uncompleted = tasks.uncompleted?.filter(item => this.projectNameById(item.project_id)?.toLowerCase().includes(this.filterByProject().trim().toLowerCase()))
     }
 
-    console.log('tasks', tasks)
     switch (this.sortBy()) {
       case SortBy.priority:
         return this.sortDir() === SortDir.asc ? {
@@ -159,7 +163,6 @@ export class UncompletedPageComponent {
         this.showMessage({ type: 'error', text: message })
       }
     );
-    // this.refresh()
     const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
     const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, true)
