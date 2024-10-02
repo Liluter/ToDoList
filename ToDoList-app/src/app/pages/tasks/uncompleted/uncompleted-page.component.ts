@@ -23,40 +23,26 @@ import { FilterModel } from "../../../types/filter.interface";
   imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass]
 })
 export class UncompletedPageComponent {
-
-  // destroyRef = inject(DestroyRef)
   badgeClass = badgeClass
   getLabelColor = getLabelColor
   getProjectColor = getProjectColor
   descriptionOpenHandler?: string;
-  // labels?: Label[]
-  // allLabels$?: Observable<Label[]>;
-  // allProjects$?: Observable<[SyncProject]>;
-  // menuObservable$: any;
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
-  // uncompletedTasks$!: Observable<Tasks>
   refreshTriger$ = this.api.refreshTrigger$
-  // modalShow$: Observable<boolean> = this.modalService.modalShow$
   modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
-  // modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
-  // messageModal$: Observable<string> = this.modalService.message$
   messageModalSignal = this.modalService.messageSignal
-  // target$: Observable<HTMLInputElement | null> = this.modalService.target$
-  // openModalBool: boolean = false
   checkBoxElementSignal = toSignal(this.modalService.target$)
-  // checkArray$: Observable<boolean[]> = this.modalService.checkArray$
-  // refreshSubject = new Subject<void>()
   loadingState: boolean = false
   showMessageService: ShowMessageService = inject(ShowMessageService)
 
+  listSortBy = SortBy
+  listSortDir = SortDir
   allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
   allProjects = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)))
   checksBoolArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
   tasksModel: boolean[] | undefined = this.checksBoolArray()
-  listSortBy = SortBy
-  listSortDir = SortDir
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
   uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
@@ -213,7 +199,8 @@ export class UncompletedPageComponent {
   }
   projectNameById(id: string) {
     return this.allProjects()?.find(el => el.id === id)?.name
-
-
+  }
+  clearFilters() {
+    this.filters.forEach(f => f.filter.set(''))
   }
 }
