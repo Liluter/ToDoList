@@ -5,18 +5,15 @@
 <ul class="list-group mb-3">
   <li class="list-group-item px-2">
     <div class="input-group ">
-      <span class="input-group-text">
-        <input class="form-check-input" type="checkbox" value="" #complCheck id="{{'completed-task-'+$index}}"
-          checked="{{task.completed_at ? 'true' : ''}}" (change)="openModal(task.task_id, complCheck)"
-          [(ngModel)]="tasks[idx]">
+      <span class="input-group-text flex-fill">
+        <span class="input-group-text">
+          <input class="form-check-input fs-3" type="checkbox" value="" #complCheck id="{{'completed-task-'+$index}}"
+            checked="{{task.completed_at ? 'true' : ''}}" (change)="openModal(task.task_id, complCheck)"
+            [(ngModel)]="tasks[idx]">
+        </span>
+        <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
 
-      <input type="text" class="form-control" value={{task.content}} readonly>
-      <span class="input-group-text">ended:<span class="badge rounded-pill text-bg-secondary ms-3">{{task.completed_at
-          |
-          date:
-          'dd-MM-YY hh:mm'}}</span>
-      </span>
       @if(modalShow$ | async){
       <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
         <div class="card text-center">
@@ -53,10 +50,18 @@
         </div>
       </div>
       }
-      <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.task_id]">Detail</button>
-      <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
-      <button type="button" class="btn btn-outline-secondary" (click)="openDeleteModal(task.task_id)"><i
-          class="bi bi-trash"></i></button>
+      <span class="input-group-text">
+        <span class="input-group-text">ended:<span
+            class="badge rounded-pill text-bg-secondary ms-3 fs-6">{{task.completed_at
+            |
+            date:
+            'dd-MM-YY hh:mm'}}</span>
+        </span>
+        <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.task_id]">Detail</button>
+        <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="openDeleteModal(task.task_id)"><i
+            class="bi bi-trash"></i></button>
+      </span>
     </div>
   </li>
 </ul>

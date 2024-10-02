@@ -2,53 +2,89 @@
 @if (allLabels$ | async; as labels) {
 @if (uncompletedTasks$ | async; as data){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
-@for(task of data?.uncompleted;track $index){
+@for(task of data?.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3">
   <li class="list-group-item px-2 ">
     <div class="input-group input-group-sm">
-      <span class="input-group-text">
-        <input class="form-check-input mt-0" type="checkbox" value="" disabled
-          checked="{{task.completed_at ? 'true' : ''}}" id="flexCheckDefault">
+      <span class="input-group-text fs-3">
+        <input #complCheck class="form-check-input mt-0" type="checkbox" value=""
+          checked="{{task.completed_at ? 'true' : ''}}" name="{{'uncompleted-task-'+$index}}"
+          id="{{'uncompleted-task-'+$index}}" (change)="openModal(task.id, complCheck, 'complete')"
+          [(ngModel)]="tasks[idx]">
       </span>
       <span class="input-group-text">
-        <span class="badge rounded-pill mt-0" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
+        <span class="badge rounded-pill mt-0 fs-6" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
       </span>
+      @if(modalShow$ | async){
+      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+        <div class="card text-center">
+          <div class="card-header">
+            Need your action
+          </div>
+          <div class="card-body">
+            <h5 class="card-title ">Are you sure you want to complete this task?</h5>
+            <p class="card-text">When you confirm this task will be archived.</p>
+            <p class="card-text">{{messageModal$ | async}}</p>
+            <div>
+              @if((type$ | async) === 'complete'){
+              <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
+              <button class="btn btn-danger" (click)="closeModal('complete')">No</button>
+              }
+              @if((type$ | async) === 'uncomplete'){
+              <button class="btn btn-primary me-3" (click)="unCompleteTask()">Yes</button>
+              <button class="btn btn-danger" (click)="closeModal('uncomplete')">No</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      @if(modalDeleteShow$ | async){
+      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+        <div class="card text-center">
+          <div class="card-header">
+            Need your action
+          </div>
+          <div class="card-body">
+            <h5 class="card-title ">Are you sure you want to delete this task?</h5>
+            <p class="card-text">When you confirm this task will be deleted permanently.</p>
+            <p class="card-text">{{messageModal$ | async}}</p>
+            <div>
+              <button class="btn btn-primary me-3" (click)="deleteTask()">Yes</button>
+              <button class="btn btn-danger" (click)="closeDeleteModal()">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
       @if(task.due){
       <span class="input-group-text">
         Due:
-        <span class="badge rounded-pill text-bg-secondary ms-1">
+        <span class="badge rounded-pill text-bg-secondary ms-1 fs-6">
           {{task.due.date | date : 'EEEE, d MMMM'}}</span>
       </span>
       }
       <span class="input-group-text">
         <div class="d-flex justify-content-center">
           @for(label of task.labels; track $index){
-          <span class="badge rounded-pill text-black label mx-1 p-1 " [ngClass]="getLabelColor(label, labels )"
+          <span class="badge rounded-pill text-black label mx-1  fs-6" [ngClass]="getLabelColor(label, labels )"
             disabled><i class="bi bi-tag ">{{label}}</i></span>
           }
         </div>
       </span>
     </div>
-    <div class="input-group mt-1">
-      <span class="input-group-text">Title:</span>
-      <input type="text" class="form-control" value={{task.content}} readonly>
-      <button type="button" class="btn btn-outline-secondary" routerLink="/detail">Detail</button>
-      <button type="button" class="btn btn-outline-secondary" routerLink="/edit">Edit</button>
-      <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
-      <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-        data-bs-toggle="dropdown" aria-expanded="false">
-        <span class="visually-hidden">Toggle Dropdown</span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="#">Edit</a></li>
-        <li><a class="dropdown-item" href="#">Add Label</a></li>
-        <li><a class="dropdown-item" href="#">Change Date</a></li>
-        <li><a class="dropdown-item" href="#">Share</a></li>
-        <li>
-          <hr class="dropdown-divider">
-        </li>
-        <li><a class="dropdown-item" href="#">Delete</a></li>
-      </ul>
+    <div class="input-group mt-1   ">
+      <span class="input-group-text flex-fill ">
+        <span class="input-group-text">Title:</span>
+        <input type="text" class="form-control" value={{task.content}} readonly>
+      </span>
+      <span class="input-group-text ">
+        <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
+        <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="openDescription(task.id)">Note</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="openDeleteModal(task.id)"><i
+            class="bi bi-trash"></i></button>
+      </span>
     </div>
     @if(descriptionOpenHandler === task.id){
     <div class="input-group col-12 mt-1" id="{{task.id}}">
@@ -69,20 +105,29 @@
 }
 @if (completedTasks$ | async ;as data){
 <h4 class="text-body-secondary">Completed tasks:</h4>
-@for(task of data.completed; track $index){
+@for(task of data.completed; track $index; let idx = $index){
 <ul class="list-group mb-3">
   <li class="list-group-item px-2">
     <div class="input-group ">
-      <span class="input-group-text"><input class="form-check-input" type="checkbox" disabled value=""
-          checked="{{task.completed_at ? 'true' : ''}}"></span>
+      <span class="input-group-text flex-fill">
+        <span class="input-group-text fs-3">
+          <input #completeCheck class="form-check-input " type="checkbox" value="" id="{{'completed-task-'+$index}}"
+            name="{{'completed-task-'+$index}}" checked="{{task.completed_at ? 'true' : ''}}"
+            (change)="openModal(task.id, completeCheck, 'uncomplete')" [(ngModel)]="tasks2[idx]">
+        </span>
 
-      <input type="text" class="form-control" value={{task.content}} readonly>
-      <span class="input-group-text">ended:<span class="badge rounded-pill text-bg-secondary ms-3">{{task.completed_at
-          |
-          date:
-          'dd-MM-YY hh:mm'}}</span></span>
-      <button type="button" class="btn btn-outline-secondary" routerLink="/detail">Detail</button>
-      <button type="button" class="btn btn-outline-secondary" routerLink="/edit">Edit</button>
+        <input type="text" class="form-control" value={{task.content}} readonly>
+      </span>
+      <span class="input-group-text">
+        <span class="input-group-text">ended:<span
+            class="badge rounded-pill text-bg-secondary ms-3 fs-6">{{task.completed_at
+            |
+            date:
+            'dd-MM-YY hh:mm'}}</span>
+        </span>
+        <button type="button" class="btn btn-outline-secondary" routerLink="/detail">Detail</button>
+        <button type="button" class="btn btn-outline-secondary" routerLink="/edit">Edit</button>
+      </span>
     </div>
   </li>
 </ul>

@@ -2,7 +2,7 @@ import { Component, DestroyRef, inject, OnInit } from "@angular/core";
 import { TasksType } from "../../../types/modals";
 import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, tap } from "rxjs";
+import { map, Observable, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
@@ -40,17 +40,17 @@ export class CompletedPageComponent implements OnInit {
   tasks: boolean[] = []
   target$: Observable<HTMLInputElement | null> = this.modalService.target$
   target!: HTMLInputElement | null
-
+  refreshTriger$ = this.api.refreshTrigger$
   ngOnInit() {
     this.target$.subscribe(data => this.target = data)
     this.allLabels$ = this.api.getAllLabels()
-    this.completedTasks$ = this.api.getCompletedTasks().pipe(
+    this.completedTasks$ = this.refreshTriger$.pipe(switchMap(() => this.api.getCompletedTasks().pipe(
       tap(data => {
         this.tasks = data.items.map(item => true)
         this.modalService.initCheckArray(this.tasks)
       }),
       map(data => { return { uncompleted: null, completed: data.items } }),
-    )
+    )))
     this.checkArray$.subscribe(data => {
       this.tasks = data
     })
@@ -80,23 +80,29 @@ export class CompletedPageComponent implements OnInit {
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
-    this.api.uncompleteTask(taskId).subscribe()
-    this.refresh()
+    this.api.uncompleteTask(taskId).subscribe(
+      data => {
+        if (data) {
+          this.loadingState = false
+          this.showMessage({ type: 'success', text: `Task "${taskId}"  moved to uncompleted successfully` })
+          this.modalService.closeDeleteModal()
+          this.refreshData()
+        }
+      }, error => {
+        this.loadingState = false
+        let message = error.message
+        if (error.status === 403 || error.status === 400) {
+          message = error.error
+        }
+        this.showMessage({ type: 'error', text: message })
+      }
+    )
     const lastIndexOf = this.target!.id.lastIndexOf('-')
     const idx = +this.target!.id.slice(lastIndexOf + 1)
     this.modalService.closeModal(idx, false)
   }
-  refresh() {
-    setTimeout(() => {
-      this.completedTasks$ = this.api.getCompletedTasks().pipe(
-        tap(data => {
-          this.tasks = data.items.map(item => true)
-          this.modalService.initCheckArray(this.tasks)
-        }),
-        map(data => { return { uncompleted: null, completed: data.items } }),
-      )
-    }, 500)
-
+  refreshData() {
+    this.refreshTriger$.next(null)
   }
   deleteTask() {
     const taskId: string = this.modalService.message.getValue()
@@ -106,7 +112,7 @@ export class CompletedPageComponent implements OnInit {
           this.loadingState = false
           this.showMessage({ type: 'success', text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
-          this.refresh()
+          this.refreshData()
         }
       }, error => {
         this.loadingState = false
