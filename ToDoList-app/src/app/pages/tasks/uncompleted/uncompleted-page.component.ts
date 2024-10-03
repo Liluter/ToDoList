@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, Signal, WritableSignal } from "@angular/core";
+import { Component, computed, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
@@ -27,14 +27,14 @@ import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/u
   styleUrl: './uncompleted-page.component.scss',
   imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass]
 })
-export class UncompletedPageComponent {
+export class UncompletedPageComponent implements OnInit {
   badgeClass = badgeClass
   getLabelColor = getLabelColor
   getProjectColor = getProjectColor
   descriptionOpenHandler?: string;
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
-  refreshTriger$ = this.api.refreshTrigger$
+  refreshTriger$ = this.api.refreshTrigger
   modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
   messageModalSignal = this.modalService.messageSignal
@@ -52,7 +52,7 @@ export class UncompletedPageComponent {
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
   uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
-      this.tasksModel = data.items.map(item => false)
+      this.tasksModel = data.items.map(() => false)
       this.modalService.initCheckArray(this.tasksModel)
     }),
     map(data => { return { uncompleted: data.items, completed: null } }),
@@ -112,7 +112,9 @@ export class UncompletedPageComponent {
   })
 
 
-
+  ngOnInit(): void {
+    this.refreshData()
+  }
 
   openDescription(id: string | undefined) {
     if (this.descriptionOpenHandler === id) {
@@ -168,7 +170,7 @@ export class UncompletedPageComponent {
     this.modalService.closeModal(idx, true)
   }
   refreshData() {
-    this.refreshTriger$.next(null)
+    this.refreshTriger$.next();
   }
   deleteTask() {
     const taskId: string = this.modalService.message.getValue()

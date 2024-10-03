@@ -37,7 +37,7 @@ export class AllPageComponent implements OnInit {
   modalService = inject(ShowModalService)
   target$: Observable<HTMLInputElement | null> = this.modalService.target$
   target!: HTMLInputElement | null
-  refreshTriger$ = this.api.refreshTrigger$
+  refreshTriger$ = this.api.refreshTrigger
   uncompletedTasks2$!: Observable<Tasks>
   tasks: boolean[] = []
   tasks2: boolean[] = []
@@ -184,7 +184,7 @@ export class AllPageComponent implements OnInit {
     this.modalService.closeModal(idx, true)
   }
   refreshData() {
-    this.refreshTriger$.next(null)
+    this.refreshTriger$.next()
   }
   deleteTask() {
     const taskId: string = this.modalService.message.getValue()

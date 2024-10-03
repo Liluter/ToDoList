@@ -40,7 +40,7 @@ export class CompletedPageComponent implements OnInit {
   tasks: boolean[] = []
   target$: Observable<HTMLInputElement | null> = this.modalService.target$
   target!: HTMLInputElement | null
-  refreshTriger$ = this.api.refreshTrigger$
+  refreshTriger$ = this.api.refreshTrigger
   ngOnInit() {
     this.target$.subscribe(data => this.target = data)
     this.allLabels$ = this.api.getAllLabels()
@@ -102,7 +102,7 @@ export class CompletedPageComponent implements OnInit {
     this.modalService.closeModal(idx, false)
   }
   refreshData() {
-    this.refreshTriger$.next(null)
+    this.refreshTriger$.next()
   }
   deleteTask() {
     const taskId: string = this.modalService.message.getValue()
