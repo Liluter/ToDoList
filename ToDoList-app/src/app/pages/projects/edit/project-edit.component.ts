@@ -44,11 +44,13 @@ export class ProjectEditCompoennt {
     this.showMessageService.showMessage(message)
   }
   saveData(form: NgForm) {
+    console.log('model', this.model)
+    console.log('form', form.form)
     this.apiService.editProject(this.model).subscribe(data => {
       if (data) {
         this.loadingState = false
         this.showMessage({ type: 'success', text: `Project "${form.form.controls['projectname'].value}"  editted successfully` })
-        this.router.navigate([`project/details/${this.id}`])
+        this.router.navigate([`projects`])
       }
     }, error => {
       this.loadingState = false

@@ -5,8 +5,8 @@
     <li class="list-group-item px-2">
       <div class="input-group mb-3">
         <span class="input-group-text" id="projectname">Name</span>
-        <input type="text" class="form-control" name="projectname" [(ngModel)]="model.name" minlength="4"
-          maxlength="40">
+        <input type="text" class="form-control" name="projectname" id="projectname" [(ngModel)]="model.name"
+          minlength="4" maxlength="40">
       </div>
       <div class="input-group mb-3 d-flex justify-content-center" [class]="project.name">
         <span class="input-group-text">Color</span>
@@ -21,8 +21,8 @@
       <div class="input-group mb-3">
         <span class="input-group-text">Is favourite</span>
         <div class="input-group-text">
-          <input class="form-check-input mt-0" type="checkbox" value="" [checked]="project.is_favorite"
-            aria-label="Checkbox for following text input">
+          <input class="form-check-input mt-0" type="checkbox" value="" name="isfavorite" id="isfavorite"
+            [(ngModel)]="model.is_favorite" aria-label="Checkbox for following text input">
         </div>
       </div>
     </li>

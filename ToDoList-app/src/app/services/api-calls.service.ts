@@ -160,7 +160,7 @@ export class ApiCallsService {
           "id": data.id,
           "color": data.color,
           "name": data.name,
-          "is_favourite": data.is_favorite
+          "is_favorite": data.is_favorite
         }
       }
       ]
