@@ -61,6 +61,14 @@
 <ul class="list-group mb-3">
   <li class="list-group-item px-2 ">
     <div class="input-group input-group-sm">
+      <span class="input-group-text mb-1">
+        Project:
+        <span class="badge rounded-pill ms-1 fs-6"
+          [ngClass]="getProjectColor(projectNameById(task.project_id)!, projects)">
+          {{projectNameById(task.project_id)}}</span>
+      </span>
+    </div>
+    <div class="input-group input-group-sm">
       <span class="input-group-text fs-3">
         <input #complCheck class="form-check-input mt-0" type="checkbox" value=""
           checked="{{task.completed_at ? 'true' : ''}}" name="{{'uncompleted-task-'+$index}}"

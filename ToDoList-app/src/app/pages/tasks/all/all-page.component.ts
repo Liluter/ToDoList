@@ -3,7 +3,7 @@ import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/c
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { map, Observable, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
-import { badgeClass, getLabelColor } from "../../../utilities/utility";
+import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
 import { RouterModule } from "@angular/router";
@@ -24,6 +24,7 @@ export class AllPageComponent implements OnInit {
   taskStatus = TaskStatus
   badgeClass = badgeClass
   getLabelColor = getLabelColor
+  getProjectColor = getProjectColor
   descriptionOpenHandler?: string;
 
   api: ApiCallsService = inject(ApiCallsService)
@@ -32,7 +33,6 @@ export class AllPageComponent implements OnInit {
   refreshTriger$ = this.api.refreshTrigger
   modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
-
 
   messageModal$: Observable<string> = this.modalService.message$
   modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
