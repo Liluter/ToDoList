@@ -15,6 +15,7 @@ import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
 import { EditData } from '../interfaces/editData.interface';
 import * as uuid from 'uuid';
+import { Sync } from '../interfaces/sync.interface';
 @Injectable({
   providedIn: 'root'
 })
@@ -186,7 +187,7 @@ export class ApiCallsService {
       }]
     }
     if (id) {
-      return this.http.post(syncUrl, body, { headers: this.authorization })
+      return this.http.post<Sync>(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
     }
@@ -203,7 +204,7 @@ export class ApiCallsService {
       }]
     }
     if (id) {
-      return this.http.post(syncUrl, body, { headers: this.authorization })
+      return this.http.post<Sync>(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
     }

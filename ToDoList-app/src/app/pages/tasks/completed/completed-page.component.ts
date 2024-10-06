@@ -15,6 +15,7 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 import { SortBy, SortDir } from "../../../types/sortBy";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FilterModel } from "../../../types/filter.interface";
+import { stringify } from "uuid";
 @Component({
   templateUrl: './completed-page.component.html',
   standalone: true,
@@ -138,11 +139,15 @@ export class CompletedPageComponent implements OnInit {
     console.log('taks id : ', taskId)
     this.api.uncompleteTask(taskId).subscribe(
       data => {
-        if (data) {
+        const syncStatus = { ...data.sync_status }
+        const response = Object.values(syncStatus)[0]
+        if (response === 'ok') {
           this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  moved to uncompleted successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
+        } else if (typeof response !== 'string') {
+          this.showMessage({ type: MessageStatus.error, text: 'Error : ' + response.error_tag })
         }
       }, error => {
         this.loadingState = false

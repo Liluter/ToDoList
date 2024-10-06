@@ -152,13 +152,17 @@ export class UncompletedPageComponent implements OnInit {
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
-    this.api.completeTask(taskId).pipe(tap(() => this.refreshData())).subscribe(
+    this.api.completeTask(taskId).subscribe(
       data => {
-        if (data) {
+        const syncStatus = { ...data.sync_status }
+        const response = Object.values(syncStatus)[0]
+        if (response === "ok") {
           this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  completed successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
+        } else if (typeof response !== 'string') {
+          this.showMessage({ type: MessageStatus.error, text: 'Error : ' + response.error_tag })
         }
       }, error => {
         this.loadingState = false
