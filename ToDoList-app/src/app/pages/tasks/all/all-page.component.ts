@@ -10,9 +10,9 @@ import { badgeClass, getLabelColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
 import { RouterModule } from "@angular/router";
-import { ShowModalService } from "../../../services/showModal.service";
+import { TaskStatus, ShowModalService } from "../../../services/showModal.service";
 import { ShowMessageService } from "../../../services/showMessage.service";
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 import { FormsModule } from "@angular/forms";
 @Component({
   templateUrl: './all-page.component.html',
@@ -21,6 +21,7 @@ import { FormsModule } from "@angular/forms";
   imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule]
 })
 export class AllPageComponent implements OnInit {
+  taskStatus = TaskStatus
   destroyRef = inject(DestroyRef)
   showModal: TasksType = { tasks: 'none' }
   uncompletedTasks$!: Observable<Tasks>;
@@ -35,7 +36,7 @@ export class AllPageComponent implements OnInit {
   menuObservable$: any;
   api: ApiCallsService = inject(ApiCallsService)
   modalService = inject(ShowModalService)
-  target$: Observable<HTMLInputElement | null> = this.modalService.target$
+  checkBoxElement$: Observable<HTMLInputElement | null> = this.modalService.checkBoxELement$
   target!: HTMLInputElement | null
   refreshTriger$ = this.api.refreshTrigger
   uncompletedTasks2$!: Observable<Tasks>
@@ -47,9 +48,9 @@ export class AllPageComponent implements OnInit {
   modalShow$: Observable<boolean> = this.modalService.modalShow$
   messageModal$: Observable<string> = this.modalService.message$
   modalDeleteShow$: Observable<boolean> = this.modalService.modalDeleteShow$
-  type$ = this.modalService.type$
+  taskStatusHandler$ = this.modalService.taskStatusHandler$
   ngOnInit(): void {
-    this.target$.subscribe(data => this.target = data)
+    this.checkBoxElement$.subscribe(data => this.target = data)
     this.allLabels$ = this.api.getAllLabels()
     // this.uncompletedTasks$ = this.api.getUncompletedTasks().pipe(
     //   map(data => { return { uncompleted: data.items, completed: null } }),
@@ -88,29 +89,29 @@ export class AllPageComponent implements OnInit {
     }
     this.descriptionOpenHandler = id;
   }
-  openModal(id: string, input: HTMLInputElement, action?: 'complete' | 'uncomplete') {
+  openModal(id: string, input: HTMLInputElement, status?: TaskStatus) {
     console.log(input.id)
-    if (action === 'complete') {
+    if (status === TaskStatus.complete) {
       const lastIndexOf = input.id.lastIndexOf('-')
       const idx = +input.id.slice(lastIndexOf + 1)
       console.log(idx, this.tasks)
       const newTasks = this.tasks.map((task, index) => index === idx ? true : false)
       if (input.checked) {
         this.modalService.nextCheck(newTasks)
-        this.modalService.showModal(id, input, action)
+        this.modalService.showModal(id, input, status)
       } else {
-        this.modalService.closeModal(idx, false, action)
+        this.modalService.closeModal(idx, false, status)
       }
-    } else if (action === 'uncomplete') {
+    } else if (status === TaskStatus.uncomplete) {
       const lastIndexOf = input.id.lastIndexOf('-')
       const idx = +input.id.slice(lastIndexOf + 1)
       console.log(idx, this.tasks2)
       const newTasks = this.tasks2.map((task, index) => index === idx ? false : true)
       if (!input.checked) {
         this.modalService.nextCheck2(newTasks)
-        this.modalService.showModal(id, input, action)
+        this.modalService.showModal(id, input, status)
       } else {
-        this.modalService.closeModal(idx, true, action)
+        this.modalService.closeModal(idx, true, status)
       }
     }
 
@@ -118,18 +119,16 @@ export class AllPageComponent implements OnInit {
   openDeleteModal(id: string) {
     this.modalService.showDeleteModal(id)
   }
-  closeModal(action: 'complete' | 'uncomplete') {
-    if (action === 'complete') {
-      console.log('complete')
+  closeModal(status: TaskStatus) {
+    if (status === TaskStatus.complete) {
       const lastIndexOf = this.target!.id.lastIndexOf('-')
       const idx = +this.target!.id.slice(lastIndexOf + 1)
-      this.modalService.closeModal(idx, false, action)
+      this.modalService.closeModal(idx, false, status)
     }
-    if (action === 'uncomplete') {
-      console.log('uncomplete')
+    if (status === TaskStatus.uncomplete) {
       const lastIndexOf = this.target!.id.lastIndexOf('-')
       const idx = +this.target!.id.slice(lastIndexOf + 1)
-      this.modalService.closeModal(idx, true, action)
+      this.modalService.closeModal(idx, true, status)
     }
   }
   closeDeleteModal() {
@@ -142,7 +141,7 @@ export class AllPageComponent implements OnInit {
       data => {
         if (data) {
           this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  completed successfully` })
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  completed successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
@@ -152,7 +151,7 @@ export class AllPageComponent implements OnInit {
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     );
     // this.refresh()
@@ -166,7 +165,7 @@ export class AllPageComponent implements OnInit {
       data => {
         if (data) {
           this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  uncomplete successfully` })
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  uncomplete successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
@@ -176,7 +175,7 @@ export class AllPageComponent implements OnInit {
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     )
     const lastIndexOf = this.target!.id.lastIndexOf('-')
@@ -192,7 +191,7 @@ export class AllPageComponent implements OnInit {
       data => {
         if (data) {
           this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  deleted successfully` })
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
@@ -202,7 +201,7 @@ export class AllPageComponent implements OnInit {
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     )
   }

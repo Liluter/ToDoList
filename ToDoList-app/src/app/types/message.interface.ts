@@ -1,4 +1,9 @@
+export enum MessageStatus {
+  success = 'success',
+  error = 'error'
+}
+
 export interface Message {
-  type: 'success' | 'error';
+  type: MessageStatus;
   text: string
 }

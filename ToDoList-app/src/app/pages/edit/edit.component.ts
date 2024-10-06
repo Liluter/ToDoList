@@ -9,7 +9,7 @@ import { Label } from "../../interfaces/label.interface";
 import { SyncProject } from "../../interfaces/syncProject.interface";
 import { FormsModule, NgForm } from "@angular/forms";
 import { EditData } from "../../interfaces/editData.interface";
-import { Message } from "../../types/message.interface";
+import { Message, MessageStatus } from "../../types/message.interface";
 import { ShowMessageService } from "../../services/showMessage.service";
 
 @Component({
@@ -123,7 +123,7 @@ export class EditComponent {
     this.apiService.editTask(taskEdited).subscribe(data => {
       if (data) {
         this.loadingState = false
-        this.showMessage({ type: 'success', text: `Task "${form.form.controls['title'].value}"  editted successfully` })
+        this.showMessage({ type: MessageStatus.success, text: `Task "${form.form.controls['title'].value}"  editted successfully` })
         this.router.navigate([`/detail/${this.id}`])
       }
     }, error => {
@@ -132,7 +132,7 @@ export class EditComponent {
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage({ type: 'error', text: message })
+      this.showMessage({ type: MessageStatus.error, text: message })
     })
 
   }
@@ -160,7 +160,7 @@ export class EditComponent {
     this.apiService.deleteTask(id).subscribe(data => {
       if (data) {
         this.loadingState = false
-        this.showMessage({ type: 'success', text: `Task "${id}"  deleted successfully` })
+        this.showMessage({ type: MessageStatus.success, text: `Task "${id}"  deleted successfully` })
         this.router.navigate([`/welcome`])
       }
     }, error => {
@@ -169,7 +169,7 @@ export class EditComponent {
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage({ type: 'error', text: message })
+      this.showMessage({ type: MessageStatus.error, text: message })
     })
   }
 }

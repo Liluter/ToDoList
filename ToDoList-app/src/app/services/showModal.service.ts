@@ -2,32 +2,40 @@ import { Injectable } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { BehaviorSubject } from "rxjs";
 
-
+export enum TaskStatus {
+  complete = 'complete',
+  uncomplete = 'uncomplete'
+}
 
 @Injectable({ providedIn: 'root' })
 export class ShowModalService {
+
   private modalShow = new BehaviorSubject<boolean>(false)
   private modalDeleteShow = new BehaviorSubject<boolean>(false)
   public message = new BehaviorSubject<string>('')
-  private type = new BehaviorSubject<string>('')
-  private target = new BehaviorSubject<HTMLInputElement | null>(null)
+  private taskStatusHandler = new BehaviorSubject<string>('')
+  private checkBoxElement = new BehaviorSubject<HTMLInputElement | null>(null)
   checkArray = new BehaviorSubject<boolean[]>([])
   checkArray2 = new BehaviorSubject<boolean[]>([])
+
   modalShow$ = this.modalShow.asObservable();
-  modalShowSignal = toSignal(this.modalShow)
   modalDeleteShow$ = this.modalDeleteShow.asObservable();
-  modalDeleteShowSignal = toSignal(this.modalDeleteShow)
+  checkBoxELement$ = this.checkBoxElement.asObservable();
   message$ = this.message.asObservable();
+
+  modalShowSignal = toSignal(this.modalShow);
+  modalDeleteShowSignal = toSignal(this.modalDeleteShow)
   messageSignal = toSignal(this.message);
-  target$ = this.target.asObservable();
-  type$ = this.type.asObservable()
+  taskStatusHandler$ = this.taskStatusHandler.asObservable()
+
   checkArray$ = this.checkArray.asObservable();
-  showModal(message: string, input: HTMLInputElement, action?: 'complete' | 'uncomplete'): void {
-    this.target.next(input)
-    this.message.next(message)
+
+  showModal(id: string, input: HTMLInputElement | null, status?: TaskStatus): void {
+    this.checkBoxElement.next(input)
+    this.message.next(id)
     this.modalShow.next(true)
-    if (action) {
-      this.type.next(action)
+    if (status) {
+      this.taskStatusHandler.next(status)
     }
   }
   showDeleteModal(message: string) {
@@ -46,10 +54,10 @@ export class ShowModalService {
   nextCheck2(array: boolean[]) {
     this.checkArray2.next(array)
   }
-  closeModal(idx?: number, check?: boolean, action?: 'complete' | 'uncomplete'): void {
+  closeModal(idx?: number, check?: boolean, status?: TaskStatus): void {
     this.modalShow.next(false)
-    if (action) {
-      if (action === 'complete') {
+    if (status) {
+      if (status === TaskStatus.complete) {
         if ((idx !== undefined) && (check !== undefined)) {
 
           if (idx >= 0) {
@@ -59,7 +67,7 @@ export class ShowModalService {
           }
         }
       }
-      if (action === 'uncomplete') {
+      if (status === TaskStatus.uncomplete) {
         if ((idx !== undefined) && (check !== undefined)) {
 
           if (idx >= 0) {

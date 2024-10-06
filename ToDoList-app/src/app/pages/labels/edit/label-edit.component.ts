@@ -6,7 +6,7 @@ import { AsyncPipe, NgClass } from "@angular/common";
 import { Router, RouterModule } from "@angular/router";
 import { FormsModule, NgForm } from "@angular/forms";
 import { colors } from "../../../varibles/env";
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 import { ShowMessageService } from "../../../services/showMessage.service";
 
 
@@ -47,7 +47,7 @@ export class LabelEditComponent implements OnInit {
     this.apiService.editLabel(this.model).subscribe(data => {
       if (data) {
         this.loadingState = false
-        this.showMessage({ type: 'success', text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })
+        this.showMessage({ type: MessageStatus.success, text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })
         this.router.navigate([`label/details/${this.id}`])
       }
     }, error => {
@@ -56,7 +56,7 @@ export class LabelEditComponent implements OnInit {
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage({ type: 'error', text: message })
+      this.showMessage({ type: MessageStatus.error, text: message })
     })
   }
 }

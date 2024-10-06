@@ -13,11 +13,12 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { Label } from "../../../interfaces/label.interface";
 
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 import { FilterModel } from "../../../types/filter.interface";
 import { SortBy, SortDir } from "../../../types/sortBy";
 
 import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
+import { SyncProject } from "../../../interfaces/syncProject.interface";
 
 
 
@@ -34,18 +35,18 @@ export class UncompletedPageComponent implements OnInit {
   descriptionOpenHandler?: string;
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
+  showMessageService: ShowMessageService = inject(ShowMessageService)
   refreshTriger$ = this.api.refreshTrigger
   modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
   messageModalSignal = this.modalService.messageSignal
-  checkBoxElementSignal = toSignal(this.modalService.target$)
+  checkBoxElementSignal: Signal<HTMLInputElement | null> = toSignal(this.modalService.checkBoxELement$, { initialValue: null })
   loadingState: boolean = false
-  showMessageService: ShowMessageService = inject(ShowMessageService)
 
   listSortBy = SortBy
   listSortDir = SortDir
-  allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
-  allProjects = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)))
+  allLabels: Signal<Label[] | null> = toSignal(this.api.getAllLabels(), { initialValue: null })
+  allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   checksBoolArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
   tasksModel: boolean[] | undefined = this.checksBoolArray()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
@@ -96,13 +97,13 @@ export class UncompletedPageComponent implements OnInit {
       case SortBy.date:
         return this.sortDir() === SortDir.asc ? {
           uncompleted: tasks.uncompleted?.sort((prim, sec) => {
-            if (prim.due && sec.due) return Date.parse(prim.due!.date) - Date.parse(sec.due!.date)
+            if (prim.due && sec.due) return Date.parse(prim.due.date) - Date.parse(sec.due.date)
             else return 1
           }
           ), completed: tasks?.completed
         } : {
           uncompleted: tasks.uncompleted?.sort((prim, sec) => {
-            if (prim.due && sec.due) return Date.parse(sec.due!.date) - Date.parse(prim.due!.date)
+            if (prim.due && sec.due) return Date.parse(sec.due.date) - Date.parse(prim.due.date)
             else return 1
           }), completed: tasks?.completed
         }
@@ -123,13 +124,13 @@ export class UncompletedPageComponent implements OnInit {
     }
     this.descriptionOpenHandler = id;
   }
-  openModal(id: string, input: HTMLInputElement) {
+  openModal(taskId: string, input: HTMLInputElement) {
     const lastIndexOf = input.id.lastIndexOf('-')
     const idx = +input.id.slice(lastIndexOf + 1)
     const newTasks = this.tasksModel?.map((task, index) => index === idx ? true : false)
     if (input.checked && newTasks) {
       this.modalService.nextCheck(newTasks)
-      this.modalService.showModal(id, input)
+      this.modalService.showModal(taskId, input)
     } else {
       this.modalService.closeModal(idx, false)
     }
@@ -139,9 +140,12 @@ export class UncompletedPageComponent implements OnInit {
   }
 
   closeModal() {
-    const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
-    const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
-    this.modalService.closeModal(idx, false)
+    const checkBoxElement = this.checkBoxElementSignal()
+    if (checkBoxElement !== null) {
+      const lastIndexOf = checkBoxElement.id.lastIndexOf('-')
+      const idx = +checkBoxElement.id.slice(lastIndexOf + 1)
+      this.modalService.closeModal(idx, false)
+    }
   }
   closeDeleteModal() {
     this.modalService.closeDeleteModal()
@@ -152,7 +156,7 @@ export class UncompletedPageComponent implements OnInit {
       data => {
         if (data) {
           this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  completed successfully` })
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  completed successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
@@ -162,12 +166,10 @@ export class UncompletedPageComponent implements OnInit {
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     );
-    const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
-    const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
-    this.modalService.closeModal(idx, true)
+    this.closeModal()
   }
   refreshData() {
     this.refreshTriger$.next();
@@ -178,7 +180,7 @@ export class UncompletedPageComponent implements OnInit {
       data => {
         if (data) {
           this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  deleted successfully` })
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
@@ -188,7 +190,7 @@ export class UncompletedPageComponent implements OnInit {
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     )
   }

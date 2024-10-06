@@ -7,7 +7,7 @@ import { AsyncPipe, NgClass } from "@angular/common";
 import { FormsModule, NgForm } from "@angular/forms";
 import { colors } from "../../../varibles/env";
 import { Router, RouterModule } from "@angular/router";
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 import { ShowMessageService } from "../../../services/showMessage.service";
 
 @Component({
@@ -49,7 +49,7 @@ export class ProjectEditCompoennt {
     this.apiService.editProject(this.model).subscribe(data => {
       if (data) {
         this.loadingState = false
-        this.showMessage({ type: 'success', text: `Project "${form.form.controls['projectname'].value}"  editted successfully` })
+        this.showMessage({ type: MessageStatus.success, text: `Project "${form.form.controls['projectname'].value}"  editted successfully` })
         this.router.navigate([`projects`])
       }
     }, error => {
@@ -58,7 +58,7 @@ export class ProjectEditCompoennt {
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage({ type: 'error', text: message })
+      this.showMessage({ type: MessageStatus.error, text: message })
     })
   }
 }

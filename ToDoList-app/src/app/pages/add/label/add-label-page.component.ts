@@ -5,7 +5,7 @@ import { SimpleLabel } from "../../../interfaces/simpleLabel.interface";
 import { colors, label } from "../../../varibles/env";
 import { CommonModule } from "@angular/common";
 import { ShowMessageService } from "../../../services/showMessage.service";
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 
 @Component({
   templateUrl: './add-label-page.component.html',
@@ -32,7 +32,7 @@ export class AddLabelPageComponent {
 
       if (data) {
         this.loadingState = false
-        this.showMessage({ type: 'success', text: `Label "${form.form.controls['name'].value}"  added successfully` })
+        this.showMessage({ type: MessageStatus.success, text: `Label "${form.form.controls['name'].value}"  added successfully` })
         this.resetLabel(form)
       }
     }, error => {
@@ -41,7 +41,7 @@ export class AddLabelPageComponent {
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage({ type: 'error', text: message })
+      this.showMessage({ type: MessageStatus.error, text: message })
     })
   }
   showMessage(message: Message) {

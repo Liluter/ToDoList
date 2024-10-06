@@ -9,7 +9,7 @@
       <span class="input-group-text fs-3">
         <input #complCheck class="form-check-input mt-0" type="checkbox" value=""
           checked="{{task.completed_at ? 'true' : ''}}" name="{{'uncompleted-task-'+$index}}"
-          id="{{'uncompleted-task-'+$index}}" (change)="openModal(task.id, complCheck, 'complete')"
+          id="{{'uncompleted-task-'+$index}}" (change)="openModal(task.id, complCheck, taskStatus.complete)"
           [(ngModel)]="tasks[idx]">
       </span>
       <span class="input-group-text">
@@ -26,13 +26,13 @@
             <p class="card-text">When you confirm this task will be archived.</p>
             <p class="card-text">{{messageModal$ | async}}</p>
             <div>
-              @if((type$ | async) === 'complete'){
+              @if((taskStatusHandler$ | async) === taskStatus.complete){
               <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
-              <button class="btn btn-danger" (click)="closeModal('complete')">No</button>
+              <button class="btn btn-danger" (click)="closeModal(taskStatus.complete)">No</button>
               }
-              @if((type$ | async) === 'uncomplete'){
+              @if((taskStatusHandler$ | async) === taskStatus.uncomplete){
               <button class="btn btn-primary me-3" (click)="unCompleteTask()">Yes</button>
-              <button class="btn btn-danger" (click)="closeModal('uncomplete')">No</button>
+              <button class="btn btn-danger" (click)="closeModal(taskStatus.uncomplete)">No</button>
               }
             </div>
           </div>
@@ -113,7 +113,7 @@
         <span class="input-group-text fs-3">
           <input #completeCheck class="form-check-input " type="checkbox" value="" id="{{'completed-task-'+$index}}"
             name="{{'completed-task-'+$index}}" checked="{{task.completed_at ? 'true' : ''}}"
-            (change)="openModal(task.id, completeCheck, 'uncomplete')" [(ngModel)]="tasks2[idx]">
+            (change)="openModal(task.id, completeCheck, taskStatus.uncomplete)" [(ngModel)]="tasks2[idx]">
         </span>
 
         <input type="text" class="form-control" value={{task.content}} readonly>

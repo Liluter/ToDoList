@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Label } from '../interfaces/label.interface';
 import { environment } from '../varibles/env';
-import { BehaviorSubject, EMPTY, Observable, Subject } from 'rxjs';
+import { EMPTY, Observable, Subject } from 'rxjs';
 import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl, itemUrl, getProjectUrl } from '../varibles/urls';
 import { SyncItem } from '../interfaces/syncItem.interface';
 import { AllCompleted } from '../interfaces/all-completed.interface';
@@ -14,7 +14,7 @@ import { GetItem } from '../interfaces/getItem.interface';
 import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
 import { EditData } from '../interfaces/editData.interface';
-import { v4 as uuidv4 } from 'uuid';
+import * as uuid from 'uuid';
 @Injectable({
   providedIn: 'root'
 })
@@ -71,6 +71,7 @@ export class ApiCallsService {
       headers: this.authorization
     })
   }
+
   postProject(data: Project) {
     return this.http.post(projectsUrl, data, {
       headers: this.authorization
@@ -106,7 +107,7 @@ export class ApiCallsService {
     }
   }
   editTask(data: EditData) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     console.log(myuuid)
     const body = {
       commands: [
@@ -131,7 +132,7 @@ export class ApiCallsService {
     }
   }
   editLabel(data: Label) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "label_update",
@@ -153,7 +154,7 @@ export class ApiCallsService {
     }
   }
   editProject(data: SyncProject) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "project_update",
@@ -174,7 +175,7 @@ export class ApiCallsService {
     }
   }
   completeTask(id: string) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "item_complete",
@@ -191,7 +192,7 @@ export class ApiCallsService {
     }
   }
   uncompleteTask(id: string) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "item_uncomplete",
@@ -208,7 +209,7 @@ export class ApiCallsService {
     }
   }
   deleteTask(id: string) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "item_delete",
