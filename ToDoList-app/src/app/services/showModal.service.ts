@@ -27,8 +27,9 @@ export class ShowModalService {
   modalDeleteShowSignal = toSignal(this.modalDeleteShow)
   messageSignal = toSignal(this.message);
   taskStatusHandler$ = this.taskStatusHandler.asObservable()
-
+  taskStatusHandlerSignal = toSignal(this.taskStatusHandler)
   checkArray$ = this.checkArray.asObservable();
+  checkArray2$ = this.checkArray2.asObservable();
 
   showModal(id: string, input: HTMLInputElement | null, status?: TaskStatus): void {
     this.checkBoxElement.next(input)

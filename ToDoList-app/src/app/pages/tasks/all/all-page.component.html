@@ -1,6 +1,61 @@
 <h1>This is All Tasks space</h1>
-@if (allLabels$ | async; as labels) {
-@if (uncompletedTasks$ | async; as data){
+@if (allLabels(); as labels) {
+@if (sortedTasks(); as data){
+<h4 class="text-body-secondary">Completed tasks:</h4>
+<div class="container mb-3 p-0">
+  <span>Sort by: </span>
+
+  <button class="btn me-1" [ngClass]="{
+              'btn-dark': true
+            }" (click)="sortOption(listSortBy.date)">{{listSortBy.date}}</button>
+  <span class="ms-1">Sort direction: </span>
+  @for (by of listSortDir | keyvalue; track $index) {
+  <button class="btn me-1" [ngClass]="{
+              'btn-outline-dark' : by.value !== sortDir(),
+              'btn-dark': by.value === sortDir()
+            }" (click)="sortDirection(by.value)">{{by.value}}</button>
+  }
+</div>
+<form class="container mb-3 p-0">
+  <div class="accordion " id="accordionFlushExample">
+    <div class="accordion-item">
+      <h2 class="accordion-header ">
+        <button class="accordion-button collapsed " type="button" data-bs-toggle="collapse"
+          data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+          <span>Filter by :</span>
+          @for(element of filters; track $index){
+          @if(element.filter().length > 0){
+          <span>&nbsp;{{element.name}}</span>
+          @if($index !== $count){
+          <span>,</span>
+          }}}
+        </button>
+      </h2>
+      <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+        <div class="accordion-body">
+          @for(element of filters; track $index){
+          <div class="input-group mb-1">
+            <span class="input-group-text">
+              @if(element.filter().length > 0){
+              <i class="bi bi-funnel-fill"></i>
+              } @else {
+              <i class="bi bi-funnel"></i>
+              }
+            </span>
+            <span class="input-group-text">by {{element.name}}</span>
+            <input type="text" class="form-control" [name]="element.name+'Filter'" [id]="element.name+'Filter'"
+              [placeholder]="'pass '+element.name" [(ngModel)]="element.filter">
+          </div>
+          }
+          <button class="btn btn-secondary" (click)="clearFilters()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</form>
+@if (allProjects(); as projects){
+@if (checksBoolArray(); as taskarr){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
 @for(task of data?.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3">
@@ -10,13 +65,13 @@
         <input #complCheck class="form-check-input mt-0" type="checkbox" value=""
           checked="{{task.completed_at ? 'true' : ''}}" name="{{'uncompleted-task-'+$index}}"
           id="{{'uncompleted-task-'+$index}}" (change)="openModal(task.id, complCheck, taskStatus.complete)"
-          [(ngModel)]="tasks[idx]">
+          [(ngModel)]="taskarr[idx]">
       </span>
       <span class="input-group-text">
         <span class="badge rounded-pill mt-0 fs-6" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
       </span>
-      @if(modalShow$ | async){
-      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+      @if(modalShowSignal()){
+      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3" id="modal">
         <div class="card text-center">
           <div class="card-header">
             Need your action
@@ -26,11 +81,11 @@
             <p class="card-text">When you confirm this task will be archived.</p>
             <p class="card-text">{{messageModal$ | async}}</p>
             <div>
-              @if((taskStatusHandler$ | async) === taskStatus.complete){
+              @if(taskStatusHandlerSignal() === taskStatus.complete){
               <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
               <button class="btn btn-danger" (click)="closeModal(taskStatus.complete)">No</button>
               }
-              @if((taskStatusHandler$ | async) === taskStatus.uncomplete){
+              @if(taskStatusHandlerSignal() === taskStatus.uncomplete){
               <button class="btn btn-primary me-3" (click)="unCompleteTask()">Yes</button>
               <button class="btn btn-danger" (click)="closeModal(taskStatus.uncomplete)">No</button>
               }
@@ -39,7 +94,7 @@
         </div>
       </div>
       }
-      @if(modalDeleteShow$ | async){
+      @if(modalDeleteShowSignal()){
       <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
         <div class="card text-center">
           <div class="card-header">
@@ -103,7 +158,7 @@
   </div>
 </div>
 }
-@if (completedTasks$ | async ;as data){
+@if(checksBoolArray2(); as taskarr2){
 <h4 class="text-body-secondary">Completed tasks:</h4>
 @for(task of data.completed; track $index; let idx = $index){
 <ul class="list-group mb-3">
@@ -111,9 +166,9 @@
     <div class="input-group ">
       <span class="input-group-text flex-fill">
         <span class="input-group-text fs-3">
-          <input #completeCheck class="form-check-input " type="checkbox" value="" id="{{'completed-task-'+$index}}"
+          <input #completeCheck2 class="form-check-input " type="checkbox" value="" id="{{'completed-task-'+$index}}"
             name="{{'completed-task-'+$index}}" checked="{{task.completed_at ? 'true' : ''}}"
-            (change)="openModal(task.id, completeCheck, taskStatus.uncomplete)" [(ngModel)]="tasks2[idx]">
+            (change)="openModal(task.task_id, completeCheck2, taskStatus.uncomplete)" [(ngModel)]="taskarr2[idx]">
         </span>
 
         <input type="text" class="form-control" value={{task.content}} readonly>
@@ -132,13 +187,13 @@
   </li>
 </ul>
 }
-}@else {
+}}@else {
 <div class="d-flex justify-content-center">
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Loading...</span>
   </div>
 </div>
-}
+}}
 }@else {
 <div class="d-flex justify-content-center">
   <div class="spinner-border text-primary" role="status">
