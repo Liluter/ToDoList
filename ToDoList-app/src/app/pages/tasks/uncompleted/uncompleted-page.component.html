@@ -56,7 +56,7 @@
 
 </form>
 @if(allProjects(); as projects){
-@if(checksBoolArray(); as taskarr){
+@if(checksBoolArrayUncompleted(); as taskarr){
 @for(task of data.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3 ">
   <li class="list-group-item px-2">

@@ -54,7 +54,7 @@
 
 </form>
 @if (allProjects(); as projects){
-@if (checksBoolArray(); as taskarr){
+@if (checksBoolArrayCompleted(); as taskarr){
 @for(task of data.completed; track $index; let idx = $index){
 <ul class="list-group mb-3">
   <li class="list-group-item px-2">
@@ -68,11 +68,9 @@
     </div>
     <div class="input-group ">
       <span class="input-group-text flex-fill">
-        <!-- <span class="input-group-text"> -->
         <input class="form-check-input fs-3 me-2 mt-0" type="checkbox" value="" #complCheck type="checkbox"
           title="Add to completed" value="" name="{{'completed-task-'+$index}}" id="{{'completed-task-'+$index}}"
           (change)="openModal(task.task_id, complCheck)" [(ngModel)]="taskarr[idx]">
-        <!-- </span> -->
         <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
 

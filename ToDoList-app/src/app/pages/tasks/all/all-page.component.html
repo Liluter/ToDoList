@@ -55,7 +55,7 @@
 
 </form>
 @if (allProjects(); as projects){
-@if (checksBoolArray(); as taskarr){
+@if (checksBoolArrayUncompleted(); as taskarr){
 <h4 class="text-body-secondary">Uncompleted tasks:</h4>
 @for(task of data?.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3">
@@ -158,23 +158,21 @@
   </div>
 </div>
 }
-@if(checksBoolArray2(); as taskarr2){
+@if(checksBoolArrayCompleted(); as taskarr2){
 <h4 class="text-body-secondary">Completed tasks:</h4>
 @for(task of data.completed; track $index; let idx = $index){
 <ul class="list-group mb-3">
   <li class="list-group-item px-2">
     <div class="input-group ">
       <span class="input-group-text flex-fill">
-        <span class="input-group-text fs-3">
-          <input #completeCheck2 class="form-check-input " type="checkbox" value="" id="{{'completed-task-'+$index}}"
-            name="{{'completed-task-'+$index}}" checked="{{task.completed_at ? 'true' : ''}}"
-            (change)="openModal(task.task_id, completeCheck2, taskStatus.uncomplete)" [(ngModel)]="taskarr2[idx]">
-        </span>
-
+        <input #completeCheck2 class="form-check-input fs-3 me-2 mt-0" type="checkbox" value=""
+          id="{{'completed-task-'+$index}}" name="{{'completed-task-'+$index}}"
+          checked="{{task.completed_at ? 'true' : ''}}"
+          (change)="openModal(task.task_id, completeCheck2, taskStatus.uncomplete)" [(ngModel)]="taskarr2[idx]">
         <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
       <span class="input-group-text">
-        <span class="input-group-text">ended:<span
+        <span class="input-group-text">Completed as of:<span
             class="badge rounded-pill text-bg-secondary ms-3 fs-6">{{task.completed_at
             |
             date:

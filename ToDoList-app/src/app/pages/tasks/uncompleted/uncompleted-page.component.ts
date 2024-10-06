@@ -7,7 +7,7 @@ import { toSignal } from "@angular/core/rxjs-interop";
 import { map, switchMap, tap } from "rxjs";
 
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { ShowModalService } from "../../../services/showModal.service";
+import { ShowModalService, TaskStatus } from "../../../services/showModal.service";
 import { ShowMessageService } from "../../../services/showMessage.service";
 
 import { Tasks } from "../../../interfaces/tasks.interface";
@@ -41,20 +41,19 @@ export class UncompletedPageComponent implements OnInit {
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
   messageModalSignal = this.modalService.messageSignal
   checkBoxElementSignal: Signal<HTMLInputElement | null> = toSignal(this.modalService.checkBoxELement$, { initialValue: null })
-  loadingState: boolean = false
 
   listSortBy = SortBy
   listSortDir = SortDir
   allLabels: Signal<Label[] | null> = toSignal(this.api.getAllLabels(), { initialValue: null })
   allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
-  checksBoolArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
-  tasksModel: boolean[] | undefined = this.checksBoolArray()
+  checksBoolArrayUncompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayUncompleted$, { initialValue: [] })
+  tasksModeluncompleted: boolean[] | undefined = this.checksBoolArrayUncompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
   uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
-      this.tasksModel = data.items.map(() => false)
-      this.modalService.initCheckArray(this.tasksModel)
+      this.tasksModeluncompleted = data.items.map(() => false)
+      this.modalService.initCheckArrayUncompleted(this.tasksModeluncompleted)
     }),
     map(data => { return { uncompleted: data.items, completed: null } }),
   ))))
@@ -127,12 +126,12 @@ export class UncompletedPageComponent implements OnInit {
   openModal(taskId: string, input: HTMLInputElement) {
     const lastIndexOf = input.id.lastIndexOf('-')
     const idx = +input.id.slice(lastIndexOf + 1)
-    const newTasks = this.tasksModel?.map((task, index) => index === idx ? true : false)
+    const newTasks = this.tasksModeluncompleted?.map((task, index) => index === idx ? true : false)
     if (input.checked && newTasks) {
-      this.modalService.nextCheck(newTasks)
+      this.modalService.nextCheckUncompleted(newTasks)
       this.modalService.showModal(taskId, input)
     } else {
-      this.modalService.closeModal(idx, false)
+      this.modalService.closeModal(idx, false, TaskStatus.complete)
     }
   }
   openDeleteModal(id: string) {
@@ -144,7 +143,7 @@ export class UncompletedPageComponent implements OnInit {
     if (checkBoxElement !== null) {
       const lastIndexOf = checkBoxElement.id.lastIndexOf('-')
       const idx = +checkBoxElement.id.slice(lastIndexOf + 1)
-      this.modalService.closeModal(idx, false)
+      this.modalService.closeModal(idx, false, TaskStatus.complete)
     }
   }
   closeDeleteModal() {
@@ -157,7 +156,6 @@ export class UncompletedPageComponent implements OnInit {
         const syncStatus = { ...data.sync_status }
         const response = Object.values(syncStatus)[0]
         if (response === "ok") {
-          this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  completed successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
@@ -165,7 +163,6 @@ export class UncompletedPageComponent implements OnInit {
           this.showMessage({ type: MessageStatus.error, text: 'Error : ' + response.error_tag })
         }
       }, error => {
-        this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
@@ -183,13 +180,11 @@ export class UncompletedPageComponent implements OnInit {
     this.api.deleteTask(taskId).subscribe(
       data => {
         if (data) {
-          this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
       }, error => {
-        this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error

@@ -15,8 +15,8 @@ export class ShowModalService {
   public message = new BehaviorSubject<string>('')
   private taskStatusHandler = new BehaviorSubject<string>('')
   private checkBoxElement = new BehaviorSubject<HTMLInputElement | null>(null)
-  checkArray = new BehaviorSubject<boolean[]>([])
-  checkArray2 = new BehaviorSubject<boolean[]>([])
+  checkArrayUncompleted = new BehaviorSubject<boolean[]>([])
+  checkArrayCompleted = new BehaviorSubject<boolean[]>([])
 
   modalShow$ = this.modalShow.asObservable();
   modalDeleteShow$ = this.modalDeleteShow.asObservable();
@@ -28,8 +28,8 @@ export class ShowModalService {
   messageSignal = toSignal(this.message);
   taskStatusHandler$ = this.taskStatusHandler.asObservable()
   taskStatusHandlerSignal = toSignal(this.taskStatusHandler)
-  checkArray$ = this.checkArray.asObservable();
-  checkArray2$ = this.checkArray2.asObservable();
+  checkArrayUncompleted$ = this.checkArrayUncompleted.asObservable();
+  checkArrayCompleted$ = this.checkArrayCompleted.asObservable();
 
   showModal(id: string, input: HTMLInputElement | null, status?: TaskStatus): void {
     this.checkBoxElement.next(input)
@@ -43,28 +43,28 @@ export class ShowModalService {
     this.message.next(message)
     this.modalDeleteShow.next(true)
   }
-  initCheckArray(array: boolean[]) {
-    this.checkArray.next(array)
+  initCheckArrayUncompleted(array: boolean[]) {
+    this.checkArrayUncompleted.next(array)
   }
-  initCheckArray2(array: boolean[]) {
-    this.checkArray2.next(array)
+  initCheckArrayCompleted(array: boolean[]) {
+    this.checkArrayCompleted.next(array)
   }
-  nextCheck(array: boolean[]) {
-    this.checkArray.next(array)
+  nextCheckUncompleted(array: boolean[]) {
+    this.checkArrayUncompleted.next(array)
   }
-  nextCheck2(array: boolean[]) {
-    this.checkArray2.next(array)
+  nextCheckCompleted(array: boolean[]) {
+    this.checkArrayCompleted.next(array)
   }
-  closeModal(idx?: number, check?: boolean, status?: TaskStatus): void {
+  closeModal(idx: number, check: boolean, status: TaskStatus): void {
     this.modalShow.next(false)
     if (status) {
       if (status === TaskStatus.complete) {
         if ((idx !== undefined) && (check !== undefined)) {
 
           if (idx >= 0) {
-            let arr = this.checkArray.getValue()
+            let arr = this.checkArrayUncompleted.getValue()
             arr[idx] = check
-            this.checkArray.next(arr)
+            this.checkArrayUncompleted.next(arr)
           }
         }
       }
@@ -72,22 +72,12 @@ export class ShowModalService {
         if ((idx !== undefined) && (check !== undefined)) {
 
           if (idx >= 0) {
-            let arr = this.checkArray2.getValue()
+            let arr = this.checkArrayCompleted.getValue()
             arr[idx] = check
-            this.checkArray2.next(arr)
+            this.checkArrayCompleted.next(arr)
           }
         }
       }
-    } else {
-      if ((idx !== undefined) && (check !== undefined)) {
-
-        if (idx >= 0) {
-          let arr = this.checkArray.getValue()
-          arr[idx] = check
-          this.checkArray.next(arr)
-        }
-      }
-
     }
   }
   closeDeleteModal() {
