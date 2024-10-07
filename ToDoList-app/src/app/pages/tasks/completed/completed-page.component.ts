@@ -1,8 +1,7 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
-import { TasksType } from "../../../types/modals";
+import { Component, computed, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
 import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { map, Observable, switchMap, tap } from "rxjs";
+import { map, switchMap, tap } from "rxjs";
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
 import { Label } from "../../../interfaces/label.interface";
@@ -15,7 +14,6 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 import { SortBy, SortDir } from "../../../types/sortBy";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { FilterModel } from "../../../types/filter.interface";
-import { stringify } from "uuid";
 @Component({
   templateUrl: './completed-page.component.html',
   standalone: true,
@@ -30,26 +28,26 @@ export class CompletedPageComponent implements OnInit {
   api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
   refreshTriger$ = this.api.refreshTrigger
-  modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
-  modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
-  messageModalSignal = this.modalService.messageSignal
+  modalShowSignal: Signal<boolean> = this.modalService.modalShowSignal
+  modalDeleteShowSignal: Signal<boolean> = this.modalService.modalDeleteShowSignal
+  messageModalSignal: Signal<string> = this.modalService.messageSignal
   checkBoxElementSignal: Signal<HTMLInputElement | null> = toSignal(this.modalService.checkBoxELement$, { initialValue: null })
 
   listSortBy = SortBy
   listSortDir = SortDir
-  allLabels: Signal<Label[] | null> = toSignal(this.api.getAllLabels(), { initialValue: null })
+  allLabels: Signal<Label[]> = toSignal(this.api.getAllLabels(), { initialValue: [] })
   allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   checksBoolArrayCompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayCompleted$, { initialValue: [] })
-  tasksModelCompleted: boolean[] | undefined = this.checksBoolArrayCompleted()
+  tasksModelCompleted: boolean[] = this.checksBoolArrayCompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
-  completedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getCompletedTasks().pipe(
+  completedTasks: Signal<Tasks | null> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getCompletedTasks().pipe(
     tap(data => {
       this.tasksModelCompleted = data.items.map(item => true)
       this.modalService.initCheckArrayCompleted(this.tasksModelCompleted)
     }),
     map(data => { return { uncompleted: null, completed: data.items } }),
-  ))))
+  ))), { initialValue: null })
 
   filterByTitle: WritableSignal<string> = signal('')
   filterByPriority: WritableSignal<string> = signal('')
@@ -57,11 +55,9 @@ export class CompletedPageComponent implements OnInit {
   filterByProject: WritableSignal<string> = signal('')
 
   filters: FilterModel[] = [{ filter: this.filterByTitle, name: 'title' },
-  // { filter: this.filterByPriority, name: 'priority' },
-  // { filter: this.filterByLabel, name: 'label' },
   { filter: this.filterByProject, name: 'project' }]
 
-  sortedTasks: Signal<Tasks | undefined> = computed(() => {
+  sortedTasks: Signal<Tasks> = computed(() => {
     let tasks: Tasks = {
       uncompleted: this.completedTasks()?.uncompleted,
       completed: this.completedTasks()?.completed
