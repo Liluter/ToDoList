@@ -4,7 +4,7 @@ import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 
 import { toSignal } from "@angular/core/rxjs-interop";
-import { map, switchMap, tap } from "rxjs";
+import { map, Subject, switchMap, tap } from "rxjs";
 
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { ShowModalService, TaskStatus } from "../../../services/showModal.service";
@@ -32,31 +32,31 @@ export class UncompletedPageComponent implements OnInit {
   badgeClass = badgeClass
   getLabelColor = getLabelColor
   getProjectColor = getProjectColor
-  descriptionOpenHandler?: string;
+  descriptionOpenHandler: string = '';
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
-  refreshTriger$ = this.api.refreshTrigger
-  modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
-  modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
-  messageModalSignal = this.modalService.messageSignal
+  refreshTriger$: Subject<void> = this.api.refreshTrigger
+  modalShowSignal: Signal<boolean> = this.modalService.modalShowSignal
+  modalDeleteShowSignal: Signal<boolean> = this.modalService.modalDeleteShowSignal
+  messageModalSignal: Signal<string> = this.modalService.messageSignal
   checkBoxElementSignal: Signal<HTMLInputElement | null> = toSignal(this.modalService.checkBoxELement$, { initialValue: null })
 
   listSortBy = SortBy
   listSortDir = SortDir
-  allLabels: Signal<Label[] | null> = toSignal(this.api.getAllLabels(), { initialValue: null })
+  allLabels: Signal<Label[]> = toSignal(this.api.getAllLabels(), { initialValue: [] })
   allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   checksBoolArrayUncompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayUncompleted$, { initialValue: [] })
-  tasksModeluncompleted: boolean[] | undefined = this.checksBoolArrayUncompleted()
+  tasksModeluncompleted: boolean[] = this.checksBoolArrayUncompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
-  uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
+  uncompletedTasks: Signal<Tasks | null> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
       this.tasksModeluncompleted = data.items.map(() => false)
       this.modalService.initCheckArrayUncompleted(this.tasksModeluncompleted)
     }),
     map(data => { return { uncompleted: data.items, completed: null } }),
-  ))))
+  ))), { initialValue: null })
 
   filterByTitle: WritableSignal<string> = signal('')
   filterByPriority: WritableSignal<string> = signal('')
@@ -68,7 +68,7 @@ export class UncompletedPageComponent implements OnInit {
   { filter: this.filterByLabel, name: 'label' },
   { filter: this.filterByProject, name: 'project' }]
 
-  sortedTasks: Signal<Tasks | undefined> = computed(() => {
+  sortedTasks: Signal<Tasks> = computed(() => {
     let tasks: Tasks = {
       uncompleted: this.uncompletedTasks()?.uncompleted,
       completed: this.uncompletedTasks()?.completed
@@ -116,7 +116,7 @@ export class UncompletedPageComponent implements OnInit {
     this.refreshData()
   }
 
-  openDescription(id: string | undefined) {
+  openDescription(id: string) {
     if (this.descriptionOpenHandler === id) {
       this.descriptionOpenHandler = ''
       return

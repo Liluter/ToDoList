@@ -23,9 +23,9 @@ export class ShowModalService {
   checkBoxELement$ = this.checkBoxElement.asObservable();
   message$ = this.message.asObservable();
 
-  modalShowSignal = toSignal(this.modalShow);
-  modalDeleteShowSignal = toSignal(this.modalDeleteShow)
-  messageSignal = toSignal(this.message);
+  modalShowSignal = toSignal(this.modalShow, { initialValue: false });
+  modalDeleteShowSignal = toSignal(this.modalDeleteShow, { initialValue: false })
+  messageSignal = toSignal(this.message, { initialValue: '' });
   taskStatusHandler$ = this.taskStatusHandler.asObservable()
   taskStatusHandlerSignal = toSignal(this.taskStatusHandler)
   checkArrayUncompleted$ = this.checkArrayUncompleted.asObservable();
