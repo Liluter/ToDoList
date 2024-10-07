@@ -31,7 +31,7 @@ export class AllPageComponent implements OnInit {
   modalService = inject(ShowModalService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
   refreshTriger$ = this.api.refreshTrigger
-  modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
+  modalShowSignal: Signal<boolean> = this.modalService.modalShowSignal
   modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
 
   messageModal$: Observable<string> = this.modalService.message$
@@ -40,7 +40,7 @@ export class AllPageComponent implements OnInit {
   taskStatusHandlerSignal = this.modalService.taskStatusHandlerSignal
   listSortBy = SortBy
   listSortDir = SortDir
-  allLabels: Signal<Label[] | null> = toSignal(this.api.getAllLabels(), { initialValue: null })
+  allLabels: Signal<Label[]> = toSignal(this.api.getAllLabels(), { initialValue: [] })
   allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   checksBoolArrayUncompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayUncompleted$, { initialValue: [] })
   checksBoolArrayCompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayCompleted$, { initialValue: [] })
@@ -53,8 +53,8 @@ export class AllPageComponent implements OnInit {
 
   filters: FilterModel[] = [{ filter: this.filterByTitle, name: 'title' },
   { filter: this.filterByProject, name: 'project' }]
-  tasksModeluncompleted: boolean[] | undefined = this.checksBoolArrayUncompleted()
-  tasksModelcompleted: boolean[] | undefined = this.checksBoolArrayCompleted()
+  tasksModeluncompleted: boolean[] = this.checksBoolArrayUncompleted()
+  tasksModelcompleted: boolean[] = this.checksBoolArrayCompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
 
@@ -72,7 +72,7 @@ export class AllPageComponent implements OnInit {
     }),
     map(data => { return { uncompleted: null, completed: data.items } }),
   ))))
-  sortedTasks: Signal<Tasks | undefined> = computed(() => {
+  sortedTasks: Signal<Tasks> = computed(() => {
     const tasks: Tasks = {
       uncompleted: this.uncompletedTasks()?.uncompleted,
       completed: this.completedTasks()?.completed
@@ -173,13 +173,11 @@ export class AllPageComponent implements OnInit {
     this.api.completeTask(taskId).pipe(tap(() => this.refreshData())).subscribe(
       data => {
         if (data) {
-          // this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  completed successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
       }, error => {
-        // this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
@@ -195,13 +193,11 @@ export class AllPageComponent implements OnInit {
     this.api.uncompleteTask(taskId).subscribe(
       data => {
         if (data) {
-          // this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  uncomplete successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
       }, error => {
-        // this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
@@ -220,13 +216,11 @@ export class AllPageComponent implements OnInit {
     this.api.deleteTask(taskId).subscribe(
       data => {
         if (data) {
-          // this.loadingState = false
           this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
       }, error => {
-        // this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
