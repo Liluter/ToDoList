@@ -10,7 +10,6 @@
         'btn-dark': by.value === sortBy()
       }" (click)="sortOption(by.value)">{{by.value}}</button>
     }
-
   </div>
   <div class="flex-inline-fill mb-1">
     <span class="ms-1">Sort direction: </span>
@@ -20,7 +19,6 @@
         'btn-dark': by.value === sortDir()
       }" (click)="sortDirection(by.value)">{{by.value}}</button>
     }
-
   </div>
 </div>
 <form class="container mb-3 p-0">
@@ -59,7 +57,6 @@
       </div>
     </div>
   </div>
-
 </form>
 @if(allProjects(); as projects){
 @if(checksBoolArrayUncompleted(); as taskarr){
@@ -83,42 +80,6 @@
       <span class="input-group-text">
         <span class="badge rounded-pill mt-0 fs-6" [ngClass]="badgeClass(task.priority)">{{task.priority}}</span>
       </span>
-      @if(modalShowSignal()){
-      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
-        <div class="card text-center">
-          <div class="card-header">
-            Need your action
-          </div>
-          <div class="card-body">
-            <h5 class="card-title ">Are you sure you want to complete this task?</h5>
-            <p class="card-text">When you confirm this task will be archived.</p>
-            <p class="card-text">{{messageModalSignal()}}</p>
-            <div>
-              <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
-              <button class="btn btn-danger" (click)="closeModal()">No</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      }
-      @if(modalDeleteShowSignal()){
-      <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
-        <div class="card text-center">
-          <div class="card-header">
-            Need your action
-          </div>
-          <div class="card-body">
-            <h5 class="card-title ">Are you sure you want to delete this task?</h5>
-            <p class="card-text">When you confirm this task will be deleted permanently.</p>
-            <p class="card-text">{{messageModalSignal()}}</p>
-            <div>
-              <button class="btn btn-primary me-3" (click)="deleteTask()">Yes</button>
-              <button class="btn btn-danger" (click)="closeDeleteModal()">No</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      }
       @if(task.due){
       <span class="input-group-text">
         Due:
@@ -126,10 +87,8 @@
           {{task.due.date | date : 'EEEE, d MMMM'}}</span>
       </span>
       }
-
       <span class="input-group-text">
         <div class="d-flex justify-content-center">
-
           @for(label of task.labels; track $index){
           <span class="badge rounded-pill text-black label mx-1 p-1 fs-6" [ngClass]="getLabelColor(label, labels )"
             disabled><i class="bi bi-tag ">{{label}}</i></span>
@@ -178,6 +137,42 @@
 <div class="d-flex justify-content-center">
   <div class="spinner-border text-primary" role="status">
     <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+}
+@if(modalShowSignal()){
+<div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+  <div class="card text-center">
+    <div class="card-header">
+      Need your action
+    </div>
+    <div class="card-body">
+      <h5 class="card-title ">Are you sure you want to complete this task?</h5>
+      <p class="card-text">When you confirm this task will be archived.</p>
+      <p class="card-text">{{messageModalSignal()}}</p>
+      <div>
+        <button class="btn btn-primary me-3" (click)="completeTask()">Yes</button>
+        <button class="btn btn-danger" (click)="closeModal()">No</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+@if(modalDeleteShowSignal()){
+<div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
+  <div class="card text-center">
+    <div class="card-header">
+      Need your action
+    </div>
+    <div class="card-body">
+      <h5 class="card-title ">Are you sure you want to delete this task?</h5>
+      <p class="card-text">When you confirm this task will be deleted permanently.</p>
+      <p class="card-text">{{messageModalSignal()}}</p>
+      <div>
+        <button class="btn btn-primary me-3" (click)="deleteTask()">Yes</button>
+        <button class="btn btn-danger" (click)="closeDeleteModal()">No</button>
+      </div>
+    </div>
   </div>
 </div>
 }

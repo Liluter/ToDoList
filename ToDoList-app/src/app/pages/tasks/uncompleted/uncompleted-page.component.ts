@@ -111,6 +111,7 @@ export class UncompletedPageComponent implements OnInit {
     }
   })
 
+  // windowSize = window.innerWidth
 
   ngOnInit(): void {
     this.refreshData()

@@ -12,10 +12,9 @@
   <div class="flex-inline-fill mb-1">
     <span class="ms-1">Sort direction: </span>
     @for (by of listSortDir | keyvalue; track $index) {
-    <button class="btn me-1" [ngClass]="{
-                'btn-outline-dark' : by.value !== sortDir(),
-                'btn-dark': by.value === sortDir()
-              }" (click)="sortDirection(by.value)">{{by.value}}</button>
+    <button class="btn me-1" [ngClass]="{'btn-outline-dark' : by.value !== sortDir(),
+    'btn-dark': by.value === sortDir()
+    }" (click)="sortDirection(by.value)">{{by.value}}</button>
     }
   </div>
 </div>
