@@ -20,6 +20,15 @@
       }" (click)="sortDirection(by.value)">{{by.value}}</button>
     }
   </div>
+  <div class="flex-inline-fill mb-1">
+    <span class="ms-1">Task size : </span>
+    @for (size of viewSizes | keyvalue; track $index) {
+    <button class="btn me-1" [ngClass]="{
+        'btn-outline-dark' : size.value !== actualViewSize(),
+        'btn-dark': size.value === actualViewSize()
+      }" (click)="changeTaskSize(size.value)">{{size.value}}</button>
+    }
+  </div>
 </div>
 <form class="container mb-3 p-0">
   <div class="accordion " id="accordionFlushExample">
@@ -63,6 +72,7 @@
 @for(task of data.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3 ">
   <li class="list-group-item px-2">
+    @if(actualViewSize()===viewSizes.big){
     <div class="input-group input-group-sm">
       <span class="input-group-text mb-1">
         Project:
@@ -71,6 +81,8 @@
           {{projectNameById(task.project_id)}}</span>
       </span>
     </div>
+    }
+    @if(actualViewSize()===viewSizes.big){
     <div class="input-group input-group-sm">
       <span class="input-group-text">
         <input class="form-check-input mt-0 fs-3" #complCheck type="checkbox" title="Add to completed" value=""
@@ -96,11 +108,13 @@
         </div>
       </span>
     </div>
+    }
     <div class="input-group mt-1">
       <span class="input-group-text flex-fill">
         <span class="input-group-text">Title:</span>
         <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
+      @if (actualViewSize()===viewSizes.big){
       <span class="input-group-text">
         <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
         <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
@@ -108,6 +122,7 @@
         <button type="button" class="btn btn-outline-secondary z-2" (click)="openDeleteModal(task.id)"><i
             class="bi bi-trash"></i></button>
       </span>
+      }
     </div>
     @if(descriptionOpenHandler === task.id){
     <div class="input-group col-12 mt-1" id="{{task.id}}">

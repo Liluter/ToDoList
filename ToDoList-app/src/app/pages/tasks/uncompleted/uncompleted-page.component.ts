@@ -15,7 +15,7 @@ import { Label } from "../../../interfaces/label.interface";
 
 import { Message, MessageStatus } from "../../../types/message.interface";
 import { FilterModel } from "../../../types/filter.interface";
-import { SortBy, SortDir } from "../../../types/sortBy";
+import { SortBy, SortDir, ViewSize } from "../../../types/sortBy";
 
 import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
@@ -41,15 +41,19 @@ export class UncompletedPageComponent implements OnInit {
   modalDeleteShowSignal: Signal<boolean> = this.modalService.modalDeleteShowSignal
   messageModalSignal: Signal<string> = this.modalService.messageSignal
   checkBoxElementSignal: Signal<HTMLInputElement | null> = toSignal(this.modalService.checkBoxELement$, { initialValue: null })
+  isSmall: WritableSignal<boolean> = signal(false)
 
   listSortBy = SortBy
   listSortDir = SortDir
+  viewSizes = ViewSize
   allLabels: Signal<Label[]> = toSignal(this.api.getAllLabels(), { initialValue: [] })
   allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   checksBoolArrayUncompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayUncompleted$, { initialValue: [] })
   tasksModeluncompleted: boolean[] = this.checksBoolArrayUncompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
+  actualViewSize: WritableSignal<ViewSize> = signal(ViewSize.big)
+
   uncompletedTasks: Signal<Tasks | null> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
       this.tasksModeluncompleted = data.items.map(() => false)
@@ -209,5 +213,8 @@ export class UncompletedPageComponent implements OnInit {
   }
   clearFilters() {
     this.filters.forEach(f => f.filter.set(''))
+  }
+  changeTaskSize(size: ViewSize) {
+    this.actualViewSize.set(size)
   }
 }
