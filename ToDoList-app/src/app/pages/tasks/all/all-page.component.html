@@ -2,19 +2,22 @@
 @if (allLabels(); as labels) {
 @if (sortedTasks(); as data){
 <h4 class="text-body-secondary">Completed tasks:</h4>
-<div class="container mb-3 p-0">
-  <span>Sort by: </span>
-
-  <button class="btn me-1" [ngClass]="{
-              'btn-dark': true
-            }" (click)="sortOption(listSortBy.date)">{{listSortBy.date}}</button>
-  <span class="ms-1">Sort direction: </span>
-  @for (by of listSortDir | keyvalue; track $index) {
-  <button class="btn me-1" [ngClass]="{
-              'btn-outline-dark' : by.value !== sortDir(),
-              'btn-dark': by.value === sortDir()
-            }" (click)="sortDirection(by.value)">{{by.value}}</button>
-  }
+<div class="container mb-3 p-0 d-flex flex-wrap">
+  <div class="flex-inline-fill mb-1 ">
+    <span>Sort by: </span>
+    <button class="btn me-1" [ngClass]="{
+    'btn-dark': true
+  }" (click)="sortOption(listSortBy.date)">{{listSortBy.date}}</button>
+  </div>
+  <div class="flex-inline-fill mb-1">
+    <span class="ms-1">Sort direction: </span>
+    @for (by of listSortDir | keyvalue; track $index) {
+    <button class="btn me-1" [ngClass]="{
+                'btn-outline-dark' : by.value !== sortDir(),
+                'btn-dark': by.value === sortDir()
+              }" (click)="sortDirection(by.value)">{{by.value}}</button>
+    }
+  </div>
 </div>
 <form class="container mb-3 p-0">
   <div class="accordion " id="accordionFlushExample">

@@ -53,6 +53,7 @@ export class AllPageComponent implements OnInit {
 
   filters: FilterModel[] = [{ filter: this.filterByTitle, name: 'title' },
   { filter: this.filterByProject, name: 'project' }]
+
   tasksModeluncompleted: boolean[] = this.checksBoolArrayUncompleted()
   tasksModelcompleted: boolean[] = this.checksBoolArrayCompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
