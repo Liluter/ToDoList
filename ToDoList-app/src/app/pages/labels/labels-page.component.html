@@ -1,17 +1,7 @@
 <h4>Labels list:</h4>
 <div class="container ">
-
-
-  @if(allLabels$ | async ; as labels ){
+  @if(allLabels(); as labels ){
   @for(label of labels;track $index){
-  <!-- <li class="list-group-item d-flex justify-content-between" [ngClass]="getLabelColor(label.name, labels)">
-  {{label.name}}
-  @if(label.is_favorite){
-  <i class="bi bi-star-fill star-filled"></i>
-  }
-</li> -->
-  <!-- <button type="button" class="btn btn-outline-secondary">Detail</button>
-<button type="button" class="btn btn-outline-secondary">Edit</button> -->
   <div class="input-group  mt-1 ">
     <span class="input-group-text ">
       @if(label.is_favorite){
@@ -26,12 +16,9 @@
           disabled><i class="bi bi-tag ">{{label.name}}</i></span>
       </div>
     </span>
-    <!-- <input type="text" class="form-control" [ngClass]="getLabelColor(label.name, labels)" value={{label.name}} readonly> -->
     <button type="button" class="btn btn-outline-secondary " [routerLink]="['/label/details', label.id]">Detail</button>
     <button type="button" class="btn btn-outline-secondary " [routerLink]="['/label/edit', label.id]">Edit</button>
   </div>
-
-
   }
   } @else {
   <div class="d-flex justify-content-center">
