@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from "@angular/core";
+import { Component, inject, Input, OnInit, Signal, signal, WritableSignal } from "@angular/core";
 import { Observable, tap } from "rxjs";
 import { Label } from "../../../interfaces/label.interface";
 import { ApiCallsService } from "../../../services/api-calls.service";
@@ -22,7 +22,7 @@ export class LabelEditComponent implements OnInit {
   apiService: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
-  loadingState: boolean = false
+  loadingState: WritableSignal<boolean> = signal(false)
   model: Label = {
     name: '',
     color: '',
@@ -44,14 +44,15 @@ export class LabelEditComponent implements OnInit {
     this.showMessageService.showMessage(message)
   }
   saveData(form: NgForm) {
+    this.loadingState.set(true)
     this.apiService.editLabel(this.model).subscribe(data => {
       if (data) {
-        this.loadingState = false
+        this.loadingState.set(false)
         this.showMessage({ type: MessageStatus.success, text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })
-        this.router.navigate([`label/details/${this.id}`])
+        this.router.navigate([`labels`])
       }
     }, error => {
-      this.loadingState = false
+      this.loadingState.set(false)
       let message = error.message
       if (error.status === 403 || error.status === 400) {
         message = error.error

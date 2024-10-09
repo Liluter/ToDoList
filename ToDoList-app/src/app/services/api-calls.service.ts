@@ -143,7 +143,7 @@ export class ApiCallsService {
           "color": data.color,
           "name": data.name,
           "item_order": data.item_order,
-          "is_favourite": data.is_favorite
+          "is_favorite": data.is_favorite
         }
       }
       ]
