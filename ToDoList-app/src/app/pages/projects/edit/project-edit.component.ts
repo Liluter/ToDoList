@@ -1,4 +1,4 @@
-import { Component, inject, Input } from "@angular/core";
+import { Component, inject, Input, signal, WritableSignal } from "@angular/core";
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { getProjectColor } from "../../../utilities/utility";
 import { map, Observable, tap } from "rxjs";
@@ -23,7 +23,7 @@ export class ProjectEditCompoennt {
   apiService: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
-  loadingState: boolean = false
+  loadingState: WritableSignal<boolean> = signal(false)
   model: SyncProject = {
     id: '',
     color: '',
@@ -44,16 +44,15 @@ export class ProjectEditCompoennt {
     this.showMessageService.showMessage(message)
   }
   saveData(form: NgForm) {
-    console.log('model', this.model)
-    console.log('form', form.form)
+    this.loadingState.set(true)
     this.apiService.editProject(this.model).subscribe(data => {
       if (data) {
-        this.loadingState = false
+        this.loadingState.set(false)
         this.showMessage({ type: MessageStatus.success, text: `Project "${form.form.controls['projectname'].value}"  editted successfully` })
         this.router.navigate([`projects`])
       }
     }, error => {
-      this.loadingState = false
+      this.loadingState.set(false)
       let message = error.message
       if (error.status === 403 || error.status === 400) {
         message = error.error
