@@ -1,4 +1,4 @@
-@if (allLabels$ | async; as labels) {
+@if (allLabelsSignal(); as labels) {
 @if (task$ | async; as task ) {
 <h2>Task edition</h2>
 <form #formEdit="ngForm" (ngSubmit)="saveData(formEdit)">
@@ -19,7 +19,7 @@
 
   <div class="mb-3">
     <div class="input-group ">
-      @if(allLabels$ | async; as labels){
+      @if(allLabelsSignal(); as labels){
       <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
         <div class="btn-group d-flex flex-wrap" role="group">
           <span class="input-group-text">Labels :</span>

@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, JsonPipe, NgClass, NgTemplateOutlet } from "@angular/common";
-import { Component, inject, Input } from "@angular/core";
+import { Component, computed, inject, Input, Signal } from "@angular/core";
 import { RouterModule, Router } from "@angular/router";
 import { badgeClass, getLabelColor, getProjectColor } from "../../utilities/utility";
 import { ApiCallsService } from "../../services/api-calls.service";
@@ -11,6 +11,7 @@ import { FormsModule, NgForm } from "@angular/forms";
 import { EditData } from "../../interfaces/editData.interface";
 import { Message, MessageStatus } from "../../types/message.interface";
 import { ShowMessageService } from "../../services/showMessage.service";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
   templateUrl: './edit.component.html',
@@ -65,15 +66,12 @@ export class EditComponent {
   task$?: Observable<Item>
   descriptionOpenHandler: string | undefined;
   allLabels$: Observable<Label[]> = this.apiService.getAllLabels()
-  projectId?: string
+  allLabelsSignal: Signal<Label[]> = toSignal(this.apiService.getAllLabels(), { initialValue: [] })
   project$?: Observable<SyncProject>;
-  projects?: SyncProject[]
-  allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
-  labels: string[] = []
+  labels: Signal<string[]> = computed(() => this.allLabelsSignal().map(label => label.name))
   ngOnInit() {
-    this.allLabels$.subscribe(labels => this.labels = labels.map(label => label.name))
     if (this.id) {
       this.task$ = this.apiService.getTaskById(this.id).pipe(
         tap(data => {
@@ -143,10 +141,10 @@ export class EditComponent {
     this.model.labels[idx] = event.target.checked ? true : false
   }
   convertLabelStrToBool() {
-    this.model.labels = this.labels.map<boolean>(label => { return this.model.labels.includes(label) })
+    this.model.labels = this.labels().map<boolean>(label => { return this.model.labels.includes(label) })
   }
   convertLabelBoolToStr() {
-    let labels = this.model.labels.map((bool, idx) => bool ? this.labels[idx] : '')
+    let labels = this.model.labels.map((bool, idx) => bool ? this.labels()[idx] : '')
     labels = labels.filter(label => label !== '')
     return labels
   }
