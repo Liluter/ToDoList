@@ -2,15 +2,16 @@ import { Component, inject, Input, OnInit } from "@angular/core";
 import { ApiCallsService } from "../../services/api-calls.service";
 import { map, Observable, tap } from "rxjs";
 import { Item } from "../../interfaces/item.interface";
-import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
+import { AsyncPipe, DatePipe, JsonPipe, NgClass, NgTemplateOutlet } from "@angular/common";
 import { badgeClass, getLabelColor, getProjectColor } from "../../utilities/utility";
 import { RouterModule } from "@angular/router";
 import { Label } from "../../interfaces/label.interface";
 import { SyncProject } from "../../interfaces/syncProject.interface";
+import { toSignal } from "@angular/core/rxjs-interop";
 @Component({
   templateUrl: './detail.component.html',
   standalone: true,
-  imports: [AsyncPipe, JsonPipe, NgClass, DatePipe, RouterModule]
+  imports: [AsyncPipe, JsonPipe, NgClass, DatePipe, RouterModule, NgTemplateOutlet]
 })
 export class DetailComponent implements OnInit {
   getProjectColor = getProjectColor
@@ -24,7 +25,8 @@ export class DetailComponent implements OnInit {
   projectId?: string
   project$?: Observable<SyncProject>;
   projects?: SyncProject[]
-  allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
+  // allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
+  allProjectsSignal = toSignal(this.apiService.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   ngOnInit() {
     if (this.id) {
       this.task$ = this.apiService.getTaskById(this.id).pipe(

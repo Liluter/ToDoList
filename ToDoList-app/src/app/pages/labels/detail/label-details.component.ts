@@ -12,10 +12,10 @@ import { RouterModule } from "@angular/router"
   imports: [AsyncPipe, NgClass, RouterModule]
 })
 export class LabelDetailsComponent implements OnInit {
+  getLabelColor = getLabelColor
   @Input() id?: string
   label$?: Observable<Label>
   apiService: ApiCallsService = inject(ApiCallsService)
-  getLabelColor = getLabelColor
   ngOnInit() {
     if (this.id) {
       this.label$ = this.apiService.getOneLabel(this.id)

@@ -19,7 +19,7 @@ export class LabelEditComponent implements OnInit {
   @Input() id?: string
   label$?: Observable<Label>
   readonly colors = [...colors]
-  apiService: ApiCallsService = inject(ApiCallsService)
+  api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
   loadingState: WritableSignal<boolean> = signal(false)
@@ -30,9 +30,10 @@ export class LabelEditComponent implements OnInit {
     is_favorite: false,
     item_order: 1
   }
+
   ngOnInit() {
     if (this.id) {
-      this.label$ = this.apiService.getOneLabel(this.id).pipe(
+      this.label$ = this.api.getOneLabel(this.id).pipe(
         tap(data => {
           this.model = data
         }
@@ -45,7 +46,7 @@ export class LabelEditComponent implements OnInit {
   }
   saveData(form: NgForm) {
     this.loadingState.set(true)
-    this.apiService.editLabel(this.model).subscribe(data => {
+    this.api.editLabel(this.model).subscribe(data => {
       if (data) {
         this.loadingState.set(false)
         this.showMessage({ type: MessageStatus.success, text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })

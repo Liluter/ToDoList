@@ -5,7 +5,6 @@ import { ApiCallsService } from "../../../services/api-calls.service";
 import { SyncProject } from "../../../interfaces/syncProject.interface";
 import { AsyncPipe, NgClass } from "@angular/common";
 import { RouterModule } from "@angular/router";
-import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
   templateUrl: './project-detail.component.html',

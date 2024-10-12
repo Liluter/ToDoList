@@ -109,7 +109,6 @@ export class ApiCallsService {
   }
   editTask(data: EditData) {
     const myuuid = uuid.v4();
-    console.log(myuuid)
     const body = {
       commands: [
         {
