@@ -1,4 +1,4 @@
-import { AsyncPipe, DatePipe, JsonPipe, NgClass } from "@angular/common";
+import { AsyncPipe, DatePipe, JsonPipe, NgClass, NgTemplateOutlet } from "@angular/common";
 import { Component, inject, Input } from "@angular/core";
 import { RouterModule, Router } from "@angular/router";
 import { badgeClass, getLabelColor, getProjectColor } from "../../utilities/utility";
@@ -16,7 +16,7 @@ import { ShowMessageService } from "../../services/showMessage.service";
   templateUrl: './edit.component.html',
   standalone: true,
   styleUrl: './edit.component.scss',
-  imports: [AsyncPipe, JsonPipe, NgClass, DatePipe, RouterModule, FormsModule]
+  imports: [AsyncPipe, JsonPipe, NgClass, DatePipe, RouterModule, FormsModule, NgTemplateOutlet]
 })
 export class EditComponent {
 

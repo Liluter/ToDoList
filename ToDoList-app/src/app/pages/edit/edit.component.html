@@ -37,11 +37,7 @@
         </div>
       </div>
       }@else {
-      <div class="d-flex justify-content-center">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
+      <ng-container *ngTemplateOutlet="loading"></ng-container>
       }
     </div>
     <div class="form-text">Select multiple labels</div>
@@ -91,4 +87,15 @@
     <button type="button" class="btn btn-danger" (click)="deleteTask(task.id)">Delete</button>
   </div>}
 </form>
-}}
+}@else {
+<ng-container *ngTemplateOutlet="loading"></ng-container>
+}}@else {
+<ng-container *ngTemplateOutlet="loading"></ng-container>
+}
+<ng-template #loading>
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</ng-template>

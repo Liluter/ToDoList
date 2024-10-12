@@ -25,7 +25,6 @@ export class DetailComponent implements OnInit {
   projectId?: string
   project$?: Observable<SyncProject>;
   projects?: SyncProject[]
-  // allProjects$: Observable<SyncProject[]> = this.apiService.getAllProjects().pipe(map(data => data.projects))
   allProjectsSignal = toSignal(this.apiService.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
   ngOnInit() {
     if (this.id) {
