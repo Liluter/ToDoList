@@ -8,7 +8,7 @@ import { Item } from "../../interfaces/item.interface";
 import { Label } from "../../interfaces/label.interface";
 import { SyncProject } from "../../interfaces/syncProject.interface";
 import { FormsModule, NgForm } from "@angular/forms";
-import { EditData } from "../../interfaces/editData.interface";
+import { EditTask } from "../../interfaces/editTask.interface";
 import { Message, MessageStatus } from "../../types/message.interface";
 import { ShowMessageService } from "../../services/showMessage.service";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -110,7 +110,7 @@ export class EditComponent {
   }
   saveData(form: NgForm) {
     this.handleDate()
-    const taskEdited: EditData = {
+    const taskEdited: EditTask = {
       id: this.model.id,
       content: this.model.content,
       description: this.model.description,
