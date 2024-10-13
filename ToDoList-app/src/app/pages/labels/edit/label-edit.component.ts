@@ -17,11 +17,11 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 })
 export class LabelEditComponent implements OnInit {
   @Input() id?: string
+  router = inject(Router)
   label$?: Observable<Label>
   readonly colors = [...colors]
   api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
-  router: Router = inject(Router)
   loadingState: WritableSignal<boolean> = signal(false)
   model: Label = {
     name: '',
@@ -52,6 +52,22 @@ export class LabelEditComponent implements OnInit {
         this.showMessage({ type: MessageStatus.success, text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })
         this.router.navigate([`labels`])
       }
+    }, error => {
+      this.loadingState.set(false)
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage({ type: MessageStatus.error, text: message })
+    })
+  }
+  deleteLabel() {
+    this.loadingState.set(true)
+    this.api.deleteLabel(this.model.id).subscribe(() => {
+      this.loadingState.set(false)
+      this.loadingState.set(false)
+      this.showMessage({ type: MessageStatus.success, text: `Label "${this.model.name}"  deleted successfully` })
+      this.router.navigate([`labels`])
     }, error => {
       this.loadingState.set(false)
       let message = error.message

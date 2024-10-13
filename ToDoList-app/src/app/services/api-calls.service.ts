@@ -73,6 +73,10 @@ export class ApiCallsService {
     })
   }
 
+  deleteLabel(id: string) {
+    return this.http.delete(labelsUrl + `/${id}`, { headers: this.authorization })
+  }
+
   postProject(data: Project) {
     return this.http.post(projectsUrl, data, {
       headers: this.authorization

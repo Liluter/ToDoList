@@ -36,6 +36,7 @@
       <div class=" d-flex justify-content-evenly">
         <button type="button" class="btn btn-primary" [routerLink]="['/label/details', label.id]">Back</button>
         <button type="submit" class="btn btn-primary" [disabled]="formLabelEdit.invalid">Save</button>
+        <button type="button" class="btn btn-danger" (click)="deleteLabel()">Delete</button>
       </div>}
     </li>
   </ul>
