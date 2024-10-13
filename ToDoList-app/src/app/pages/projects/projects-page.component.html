@@ -1,6 +1,6 @@
 <h4>Projects list:</h4>
 <ul class="list-group">
-  @if(allProjects$ | async; as projects){
+  @if(allProjects(); as projects){
   @for(project of projects;track project.id){
   <div class="input-group  mt-1 ">
     <span class="input-group-text ">

@@ -6,3 +6,9 @@ export enum SortDir {
   asc = 'asc',
   desc = 'desc'
 }
+
+export enum ViewSize {
+  collapsed = 'collapsed',
+  expand = 'expand',
+  none = 'none'
+}

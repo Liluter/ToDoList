@@ -90,3 +90,8 @@ Routing implication:
   Signals upgrade
 
 - [x] upgrade uncompleted task component with signals, and show.modal.service
+- [x] upgrade every components with signals.
+
+  New feature
+
+- [x] Add new feature collapsing item in uncompleted tasks.

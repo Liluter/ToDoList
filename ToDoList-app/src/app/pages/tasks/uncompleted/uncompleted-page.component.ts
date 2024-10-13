@@ -1,23 +1,24 @@
-import { Component, computed, inject, signal, Signal, WritableSignal } from "@angular/core";
-import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
+import { Component, computed, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
+import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass, NgTemplateOutlet } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 
 import { toSignal } from "@angular/core/rxjs-interop";
-import { map, switchMap, tap } from "rxjs";
+import { map, Subject, switchMap, tap } from "rxjs";
 
 import { ApiCallsService } from "../../../services/api-calls.service";
-import { ShowModalService } from "../../../services/showModal.service";
+import { ShowModalService, TaskStatus } from "../../../services/showModal.service";
 import { ShowMessageService } from "../../../services/showMessage.service";
 
 import { Tasks } from "../../../interfaces/tasks.interface";
 import { Label } from "../../../interfaces/label.interface";
 
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 import { FilterModel } from "../../../types/filter.interface";
-import { SortBy, SortDir } from "../../../types/sortBy";
+import { SortBy, SortDir, ViewSize } from "../../../types/sortBy";
 
 import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/utility";
+import { SyncProject } from "../../../interfaces/syncProject.interface";
 
 
 
@@ -25,38 +26,44 @@ import { badgeClass, getLabelColor, getProjectColor } from "../../../utilities/u
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
   styleUrl: './uncompleted-page.component.scss',
-  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass]
+  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass, NgTemplateOutlet]
 })
-export class UncompletedPageComponent {
+export class UncompletedPageComponent implements OnInit {
   badgeClass = badgeClass
   getLabelColor = getLabelColor
   getProjectColor = getProjectColor
-  descriptionOpenHandler?: string;
+  descriptionOpenHandler: string = '';
   modalService = inject(ShowModalService)
   api: ApiCallsService = inject(ApiCallsService)
-  refreshTriger$ = this.api.refreshTrigger$
-  modalShowSignal: Signal<boolean | undefined> = this.modalService.modalShowSignal
-  modalDeleteShowSignal = this.modalService.modalDeleteShowSignal
-  messageModalSignal = this.modalService.messageSignal
-  checkBoxElementSignal = toSignal(this.modalService.target$)
-  loadingState: boolean = false
   showMessageService: ShowMessageService = inject(ShowMessageService)
+  refreshTriger$: Subject<void> = this.api.refreshTrigger
+  modalShowSignal: Signal<boolean> = this.modalService.modalShowSignal
+  modalDeleteShowSignal: Signal<boolean> = this.modalService.modalDeleteShowSignal
+  messageModalSignal: Signal<string> = this.modalService.messageSignal
+  checkBoxElementSignal: Signal<HTMLInputElement | null> = toSignal(this.modalService.checkBoxELement$, { initialValue: null })
+  isSmall: WritableSignal<boolean> = signal(false)
 
   listSortBy = SortBy
   listSortDir = SortDir
-  allLabels: Signal<Label[] | undefined> = toSignal(this.api.getAllLabels())
-  allProjects = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)))
-  checksBoolArray: Signal<boolean[] | undefined> = toSignal(this.modalService.checkArray$)
-  tasksModel: boolean[] | undefined = this.checksBoolArray()
+  viewSizes = ViewSize
+  allLabels: Signal<Label[]> = toSignal(this.api.getAllLabels(), { initialValue: [] })
+  allProjects: Signal<[SyncProject] | null> = toSignal(this.api.getAllProjects().pipe(map(data => data.projects)), { initialValue: null })
+  checksBoolArrayUncompleted: Signal<boolean[]> = toSignal(this.modalService.checkArrayUncompleted$, { initialValue: [] })
+  tasksModeluncompleted: boolean[] = this.checksBoolArrayUncompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
-  uncompletedTasks: Signal<Tasks | undefined> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
+  actualViewSize: WritableSignal<ViewSize | ''> = signal('')
+  collapsedId = signal('')
+  expandId = signal('')
+  uncompletedTasks: Signal<Tasks | null> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
-      this.tasksModel = data.items.map(item => false)
-      this.modalService.initCheckArray(this.tasksModel)
+      this.tasksModeluncompleted = data.items.map(() => false)
+      this.modalService.initCheckArrayUncompleted(this.tasksModeluncompleted)
     }),
-    map(data => { return { uncompleted: data.items, completed: null } }),
-  ))))
+    map(data => {
+      return { uncompleted: data.items, completed: null }
+    }),
+  ))), { initialValue: null })
 
   filterByTitle: WritableSignal<string> = signal('')
   filterByPriority: WritableSignal<string> = signal('')
@@ -68,11 +75,33 @@ export class UncompletedPageComponent {
   { filter: this.filterByLabel, name: 'label' },
   { filter: this.filterByProject, name: 'project' }]
 
-  sortedTasks: Signal<Tasks | undefined> = computed(() => {
+  sortedTasks: Signal<Tasks> = computed(() => {
     let tasks: Tasks = {
       uncompleted: this.uncompletedTasks()?.uncompleted,
       completed: this.uncompletedTasks()?.completed
     }
+    if (this.actualViewSize() === ViewSize.none) {
+      if (this.collapsedId() && tasks.uncompleted) {
+        let collapsingItem = tasks.uncompleted.find(item => item.id === this.collapsedId())
+        if (collapsingItem) {
+          collapsingItem.is_collapsed = true
+        }
+      } else if (this.expandId() && tasks.uncompleted) {
+        let expandingItem = tasks.uncompleted.find(item => item.id === this.expandId())
+        if (expandingItem) {
+          expandingItem.is_collapsed = false
+        }
+      }
+    } else {
+      if (this.actualViewSize() === ViewSize.expand) {
+        tasks.uncompleted?.forEach(task => task.is_collapsed = false)
+      }
+      if (this.actualViewSize() === ViewSize.collapsed) {
+
+        tasks.uncompleted?.forEach(task => task.is_collapsed = true)
+      }
+    }
+
     if (this.filterByTitle().length > 0) {
       tasks.uncompleted = tasks.uncompleted?.filter(item => item.content.toLowerCase().includes(this.filterByTitle().trim().toLowerCase()))
     }
@@ -96,13 +125,13 @@ export class UncompletedPageComponent {
       case SortBy.date:
         return this.sortDir() === SortDir.asc ? {
           uncompleted: tasks.uncompleted?.sort((prim, sec) => {
-            if (prim.due && sec.due) return Date.parse(prim.due!.date) - Date.parse(sec.due!.date)
+            if (prim.due && sec.due) return Date.parse(prim.due.date) - Date.parse(sec.due.date)
             else return 1
           }
           ), completed: tasks?.completed
         } : {
           uncompleted: tasks.uncompleted?.sort((prim, sec) => {
-            if (prim.due && sec.due) return Date.parse(sec.due!.date) - Date.parse(prim.due!.date)
+            if (prim.due && sec.due) return Date.parse(sec.due.date) - Date.parse(prim.due.date)
             else return 1
           }), completed: tasks?.completed
         }
@@ -111,25 +140,26 @@ export class UncompletedPageComponent {
     }
   })
 
+  ngOnInit(): void {
+    this.refreshData()
+  }
 
-
-
-  openDescription(id: string | undefined) {
+  openDescription(id: string) {
     if (this.descriptionOpenHandler === id) {
       this.descriptionOpenHandler = ''
       return
     }
     this.descriptionOpenHandler = id;
   }
-  openModal(id: string, input: HTMLInputElement) {
+  openModal(taskId: string, input: HTMLInputElement) {
     const lastIndexOf = input.id.lastIndexOf('-')
     const idx = +input.id.slice(lastIndexOf + 1)
-    const newTasks = this.tasksModel?.map((task, index) => index === idx ? true : false)
+    const newTasks = this.tasksModeluncompleted?.map((task, index) => index === idx ? true : false)
     if (input.checked && newTasks) {
-      this.modalService.nextCheck(newTasks)
-      this.modalService.showModal(id, input)
+      this.modalService.nextCheckUncompleted(newTasks)
+      this.modalService.showModal(taskId, input)
     } else {
-      this.modalService.closeModal(idx, false)
+      this.modalService.closeModal(idx, false, TaskStatus.complete)
     }
   }
   openDeleteModal(id: string) {
@@ -137,56 +167,57 @@ export class UncompletedPageComponent {
   }
 
   closeModal() {
-    const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
-    const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
-    this.modalService.closeModal(idx, false)
+    const checkBoxElement = this.checkBoxElementSignal()
+    if (checkBoxElement !== null) {
+      const lastIndexOf = checkBoxElement.id.lastIndexOf('-')
+      const idx = +checkBoxElement.id.slice(lastIndexOf + 1)
+      this.modalService.closeModal(idx, false, TaskStatus.complete)
+    }
   }
   closeDeleteModal() {
     this.modalService.closeDeleteModal()
   }
   completeTask() {
     const taskId: string = this.modalService.message.getValue()
-    this.api.completeTask(taskId).pipe(tap(() => this.refreshData())).subscribe(
+    this.api.completeTask(taskId).subscribe(
       data => {
-        if (data) {
-          this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  completed successfully` })
+        const syncStatus = { ...data.sync_status }
+        const response = Object.values(syncStatus)[0]
+        if (response === "ok") {
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  completed successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
+        } else if (typeof response !== 'string') {
+          this.showMessage({ type: MessageStatus.error, text: 'Error : ' + response.error_tag })
         }
       }, error => {
-        this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     );
-    const lastIndexOf = this.checkBoxElementSignal()!.id.lastIndexOf('-')
-    const idx = +this.checkBoxElementSignal()!.id.slice(lastIndexOf + 1)
-    this.modalService.closeModal(idx, true)
+    this.closeModal()
   }
   refreshData() {
-    this.refreshTriger$.next(null)
+    this.refreshTriger$.next();
   }
   deleteTask() {
     const taskId: string = this.modalService.message.getValue()
     this.api.deleteTask(taskId).subscribe(
       data => {
         if (data) {
-          this.loadingState = false
-          this.showMessage({ type: 'success', text: `Task "${taskId}"  deleted successfully` })
+          this.showMessage({ type: MessageStatus.success, text: `Task "${taskId}"  deleted successfully` })
           this.modalService.closeDeleteModal()
           this.refreshData()
         }
       }, error => {
-        this.loadingState = false
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
         }
-        this.showMessage({ type: 'error', text: message })
+        this.showMessage({ type: MessageStatus.error, text: message })
       }
     )
   }
@@ -205,5 +236,19 @@ export class UncompletedPageComponent {
   }
   clearFilters() {
     this.filters.forEach(f => f.filter.set(''))
+  }
+  changeTaskSize(size: ViewSize) {
+    this.actualViewSize.set(size)
+  }
+
+  collapsed(id: string) {
+    this.actualViewSize.set(ViewSize.none)
+    this.collapsedId.update(oldId => id)
+    this.expandId.update(oldId => '')
+  }
+  expand(id: string) {
+    this.actualViewSize.set(ViewSize.none)
+    this.expandId.update(oldId => id)
+    this.collapsedId.update(oldId => '')
   }
 }

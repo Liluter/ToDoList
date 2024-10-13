@@ -1,4 +1,4 @@
-export interface EditData {
+export interface EditTask {
   id: string,
   content: string
   description: string,

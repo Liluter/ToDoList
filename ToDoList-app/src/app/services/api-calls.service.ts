@@ -1,96 +1,77 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Label } from '../interfaces/label.interface';
-import { environment } from '../varibles/env';
-import { BehaviorSubject, EMPTY, Observable } from 'rxjs';
-import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl, itemUrl, getProjectUrl } from '../varibles/urls';
-import { SyncItem } from '../interfaces/syncItem.interface';
+import { EMPTY, map, Observable, Subject } from 'rxjs';
+
 import { AllCompleted } from '../interfaces/all-completed.interface';
-import { SyncProjects } from '../interfaces/syncProjects.interface';
-import { Project } from '../interfaces/project.interface';
-import { Task } from '../interfaces/task.interface';
-import { SimpleLabel } from '../interfaces/simpleLabel.interface';
+import { EditTask } from '../interfaces/editTask.interface';
 import { GetItem } from '../interfaces/getItem.interface';
-import { SyncProject } from '../interfaces/syncProject.interface';
 import { GetSyncProject } from '../interfaces/getSyncProject.interface';
-import { EditData } from '../interfaces/editData.interface';
-import { v4 as uuidv4 } from 'uuid';
+import { Label } from '../interfaces/label.interface';
+import { SyncItem } from '../interfaces/syncItem.interface';
+import { Project } from '../interfaces/project.interface';
+import { SimpleLabel } from '../interfaces/simpleLabel.interface';
+import { SyncProject } from '../interfaces/syncProject.interface';
+import { SyncProjects } from '../interfaces/syncProjects.interface';
+import { Task } from '../interfaces/task.interface';
+import { Sync } from '../interfaces/sync.interface';
+
+import { completedUrl, labelsUrl, projectsUrl, syncUrl, tasksUrl, itemUrl, getProjectUrl } from '../varibles/urls';
+import { environment } from '../varibles/env';
+
+import * as uuid from 'uuid';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiCallsService {
+  http = inject(HttpClient)
   private authorization: HttpHeaders = new HttpHeaders({
     'Authorization': 'Bearer ' + environment.restApitoken
   })
   private itemsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["items"]' } })
 
   private projectsParams = new HttpParams({ fromObject: { sync_token: '*', resource_types: '["projects"]' } })
-  refreshTrigger$ = new BehaviorSubject<null>(null)
-  allProjects$?: Observable<SyncProjects>
-  constructor(private readonly http: HttpClient) {
-    this.allProjects$ = this.http.get<SyncProjects>(syncUrl,
-      {
-        headers: this.authorization,
-        params: this.projectsParams
-      })
 
-  }
+  refreshTrigger: Subject<void> = new Subject()
 
-  getUncompletedTasks(): Observable<SyncItem> {
-    return this.http.get<SyncItem>(syncUrl,
-      {
-        headers: this.authorization,
-        params: this.itemsParams
-      })
-  }
-  getCompletedTasks(): Observable<AllCompleted> {
-    return this.http.get<AllCompleted>(completedUrl,
-      {
-        headers: this.authorization
-      })
-  }
-
-  getAllProjects(): Observable<SyncProjects> {
-    return this.http.get<SyncProjects>(syncUrl,
-      {
-        headers: this.authorization,
-        params: this.projectsParams
-      })
-  }
-
-  getAllLabels(): Observable<Label[]> {
-    return this.http.get<Label[]>(labelsUrl, { headers: this.authorization })
-  }
-  getOneLabel(id: string): Observable<Label> {
-    return this.http.get<Label>(labelsUrl + `/${id}`, { headers: this.authorization })
-  }
+  //LABEL
   postLabel(data: SimpleLabel) {
     return this.http.post(labelsUrl, data, {
       headers: this.authorization
     })
   }
-  postProject(data: Project) {
-    return this.http.post(projectsUrl, data, {
-      headers: this.authorization
-    })
+  getOneLabel(id: string): Observable<Label> {
+    return this.http.get<Label>(labelsUrl + `/${id}`, { headers: this.authorization })
   }
-  postTask(data: Task) {
-    return this.http.post(tasksUrl, data, {
-      headers: this.authorization
-    })
+  getAllLabels(): Observable<Label[]> {
+    return this.http.get<Label[]>(labelsUrl, { headers: this.authorization })
   }
-  getTaskById(id: string): Observable<GetItem> {
-    if (id) {
-      const itemParams = new HttpParams({ fromObject: { all_data: 'false', item_id: id } })
-      return this.http.get<GetItem>(itemUrl,
-        {
-          headers: this.authorization,
-          params: itemParams
-        })
+  editLabel(data: Label) {
+    const myuuid = uuid.v4();
+    const body = {
+      commands: [{
+        "type": "label_update",
+        "uuid": myuuid,
+        "args": {
+          "id": data.id,
+          "color": data.color,
+          "name": data.name,
+          "item_order": data.item_order,
+          "is_favorite": data.is_favorite
+        }
+      }
+      ]
+    }
+    if (data) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
     }
   }
+  deleteLabel(id: string): Observable<Object> {
+    return this.http.delete(labelsUrl + `/${id}`, { headers: this.authorization })
+  }
+  //PROJECT
   getProjectById(id?: string) {
     if (id) {
       const itemParams = new HttpParams({ fromObject: { all_data: 'false', project_id: id } })
@@ -103,9 +84,81 @@ export class ApiCallsService {
       return EMPTY
     }
   }
-  editTask(data: EditData) {
-    const myuuid = uuidv4();
-    console.log(myuuid)
+  getAllProjects(): Observable<SyncProjects> {
+    return this.http.get<SyncProjects>(syncUrl,
+      {
+        headers: this.authorization,
+        params: this.projectsParams
+      })
+  }
+  postProject(data: Project) {
+    return this.http.post(projectsUrl, data, {
+      headers: this.authorization
+    })
+  }
+  deleteProject(id: string) {
+    return this.http.delete(projectsUrl + `/${id}`, { headers: this.authorization })
+
+  }
+  editProject(data: SyncProject) {
+    const myuuid = uuid.v4();
+    const body = {
+      commands: [{
+        "type": "project_update",
+        "uuid": myuuid,
+        "args": {
+          "id": data.id,
+          "color": data.color,
+          "name": data.name,
+          "is_favorite": data.is_favorite
+        }
+      }
+      ]
+    }
+    if (data) {
+      return this.http.post(syncUrl, body, { headers: this.authorization })
+    } else {
+      return EMPTY
+    }
+  }
+  //TASKS
+  postTask(data: Task) {
+    return this.http.post(tasksUrl, data, {
+      headers: this.authorization
+    })
+  }
+  getUncompletedTasks(): Observable<SyncItem> {
+    return this.http.get<SyncItem>(syncUrl,
+      {
+        headers: this.authorization,
+        params: this.itemsParams
+      }).pipe(map(data => {
+        data.items.map(item => item.is_collapsed = false)
+        return data
+      }))
+  }
+  getCompletedTasks(): Observable<AllCompleted> {
+    return this.http.get<AllCompleted>(completedUrl,
+      {
+        headers: this.authorization
+      })
+  }
+
+  getTaskById(id: string): Observable<GetItem> {
+    if (id) {
+      const itemParams = new HttpParams({ fromObject: { all_data: 'false', item_id: id } })
+      return this.http.get<GetItem>(itemUrl,
+        {
+          headers: this.authorization,
+          params: itemParams
+        })
+    } else {
+      return EMPTY
+    }
+  }
+
+  editTask(data: EditTask) {
+    const myuuid = uuid.v4();
     const body = {
       commands: [
         {
@@ -128,51 +181,8 @@ export class ApiCallsService {
       return EMPTY
     }
   }
-  editLabel(data: Label) {
-    const myuuid = uuidv4();
-    const body = {
-      commands: [{
-        "type": "label_update",
-        "uuid": myuuid,
-        "args": {
-          "id": data.id,
-          "color": data.color,
-          "name": data.name,
-          "item_order": data.item_order,
-          "is_favourite": data.is_favorite
-        }
-      }
-      ]
-    }
-    if (data) {
-      return this.http.post(syncUrl, body, { headers: this.authorization })
-    } else {
-      return EMPTY
-    }
-  }
-  editProject(data: SyncProject) {
-    const myuuid = uuidv4();
-    const body = {
-      commands: [{
-        "type": "project_update",
-        "uuid": myuuid,
-        "args": {
-          "id": data.id,
-          "color": data.color,
-          "name": data.name,
-          "is_favourite": data.is_favorite
-        }
-      }
-      ]
-    }
-    if (data) {
-      return this.http.post(syncUrl, body, { headers: this.authorization })
-    } else {
-      return EMPTY
-    }
-  }
   completeTask(id: string) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "item_complete",
@@ -183,13 +193,13 @@ export class ApiCallsService {
       }]
     }
     if (id) {
-      return this.http.post(syncUrl, body, { headers: this.authorization })
+      return this.http.post<Sync>(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
     }
   }
   uncompleteTask(id: string) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "item_uncomplete",
@@ -200,13 +210,13 @@ export class ApiCallsService {
       }]
     }
     if (id) {
-      return this.http.post(syncUrl, body, { headers: this.authorization })
+      return this.http.post<Sync>(syncUrl, body, { headers: this.authorization })
     } else {
       return EMPTY
     }
   }
   deleteTask(id: string) {
-    const myuuid = uuidv4();
+    const myuuid = uuid.v4();
     const body = {
       commands: [{
         "type": "item_delete",

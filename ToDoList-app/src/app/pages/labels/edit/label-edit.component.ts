@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit } from "@angular/core";
+import { Component, inject, Input, OnInit, Signal, signal, WritableSignal } from "@angular/core";
 import { Observable, tap } from "rxjs";
 import { Label } from "../../../interfaces/label.interface";
 import { ApiCallsService } from "../../../services/api-calls.service";
@@ -6,7 +6,7 @@ import { AsyncPipe, NgClass } from "@angular/common";
 import { Router, RouterModule } from "@angular/router";
 import { FormsModule, NgForm } from "@angular/forms";
 import { colors } from "../../../varibles/env";
-import { Message } from "../../../types/message.interface";
+import { Message, MessageStatus } from "../../../types/message.interface";
 import { ShowMessageService } from "../../../services/showMessage.service";
 
 
@@ -17,12 +17,12 @@ import { ShowMessageService } from "../../../services/showMessage.service";
 })
 export class LabelEditComponent implements OnInit {
   @Input() id?: string
+  router = inject(Router)
   label$?: Observable<Label>
   readonly colors = [...colors]
-  apiService: ApiCallsService = inject(ApiCallsService)
+  api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
-  router: Router = inject(Router)
-  loadingState: boolean = false
+  loadingState: WritableSignal<boolean> = signal(false)
   model: Label = {
     name: '',
     color: '',
@@ -30,9 +30,10 @@ export class LabelEditComponent implements OnInit {
     is_favorite: false,
     item_order: 1
   }
+
   ngOnInit() {
     if (this.id) {
-      this.label$ = this.apiService.getOneLabel(this.id).pipe(
+      this.label$ = this.api.getOneLabel(this.id).pipe(
         tap(data => {
           this.model = data
         }
@@ -44,19 +45,36 @@ export class LabelEditComponent implements OnInit {
     this.showMessageService.showMessage(message)
   }
   saveData(form: NgForm) {
-    this.apiService.editLabel(this.model).subscribe(data => {
+    this.loadingState.set(true)
+    this.api.editLabel(this.model).subscribe(data => {
       if (data) {
-        this.loadingState = false
-        this.showMessage({ type: 'success', text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })
-        this.router.navigate([`label/details/${this.id}`])
+        this.loadingState.set(false)
+        this.showMessage({ type: MessageStatus.success, text: `Label "${form.form.controls['labelname'].value}"  editted successfully` })
+        this.router.navigate([`labels`])
       }
     }, error => {
-      this.loadingState = false
+      this.loadingState.set(false)
       let message = error.message
       if (error.status === 403 || error.status === 400) {
         message = error.error
       }
-      this.showMessage({ type: 'error', text: message })
+      this.showMessage({ type: MessageStatus.error, text: message })
+    })
+  }
+  deleteLabel() {
+    this.loadingState.set(true)
+    this.api.deleteLabel(this.model.id).subscribe(() => {
+      this.loadingState.set(false)
+      this.loadingState.set(false)
+      this.showMessage({ type: MessageStatus.success, text: `Label "${this.model.name}"  deleted successfully` })
+      this.router.navigate([`labels`])
+    }, error => {
+      this.loadingState.set(false)
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage({ type: MessageStatus.error, text: message })
     })
   }
 }

@@ -20,13 +20,14 @@
       <div class="input-group mb-3">
         <span class="input-group-text">Is favourite</span>
         <div class="input-group-text">
-          <input class="form-check-input mt-0" type="checkbox" value="" [checked]="label.is_favorite"
+          <input class="form-check-input mt-0" type="checkbox" value="" name="is_favorite" id="is_favorite"
+            [checked]="label.is_favorite" [(ngModel)]="model.is_favorite"
             aria-label="Checkbox for following text input">
         </div>
       </div>
     </li>
     <li class="list-group-item px-2 ">
-      @if(loadingState){
+      @if(loadingState()){
       <button class="btn btn-success" type="button" disabled>
         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
         <span role="status">Loading...</span>
@@ -35,6 +36,7 @@
       <div class=" d-flex justify-content-evenly">
         <button type="button" class="btn btn-primary" [routerLink]="['/label/details', label.id]">Back</button>
         <button type="submit" class="btn btn-primary" [disabled]="formLabelEdit.invalid">Save</button>
+        <button type="button" class="btn btn-danger" (click)="deleteLabel()">Delete</button>
       </div>}
     </li>
   </ul>

@@ -46,14 +46,14 @@
 
 </nav>
 
-@if(notification$ | async){
+@if(notificationSignal()){
 <div class="toast-container bottom-0 end-0 p-3">
   <div class="toast align-items-center  border-0 fade show "
-    [class]="(type$ | async) === 'success' ? 'bg-success-subtle' : 'bg-danger-subtle'" role="alert"
+    [class]="(typweSignal()) === 'success' ? 'bg-success-subtle' : 'bg-danger-subtle'" role="alert"
     aria-live="assertive" aria-atomic="true">
     <div class="d-flex">
       <div class="toast-body">
-        <p>{{message$ | async}}</p>
+        <p>{{messageSignal()}}</p>
       </div>
       <button type="button" class="btn-close btn-close-black me-2 m-auto" data-bs-dismiss="toast"
         aria-label="Close"></button>
