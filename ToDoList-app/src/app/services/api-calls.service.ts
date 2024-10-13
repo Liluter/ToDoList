@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { EMPTY, Observable, Subject } from 'rxjs';
+import { EMPTY, map, Observable, Subject } from 'rxjs';
 
 import { AllCompleted } from '../interfaces/all-completed.interface';
 import { EditTask } from '../interfaces/editTask.interface';
@@ -132,7 +132,10 @@ export class ApiCallsService {
       {
         headers: this.authorization,
         params: this.itemsParams
-      })
+      }).pipe(map(data => {
+        data.items.map(item => item.is_collapsed = false)
+        return data
+      }))
   }
   getCompletedTasks(): Observable<AllCompleted> {
     return this.http.get<AllCompleted>(completedUrl,

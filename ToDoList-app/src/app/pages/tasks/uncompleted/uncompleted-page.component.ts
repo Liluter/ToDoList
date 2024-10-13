@@ -1,5 +1,5 @@
 import { Component, computed, inject, OnInit, signal, Signal, WritableSignal } from "@angular/core";
-import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass } from "@angular/common";
+import { AsyncPipe, DatePipe, JsonPipe, KeyValuePipe, NgClass, NgTemplateOutlet } from "@angular/common";
 import { RouterModule } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 
@@ -26,7 +26,7 @@ import { SyncProject } from "../../../interfaces/syncProject.interface";
   templateUrl: './uncompleted-page.component.html',
   standalone: true,
   styleUrl: './uncompleted-page.component.scss',
-  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass]
+  imports: [AsyncPipe, NgClass, DatePipe, JsonPipe, RouterModule, FormsModule, KeyValuePipe, NgClass, NgTemplateOutlet]
 })
 export class UncompletedPageComponent implements OnInit {
   badgeClass = badgeClass
@@ -52,14 +52,17 @@ export class UncompletedPageComponent implements OnInit {
   tasksModeluncompleted: boolean[] = this.checksBoolArrayUncompleted()
   sortBy: WritableSignal<SortBy> = signal(SortBy.date)
   sortDir: WritableSignal<SortDir> = signal(SortDir.asc)
-  actualViewSize: WritableSignal<ViewSize> = signal(ViewSize.big)
-
+  actualViewSize: WritableSignal<ViewSize | ''> = signal('')
+  collapsedId = signal('')
+  expandId = signal('')
   uncompletedTasks: Signal<Tasks | null> = toSignal(this.refreshTriger$.pipe(switchMap(() => this.api.getUncompletedTasks().pipe(
     tap(data => {
       this.tasksModeluncompleted = data.items.map(() => false)
       this.modalService.initCheckArrayUncompleted(this.tasksModeluncompleted)
     }),
-    map(data => { return { uncompleted: data.items, completed: null } }),
+    map(data => {
+      return { uncompleted: data.items, completed: null }
+    }),
   ))), { initialValue: null })
 
   filterByTitle: WritableSignal<string> = signal('')
@@ -77,6 +80,28 @@ export class UncompletedPageComponent implements OnInit {
       uncompleted: this.uncompletedTasks()?.uncompleted,
       completed: this.uncompletedTasks()?.completed
     }
+    if (this.actualViewSize() === ViewSize.none) {
+      if (this.collapsedId() && tasks.uncompleted) {
+        let collapsingItem = tasks.uncompleted.find(item => item.id === this.collapsedId())
+        if (collapsingItem) {
+          collapsingItem.is_collapsed = true
+        }
+      } else if (this.expandId() && tasks.uncompleted) {
+        let expandingItem = tasks.uncompleted.find(item => item.id === this.expandId())
+        if (expandingItem) {
+          expandingItem.is_collapsed = false
+        }
+      }
+    } else {
+      if (this.actualViewSize() === ViewSize.expand) {
+        tasks.uncompleted?.forEach(task => task.is_collapsed = false)
+      }
+      if (this.actualViewSize() === ViewSize.collapsed) {
+
+        tasks.uncompleted?.forEach(task => task.is_collapsed = true)
+      }
+    }
+
     if (this.filterByTitle().length > 0) {
       tasks.uncompleted = tasks.uncompleted?.filter(item => item.content.toLowerCase().includes(this.filterByTitle().trim().toLowerCase()))
     }
@@ -114,8 +139,6 @@ export class UncompletedPageComponent implements OnInit {
         return tasks
     }
   })
-
-  // windowSize = window.innerWidth
 
   ngOnInit(): void {
     this.refreshData()
@@ -216,5 +239,16 @@ export class UncompletedPageComponent implements OnInit {
   }
   changeTaskSize(size: ViewSize) {
     this.actualViewSize.set(size)
+  }
+
+  collapsed(id: string) {
+    this.actualViewSize.set(ViewSize.none)
+    this.collapsedId.update(oldId => id)
+    this.expandId.update(oldId => '')
+  }
+  expand(id: string) {
+    this.actualViewSize.set(ViewSize.none)
+    this.expandId.update(oldId => id)
+    this.collapsedId.update(oldId => '')
   }
 }

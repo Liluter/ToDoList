@@ -54,7 +54,8 @@ export class EditComponent {
     v2_id: '',
     v2_parent_id: '',
     v2_project_id: '',
-    v2_section_id: ''
+    v2_section_id: '',
+    is_collapsed: false
   }
   apiService: ApiCallsService = inject(ApiCallsService)
   @Input() id!: string

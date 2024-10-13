@@ -32,4 +32,5 @@ export interface Item {
   v2_parent_id: string | number | null
   v2_project_id: string | number | null
   v2_section_id: string | number | null
+  is_collapsed: boolean
 }

@@ -21,7 +21,7 @@
     }
   </div>
   <div class="flex-inline-fill mb-1">
-    <span class="ms-1">Task size : </span>
+    <span class="ms-1">Task view : </span>
     @for (size of viewSizes | keyvalue; track $index) {
     <button class="btn me-1" [ngClass]="{
         'btn-outline-dark' : size.value !== actualViewSize(),
@@ -72,7 +72,7 @@
 @for(task of data.uncompleted;track $index; let idx = $index){
 <ul class="list-group mb-3 ">
   <li class="list-group-item px-2">
-    @if(actualViewSize()===viewSizes.big){
+    @if(!task.is_collapsed){
     <div class="input-group input-group-sm">
       <span class="input-group-text mb-1">
         Project:
@@ -82,7 +82,7 @@
       </span>
     </div>
     }
-    @if(actualViewSize()===viewSizes.big){
+    @if(!task.is_collapsed){
     <div class="input-group input-group-sm">
       <span class="input-group-text">
         <input class="form-check-input mt-0 fs-3" #complCheck type="checkbox" title="Add to completed" value=""
@@ -110,11 +110,19 @@
     </div>
     }
     <div class="input-group mt-1">
+
+      @if(task.is_collapsed){
+      <button type="button" class="btn btn-outline-secondary fs-2" (click)="expand(task.id)"><i
+          class="bi bi-arrows-expand "></i></button>
+      } @else {
+      <button type="button" class="btn btn-outline-secondary fs-2" (click)="collapsed(task.id)"><i
+          class="bi bi-arrows-collapse"></i></button>
+      }
       <span class="input-group-text flex-fill">
         <span class="input-group-text">Title:</span>
         <input type="text" class="form-control" value={{task.content}} readonly>
       </span>
-      @if (actualViewSize()===viewSizes.big){
+      @if (!task.is_collapsed){
       <span class="input-group-text">
         <button type="button" class="btn btn-outline-secondary" [routerLink]="['/detail', task.id]">Detail</button>
         <button type="button" class="btn btn-outline-secondary" [routerLink]="['/edit',task.id]">Edit</button>
@@ -135,25 +143,13 @@
 </ul>
 }
 }}@else {
-<div class="d-flex justify-content-center">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</div>
+<ng-container *ngTemplateOutlet="loading"></ng-container>
 }
 }@else {
-<div class="d-flex justify-content-center">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</div>
+<ng-container *ngTemplateOutlet="loading"></ng-container>
 }
 }@else {
-<div class="d-flex justify-content-center">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-</div>
+<ng-container *ngTemplateOutlet="loading"></ng-container>
 }
 @if(modalShowSignal()){
 <div class="position-fixed bottom-50 start-50 translate-middle-x z-3">
@@ -191,3 +187,10 @@
   </div>
 </div>
 }
+<ng-template #loading>
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</ng-template>
