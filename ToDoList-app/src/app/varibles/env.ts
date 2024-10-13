@@ -17,7 +17,7 @@ export const task: Task = {
   project_id: '2334294385'
 }
 
-export const project: Project = {
+export const defaultProject: Project = {
   color: 'charcoal',
   name: '',
   is_favorite: false,

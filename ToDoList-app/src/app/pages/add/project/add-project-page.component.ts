@@ -1,8 +1,8 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { FormsModule, NgForm } from "@angular/forms";
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { Project } from "../../../interfaces/project.interface";
-import { project, colors } from "../../../varibles/env";
+import { defaultProject, colors } from "../../../varibles/env";
 import { CommonModule } from '@angular/common';
 import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message, MessageStatus } from "../../../types/message.interface";
@@ -13,29 +13,24 @@ import { Message, MessageStatus } from "../../../types/message.interface";
   imports: [FormsModule, CommonModule]
 })
 export class AddProjectPageComponent {
-  loadingState: boolean = false
-  newProject: Project = { ...project }
-  completionSuccess?: boolean;
-  showCompletionMessage: boolean = false
-  message?: string;
-  readonly defaultProjectValue: Project = { ...project }
-  readonly colors = [...colors]
+  loadingState = signal(false)
+  api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
-  constructor(private readonly api: ApiCallsService) {
-
-  }
+  readonly defaultProjectValue: Project = { ...defaultProject }
+  readonly colors = [...colors]
+  newProject: Project = { ...defaultProject }
 
   onAddProject(form: NgForm) {
-    this.loadingState = true
+    this.loadingState.set(true)
     this.api.postProject(this.newProject)
       .subscribe(data => {
         if (data) {
-          this.loadingState = false
+          this.loadingState.set(false)
           this.showMessage({ type: MessageStatus.success, text: `Project "${form.form.controls['name'].value}"  added successfully` })
           this.resetProject(form)
         }
       }, error => {
-        this.loadingState = false
+        this.loadingState.set(false)
         let message = error.message
         if (error.status === 403 || error.status === 400) {
           message = error.error
