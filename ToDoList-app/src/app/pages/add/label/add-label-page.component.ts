@@ -2,7 +2,7 @@ import { Component, inject } from "@angular/core";
 import { FormsModule, NgForm } from "@angular/forms";
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { SimpleLabel } from "../../../interfaces/simpleLabel.interface";
-import { colors, label } from "../../../varibles/env";
+import { colors, defaultLabel } from "../../../varibles/env";
 import { CommonModule } from "@angular/common";
 import { ShowMessageService } from "../../../services/showMessage.service";
 import { Message, MessageStatus } from "../../../types/message.interface";
@@ -14,19 +14,14 @@ import { Message, MessageStatus } from "../../../types/message.interface";
   imports: [FormsModule, CommonModule]
 })
 export class AddLabelPageComponent {
-  loadingState: boolean = false
-  newLabel: SimpleLabel = { ...label }
-  message?: string;
-  showCompletionMessage: boolean = false
-  completionSuccess?: boolean;
-  readonly defaultLabelValue: SimpleLabel = { ...label }
+  readonly defaultLabelValue: SimpleLabel = { ...defaultLabel }
   readonly colors = [...colors]
   showMessageService: ShowMessageService = inject(ShowMessageService)
-  constructor(private readonly api: ApiCallsService) {
+  api: ApiCallsService = inject(ApiCallsService)
+  loadingState: boolean = false
+  newLabel: SimpleLabel = { ...defaultLabel }
 
-  }
   onAddLabel(form: NgForm) {
-    // REST APIqq
     this.loadingState = true
     this.api.postLabel(this.newLabel).subscribe(data => {
 

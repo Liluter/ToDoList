@@ -22,7 +22,7 @@ export const project: Project = {
   name: '',
   is_favorite: false,
 }
-export const label: SimpleLabel = {
+export const defaultLabel: SimpleLabel = {
   color: 'charcoal',
   name: '',
   is_favorite: false,
