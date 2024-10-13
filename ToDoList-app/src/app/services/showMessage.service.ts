@@ -1,4 +1,4 @@
-import { Injectable } from "@angular/core";
+import { Injectable, Signal } from "@angular/core";
 import { BehaviorSubject } from "rxjs";
 import { Message } from "../types/message.interface";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -12,11 +12,11 @@ export class ShowMessageService {
   private type = new BehaviorSubject<string>('')
 
   notification$ = this.notification.asObservable();
-  notificationSignal = toSignal(this.notification)
+  notificationSignal: Signal<boolean> = toSignal(this.notification, { initialValue: false })
   message$ = this.message.asObservable();
-  messageSignal = toSignal(this.message)
+  messageSignal: Signal<string> = toSignal(this.message, { initialValue: '' })
   type$ = this.type.asObservable()
-  typeSignal = toSignal(this.type)
+  typeSignal: Signal<string> = toSignal(this.type, { initialValue: '' })
 
   showMessage(message: Message): void {
     this.message.next(message.text)
