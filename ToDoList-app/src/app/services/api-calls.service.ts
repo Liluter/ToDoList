@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Label } from '../interfaces/label.interface';
 import { environment } from '../varibles/env';
 import { EMPTY, Observable, Subject } from 'rxjs';
@@ -73,7 +73,7 @@ export class ApiCallsService {
     })
   }
 
-  deleteLabel(id: string) {
+  deleteLabel(id: string): Observable<Object> {
     return this.http.delete(labelsUrl + `/${id}`, { headers: this.authorization })
   }
 
@@ -81,6 +81,10 @@ export class ApiCallsService {
     return this.http.post(projectsUrl, data, {
       headers: this.authorization
     })
+  }
+  deleteProject(id: string) {
+    return this.http.delete(projectsUrl + `/${id}`, { headers: this.authorization })
+
   }
   postTask(data: Task) {
     return this.http.post(tasksUrl, data, {

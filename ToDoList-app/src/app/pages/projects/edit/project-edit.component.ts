@@ -20,7 +20,7 @@ export class ProjectEditCompoennt {
   getProjectColor = getProjectColor
   readonly colors = [...colors]
   project$?: Observable<SyncProject>
-  apiService: ApiCallsService = inject(ApiCallsService)
+  api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
   router: Router = inject(Router)
   loadingState: WritableSignal<boolean> = signal(false)
@@ -32,7 +32,7 @@ export class ProjectEditCompoennt {
   }
   ngOnInit() {
     if (this.id) {
-      this.project$ = this.apiService.getProjectById(this.id).pipe(
+      this.project$ = this.api.getProjectById(this.id).pipe(
         map(data => data.project),
         tap(data => {
           this.model = data
@@ -45,12 +45,28 @@ export class ProjectEditCompoennt {
   }
   saveData(form: NgForm) {
     this.loadingState.set(true)
-    this.apiService.editProject(this.model).subscribe(data => {
+    this.api.editProject(this.model).subscribe(data => {
       if (data) {
         this.loadingState.set(false)
         this.showMessage({ type: MessageStatus.success, text: `Project "${form.form.controls['projectname'].value}"  editted successfully` })
         this.router.navigate([`projects`])
       }
+    }, error => {
+      this.loadingState.set(false)
+      let message = error.message
+      if (error.status === 403 || error.status === 400) {
+        message = error.error
+      }
+      this.showMessage({ type: MessageStatus.error, text: message })
+    })
+  }
+  deleteProject() {
+    this.loadingState.set(true)
+    this.api.deleteProject(this.model.id).subscribe(() => {
+      this.loadingState.set(false)
+      this.loadingState.set(false)
+      this.showMessage({ type: MessageStatus.success, text: `Project "${this.model.name}"  deleted successfully` })
+      this.router.navigate([`projects`])
     }, error => {
       this.loadingState.set(false)
       let message = error.message

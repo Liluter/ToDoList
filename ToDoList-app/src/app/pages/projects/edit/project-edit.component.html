@@ -36,6 +36,8 @@
       <div class=" d-flex justify-content-evenly">
         <button type="button" class="btn btn-primary" [routerLink]="['/project/details', project.id]">Back</button>
         <button type="submit" class="btn btn-primary" [disabled]="formProjectEdit.invalid">Save</button>
+        <button type="button" class="btn btn-danger" (click)="deleteProject()">Delete</button>
+
       </div>}
     </li>
   </ul>
