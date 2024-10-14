@@ -1,5 +1,5 @@
 <h1 class="text-center">Label edit</h1>
-@if (label$ | async; as label ) {
+@if (labelSignal(); as label ) {
 <form #formLabelEdit="ngForm" (ngSubmit)="saveData(formLabelEdit)">
   <ul class="list-group mb-3">
     <li class="list-group-item px-2">

@@ -1,5 +1,5 @@
-import { Component, inject, Input, OnInit, Signal, signal, WritableSignal } from "@angular/core";
-import { Observable, tap } from "rxjs";
+import { Component, effect, inject, input, signal, WritableSignal } from "@angular/core";
+import { Observable, switchMap, tap } from "rxjs";
 import { Label } from "../../../interfaces/label.interface";
 import { ApiCallsService } from "../../../services/api-calls.service";
 import { AsyncPipe, NgClass } from "@angular/common";
@@ -8,6 +8,7 @@ import { FormsModule, NgForm } from "@angular/forms";
 import { colors } from "../../../varibles/env";
 import { Message, MessageStatus } from "../../../types/message.interface";
 import { ShowMessageService } from "../../../services/showMessage.service";
+import { toObservable, toSignal } from "@angular/core/rxjs-interop";
 
 
 @Component({
@@ -15,13 +16,12 @@ import { ShowMessageService } from "../../../services/showMessage.service";
   standalone: true,
   imports: [AsyncPipe, NgClass, RouterModule, FormsModule]
 })
-export class LabelEditComponent implements OnInit {
-  @Input() id?: string
+export class LabelEditComponent {
   router = inject(Router)
-  label$?: Observable<Label>
-  readonly colors = [...colors]
-  api: ApiCallsService = inject(ApiCallsService)
   showMessageService: ShowMessageService = inject(ShowMessageService)
+  api: ApiCallsService = inject(ApiCallsService)
+  id = input.required<string>();
+  readonly colors = [...colors]
   loadingState: WritableSignal<boolean> = signal(false)
   model: Label = {
     name: '',
@@ -30,17 +30,8 @@ export class LabelEditComponent implements OnInit {
     is_favorite: false,
     item_order: 1
   }
+  labelSignal = toSignal(toObservable(this.id).pipe(switchMap((id) => this.api.getOneLabel(id))))
 
-  ngOnInit() {
-    if (this.id) {
-      this.label$ = this.api.getOneLabel(this.id).pipe(
-        tap(data => {
-          this.model = data
-        }
-        ),
-      )
-    }
-  }
   showMessage(message: Message) {
     this.showMessageService.showMessage(message)
   }
